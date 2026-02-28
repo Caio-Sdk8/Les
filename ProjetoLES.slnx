@@ -1,0 +1,7 @@
+<Solution>
+  <Project Path="projetoles.client/projetoles.client.esproj">
+    <Build />
+    <Deploy />
+  </Project>
+  <Project Path="ProjetoLES.Server/ProjetoLES.Server.csproj" />
+</Solution>
