@@ -224,4 +224,5 @@ export const ButtonDiv = styled.div`
   width: 100%;
   align-items: end;
   justify-content: end;
+  gap: 15px;
 `;

@@ -1,5 +1,3 @@
-"use client";
-
 import { useState } from "react";
 import {
   Container,
@@ -15,8 +13,10 @@ import { DivPagination } from "../../components/Pagination/style";
 import Pagination from "../../components/Pagination/Paginations";
 import { usuariosMock } from "../../mock/usuáriosMock";
 import { Main, SubTitle, SubtitleContainer } from "../Cadastro/style";
-
+import PencilIcon from "../../assets/PencilIcon.svg";
+import { useNavigate } from "react-router-dom";
 const ListagemCliente = () => {
+  const navigate = useNavigate();
   const [currentPage, setCurrentPage] = useState(1);
   const [isActive, setIsActive] = useState(false);
   const [isDesactive, setIsDesactive] = useState(false);
@@ -25,6 +25,10 @@ const ListagemCliente = () => {
 
   const handlePageChange = (pageNumber: number) => {
     setCurrentPage(pageNumber);
+  };
+
+  const handleEdit = () => {
+    navigate("/editarUsuario");
   };
 
   return (
@@ -83,6 +87,7 @@ const ListagemCliente = () => {
                           }
                         }}
                       />
+                      <img src={PencilIcon} alt="Editar" onClick={handleEdit} />
                     </Td>
                   </Tr>
                 </tbody>
@@ -92,7 +97,7 @@ const ListagemCliente = () => {
             {(usuariosMock.length ?? 0) > 0 && (
               <DivPagination>
                 <Pagination
-                  currentPage={1}
+                  currentPage={currentPage}
                   currentCount={usuariosMock.length}
                   totalCount={usuariosMock.length}
                   totalPages={1}
