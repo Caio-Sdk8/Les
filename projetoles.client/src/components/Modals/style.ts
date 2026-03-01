@@ -80,6 +80,8 @@ export const ModalContainerSmall = styled.div<ModalProps>`
   align-items: center;
   flex-direction: column;
   padding: 12px;
+  max-height: 500px;
+  overflow-y: auto;
 `;
 
 export const IconModal = styled.img`

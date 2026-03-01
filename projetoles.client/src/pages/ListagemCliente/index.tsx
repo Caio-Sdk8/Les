@@ -12,10 +12,11 @@ import { ToggleSwitch } from "../../components/Switch/Switch";
 import { DivPagination } from "../../components/Pagination/style";
 import Pagination from "../../components/Pagination/Paginations";
 import { usuariosMock } from "../../mock/usuáriosMock";
-import { Main, SubTitle, SubtitleContainer } from "../Cadastro/style";
+import { DivTitle, Main, SubTitle, SubtitleContainer } from "../Cadastro/style";
 import PencilIcon from "../../assets/PencilIcon.svg";
 import CarrinhoIcon from "../../assets/Carrinho.png";
 import { useNavigate } from "react-router-dom";
+import { NavBar } from "../../components/NavBar/NavBar";
 const ListagemCliente = () => {
   const navigate = useNavigate();
   const [currentPage, setCurrentPage] = useState(1);
@@ -38,11 +39,12 @@ const ListagemCliente = () => {
 
   return (
     <Main>
-      <Container>
+      <DivTitle>
         <SubtitleContainer>
           <SubTitle>Listagem de Clientes</SubTitle>
         </SubtitleContainer>
-      </Container>
+        <NavBar />
+      </DivTitle>
       <MainTable>
         <ContainerDad>
           <Container>

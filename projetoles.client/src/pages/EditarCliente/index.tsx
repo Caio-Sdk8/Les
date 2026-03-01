@@ -1,11 +1,11 @@
 import { useNavigate } from "react-router-dom";
-import { Container } from "../../components/Header/style";
 import {
   BodyData,
   ButtonDiv,
   DataContainer,
   DivLabel,
   DivSeparator,
+  DivTitle,
   InputSing,
   InputWrapper,
   Label,
@@ -19,6 +19,7 @@ import { useState } from "react";
 import ModalCartao from "../../components/Modals/Cartão";
 import ModalEndereco from "../../components/Modals/Endereco";
 import ModalSenha from "../../components/Modals/Senha";
+import { NavBar } from "../../components/NavBar/NavBar";
 
 export default function Edicao() {
   const [modalCartao, setModalCartao] = useState(false);
@@ -32,11 +33,12 @@ export default function Edicao() {
 
   return (
     <Main>
-      <Container>
+      <DivTitle>
         <SubtitleContainer>
           <SubTitle>Edição</SubTitle>
         </SubtitleContainer>
-      </Container>
+        <NavBar />
+      </DivTitle>
 
       <DataContainer>
         <BodyData>
@@ -150,6 +152,7 @@ export default function Edicao() {
           button="Cadastrar"
           button2="Cancelar"
           back={() => setModalEndereco(false)}
+          width="700px"
         />
       )}
     </Main>

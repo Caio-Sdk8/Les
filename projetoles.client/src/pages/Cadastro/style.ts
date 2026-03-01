@@ -5,7 +5,7 @@ export const Main = styled.main`
   flex-direction: column;
   min-height: 100vh;
   width: 100%;
-  padding: 20px 90px;
+  padding: 90px;
   box-sizing: border-box;
 `;
 
@@ -69,7 +69,12 @@ export const DataContainerEtapa1 = styled.div`
 `;
 
 export const SubTitle = styled.h1`
-  font-size: 20px;
+  width: 100%;
+  height: 80px;
+  display: flex;
+  align-items: center;
+  text-align: center;
+  font-size: 35px;
   font-weight: 700;
 `;
 
@@ -225,4 +230,20 @@ export const ButtonDiv = styled.div`
   align-items: end;
   justify-content: end;
   gap: 15px;
+`;
+
+export const DivTitle = styled.div`
+  width: 100%;
+  height: 80px;
+  background-color: purple;
+  color: white;
+  padding: 0 40px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  position: fixed;
+  top: 0;
+  left: 0;
 `;

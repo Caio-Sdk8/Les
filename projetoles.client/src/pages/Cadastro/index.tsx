@@ -1,11 +1,11 @@
 import { useNavigate } from "react-router-dom";
-import { Container } from "../../components/Header/style";
 import {
   BodyData,
   ButtonDiv,
   DataContainer,
   DivLabel,
   DivSeparator,
+  DivTitle,
   InputSing,
   InputWrapper,
   Label,
@@ -14,6 +14,7 @@ import {
   SubTitle,
   SubtitleContainer,
 } from "./style";
+import { NavBar } from "../../components/NavBar/NavBar";
 
 export default function Cadastro() {
   const navigate = useNavigate();
@@ -24,11 +25,12 @@ export default function Cadastro() {
 
   return (
     <Main>
-      <Container>
+      <DivTitle>
         <SubtitleContainer>
           <SubTitle>Cadastro do Usuário</SubTitle>
         </SubtitleContainer>
-      </Container>
+        <NavBar />
+      </DivTitle>
 
       <DataContainer>
         <BodyData>
