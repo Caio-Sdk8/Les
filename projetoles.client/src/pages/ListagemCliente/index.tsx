@@ -14,6 +14,7 @@ import Pagination from "../../components/Pagination/Paginations";
 import { usuariosMock } from "../../mock/usuáriosMock";
 import { Main, SubTitle, SubtitleContainer } from "../Cadastro/style";
 import PencilIcon from "../../assets/PencilIcon.svg";
+import CarrinhoIcon from "../../assets/Carrinho.png";
 import { useNavigate } from "react-router-dom";
 const ListagemCliente = () => {
   const navigate = useNavigate();
@@ -29,6 +30,10 @@ const ListagemCliente = () => {
 
   const handleEdit = () => {
     navigate("/editarUsuario");
+  };
+
+  const handleTransacao = () => {
+    navigate("/transacao");
   };
 
   return (
@@ -73,7 +78,7 @@ const ListagemCliente = () => {
                         justifyContent: "center",
                         alignItems: "center",
                         height: "inherit",
-                        gap: "36px",
+                        gap: "20px",
                       }}
                     >
                       <ToggleSwitch
@@ -87,7 +92,26 @@ const ListagemCliente = () => {
                           }
                         }}
                       />
-                      <img src={PencilIcon} alt="Editar" onClick={handleEdit} />
+                      <img
+                        src={PencilIcon}
+                        alt="Editar"
+                        onClick={handleEdit}
+                        style={{
+                          width: "24px",
+                          height: "24px",
+                          cursor: "pointer",
+                        }}
+                      />
+                      <img
+                        src={CarrinhoIcon}
+                        alt="Transações"
+                        onClick={handleTransacao}
+                        style={{
+                          width: "24px",
+                          height: "24px",
+                          cursor: "pointer",
+                        }}
+                      />
                     </Td>
                   </Tr>
                 </tbody>

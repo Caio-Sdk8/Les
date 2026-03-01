@@ -7,6 +7,9 @@ import {
   Text,
 } from "./style";
 
+import SetaDireita from "../../assets/SetaDireita.svg";
+import SetaEsquerda from "../../assets/SetaEsquerda.svg";
+
 export const ItensPerPage = 20;
 
 type Props = {
@@ -74,7 +77,15 @@ const Pagination = ({
           onClick={() => onPageChange(currentPage - 1)}
           disabled={currentPage === 1}
         >
-          <Icon src={"/img/SetaEsquerda.svg"} />
+          <img
+            src={SetaEsquerda}
+            alt="Editar"
+            style={{
+              width: "15px",
+              height: "15px",
+              cursor: "pointer",
+            }}
+          />
         </PageButton>
 
         {pages.map((page, index) =>
@@ -98,7 +109,15 @@ const Pagination = ({
           onClick={() => onPageChange(currentPage + 1)}
           disabled={currentPage === totalPages}
         >
-          <Icon src={"/img/SetaDireita.svg"} />
+          <img
+            src={SetaDireita}
+            alt="Editar"
+            style={{
+              width: "15px",
+              height: "15px",
+              cursor: "pointer",
+            }}
+          />
         </PageButton>
       </ButtonsContainer>
     </PaginationContainer>
