@@ -4,13 +4,17 @@ import { DivPagination } from "../../components/Pagination/style";
 import Pagination from "../../components/Pagination/Paginations";
 import { DivTitle, Main, SubTitle, SubtitleContainer } from "../Cadastro/style";
 import { useNavigate } from "react-router-dom";
+import Plus from "../../assets/PlusIcon.svg";
 import { NavBar } from "../../components/NavBar/NavBar";
+
+import CarrinhoIcon from "../../assets/Carrinho.png";
 import {
   DescriptionLabel,
   DivGlobalItens,
   HoverIcons,
   IconBack,
   IconButton,
+  IconDiv,
   ImageWrapper,
   PubliContainer,
   PubliItens,
@@ -34,7 +38,14 @@ const Loja = () => {
         </SubtitleContainer>
         <NavBar />
       </DivTitle>
-
+      <IconDiv>
+        <img
+          src={CarrinhoIcon}
+          alt="Loja"
+          style={{ width: "50px", height: "50px", cursor: "pointer" }}
+          onClick={() => navigate("/carrinho")}
+        />
+      </IconDiv>
       <PubliContainer>
         {produtos &&
           produtos.map((item) => (
@@ -44,7 +55,13 @@ const Loja = () => {
                   <img src={item.imagem} alt={item.nome} />
                   <HoverIcons>
                     <IconButton>
-                      <IconBack></IconBack>
+                      <IconBack>
+                        <img
+                          src={Plus}
+                          alt={item.nome}
+                          style={{ width: "24px", height: "24px" }}
+                        />
+                      </IconBack>
                     </IconButton>
                   </HoverIcons>
                 </ImageWrapper>

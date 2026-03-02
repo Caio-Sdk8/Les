@@ -109,3 +109,11 @@ export const DescriptionLabel = styled.p`
     font-size: 14px;
   }
 `;
+
+export const IconDiv = styled.div`
+  width: 100%;
+  height: auto;
+  display: flex;
+  justify-content: end;
+  margin: 20px 0px;
+`;

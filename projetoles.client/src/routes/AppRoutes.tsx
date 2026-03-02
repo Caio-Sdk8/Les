@@ -4,6 +4,9 @@ import ListagemCliente from "../pages/ListagemCliente";
 import Edicao from "../pages/EditarCliente";
 import Transacao from "../pages/Transacao";
 import Loja from "../pages/Loja/Loja";
+import Carrinho from "../pages/Carrinho";
+import IA from "../pages/IA";
+import Grafico from "../pages/Grafico";
 
 export default function AppRoutes() {
   return (
@@ -14,6 +17,9 @@ export default function AppRoutes() {
         <Route path="/editarUsuario" element={<Edicao />} />
         <Route path="/transacao" element={<Transacao />} />
         <Route path="/loja" element={<Loja />} />
+        <Route path="/carrinho" element={<Carrinho />} />
+        <Route path="/IA" element={<IA />} />
+        <Route path="/grafico" element={<Grafico />} />
       </Routes>
     </BrowserRouter>
   );
