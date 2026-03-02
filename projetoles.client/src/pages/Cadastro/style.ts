@@ -288,7 +288,11 @@ export const CardSection = styled.div`
 `;
 
 /** Card individual — borda roxa se for preferencial */
-export const CardItem = styled.div`
+interface CardItemProps {
+  $preferred?: boolean;
+}
+
+export const CardItem = styled.div<CardItemProps>`
   width: 100%;
   border: 2px solid ${({ $preferred }) => ($preferred ? "purple" : "#d1d5db")};
   border-radius: 12px;
@@ -297,7 +301,9 @@ export const CardItem = styled.div`
   flex-direction: column;
   gap: 20px;
   background-color: ${({ $preferred }) => ($preferred ? "#faf5ff" : "#ffffff")};
-  transition: border-color 0.2s, background-color 0.2s;
+  transition:
+    border-color 0.2s,
+    background-color 0.2s;
 `;
 
 export const CardHeader = styled.div`
@@ -307,7 +313,11 @@ export const CardHeader = styled.div`
 `;
 
 /** Badge com número ou "★ Preferencial" */
-export const CardBadge = styled.span`
+interface CardBadgeProps {
+  $preferred?: boolean;
+}
+
+export const CardBadge = styled.span<CardBadgeProps>`
   font-size: 14px;
   font-weight: 700;
   color: ${({ $preferred }) => ($preferred ? "purple" : "#6b7280")};
