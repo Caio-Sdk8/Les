@@ -1,4 +1,6 @@
-import styled from "styled-components";
+﻿import styled from "styled-components";
+
+// ── Existentes (mantidos intactos) ─────────────────────────────────────────
 
 export const Main = styled.main`
   display: flex;
@@ -138,9 +140,12 @@ export const InputSing = styled.input`
   font-size: 14px;
   padding: 11px 12px;
   font-weight: 500;
-  border-color: gray;
+  border: 1px solid gray;
   border-radius: 8px;
-  outline: none;
+
+  &:focus {
+    border-color: purple;
+  }
 
   &::placeholder {
   }
@@ -246,4 +251,141 @@ export const DivTitle = styled.div`
   position: fixed;
   top: 0;
   left: 0;
+`;
+
+// ── Novo: select com mesmo visual dos inputs ───────────────────────────────
+
+export const InputSelect = styled.select`
+  width: 100%;
+  height: 46px;
+  outline: none;
+  font-size: 14px;
+  padding: 0 12px;
+  font-weight: 500;
+  border: 1px solid gray;
+  border-radius: 8px;
+  background: white;
+  cursor: pointer;
+
+  &:focus {
+    border-color: purple;
+  }
+`;
+
+// ── Novos: seção de cartões ────────────────────────────────────────────────
+
+export const CardsContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 100%;
+`;
+
+export const CardSection = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+`;
+
+/** Card individual — borda roxa se for preferencial */
+export const CardItem = styled.div`
+  width: 100%;
+  border: 2px solid ${({ $preferred }) => ($preferred ? "purple" : "#d1d5db")};
+  border-radius: 12px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  background-color: ${({ $preferred }) => ($preferred ? "#faf5ff" : "#ffffff")};
+  transition: border-color 0.2s, background-color 0.2s;
+`;
+
+export const CardHeader = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+`;
+
+/** Badge com número ou "★ Preferencial" */
+export const CardBadge = styled.span`
+  font-size: 14px;
+  font-weight: 700;
+  color: ${({ $preferred }) => ($preferred ? "purple" : "#6b7280")};
+  background: ${({ $preferred }) => ($preferred ? "#f3e8ff" : "#f3f4f6")};
+  padding: 4px 12px;
+  border-radius: 999px;
+`;
+
+/** Mensagem de rodapé dentro do card preferencial */
+export const PreferredBadge = styled.p`
+  font-size: 12px;
+  font-weight: 600;
+  color: purple;
+  margin: 0;
+  padding: 8px 12px;
+  background: #f3e8ff;
+  border-radius: 6px;
+`;
+
+/** Botão secundário: "Definir preferencial" */
+export const SetPreferredButton = styled.button`
+  height: 32px;
+  padding: 0 14px;
+  background: transparent;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #6b7280;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: inherit;
+
+  &:hover {
+    border-color: purple;
+    color: purple;
+    background: #faf5ff;
+  }
+`;
+
+/** Botão remover cartão */
+export const RemoveButton = styled.button`
+  height: 32px;
+  padding: 0 14px;
+  background: transparent;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #9ca3af;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: inherit;
+
+  &:hover {
+    border-color: #ef4444;
+    color: #ef4444;
+    background: #fef2f2;
+  }
+`;
+
+/** Botão de adicionar novo cartão — estilo dashed */
+export const AddCardButton = styled.button`
+  width: 100%;
+  height: 46px;
+  background: transparent;
+  border: 2px dashed #d1d5db;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #9ca3af;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: inherit;
+
+  &:hover {
+    border-color: purple;
+    color: purple;
+    background: #faf5ff;
+  }
 `;
