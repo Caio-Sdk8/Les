@@ -7,7 +7,8 @@ export const NavBar = () => {
 
   return (
     <ItemsContainer>
-      <NavItems onClick={() => navigate("/")}>Cadastro</NavItems>
+      <NavItems onClick={() => navigate("/")}>Login</NavItems>
+      <NavItems onClick={() => navigate("/cadastro")}>Cadastro</NavItems>
       <NavItems onClick={() => navigate("/clientes")}>Clientes</NavItems>
       <NavItems onClick={() => navigate("/loja")}>Loja</NavItems>
       <NavItems onClick={() => navigate("/carrinho")}>Carrinho</NavItems>

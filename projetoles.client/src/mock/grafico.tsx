@@ -1,8 +1,20 @@
-export const vendasPorCategoria = [
-  { categoria: "Tarja Preta - Genérico", vendidos: 120 },
-  { categoria: "Tarja Preta - Referência", vendidos: 85 },
-  { categoria: "Tarja Vermelha - Genérico", vendidos: 210 },
-  { categoria: "Tarja Vermelha - Referência", vendidos: 160 },
-  { categoria: "Sem Tarja - Genérico", vendidos: 300 },
-  { categoria: "Sem Tarja - Referência", vendidos: 190 },
+export const vendasPorProduto = [
+  {
+    produto: "Dipirona",
+    vendas: [
+      { periodo: "Jan", quantidade: 120 },
+      { periodo: "Fev", quantidade: 95 },
+      { periodo: "Mar", quantidade: 140 },
+      { periodo: "Abr", quantidade: 110 },
+    ],
+  },
+  {
+    produto: "Amoxicilina",
+    vendas: [
+      { periodo: "Jan", quantidade: 60 },
+      { periodo: "Fev", quantidade: 80 },
+      { periodo: "Mar", quantidade: 75 },
+      { periodo: "Abr", quantidade: 90 },
+    ],
+  },
 ];

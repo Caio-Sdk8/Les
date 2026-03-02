@@ -7,12 +7,13 @@ import Loja from "../pages/Loja/Loja";
 import Carrinho from "../pages/Carrinho";
 import IA from "../pages/IA";
 import Grafico from "../pages/Grafico";
+import LoginForm from "../pages/Login/index";
 
 export default function AppRoutes() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<Cadastro />} />
+        <Route path="/" element={<LoginForm />} />
         <Route path="/clientes" element={<ListagemCliente />} />
         <Route path="/editarUsuario" element={<Edicao />} />
         <Route path="/transacao" element={<Transacao />} />
@@ -20,6 +21,7 @@ export default function AppRoutes() {
         <Route path="/carrinho" element={<Carrinho />} />
         <Route path="/IA" element={<IA />} />
         <Route path="/grafico" element={<Grafico />} />
+        <Route path="/cadastro" element={<Cadastro />} />
       </Routes>
     </BrowserRouter>
   );

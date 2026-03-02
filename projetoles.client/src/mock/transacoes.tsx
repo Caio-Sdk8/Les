@@ -25,20 +25,20 @@ export const transacoesMock: Transacao[] = [
   {
     id: 1,
     codigo: "TRX-001",
-    valor: 350.9,
+    valor: 124.8,
     status: "EM_ENTREGA",
     produtos: [
       {
         id: 101,
-        nome: "Notebook Dell",
-        quantidade: 1,
-        precoUnitario: 3200.0,
+        nome: "Dipirona 500mg",
+        quantidade: 2,
+        precoUnitario: 12.4,
       },
       {
         id: 102,
-        nome: "Mouse Logitech",
-        quantidade: 2,
-        precoUnitario: 75.45,
+        nome: "Amoxicilina 500mg",
+        quantidade: 1,
+        precoUnitario: 100.0,
       },
     ],
   },
@@ -50,7 +50,7 @@ export const transacoesMock: Transacao[] = [
     produtos: [
       {
         id: 103,
-        nome: "Teclado Mecânico",
+        nome: "Insulina Regular",
         quantidade: 1,
         precoUnitario: 89.9,
       },
@@ -59,14 +59,14 @@ export const transacoesMock: Transacao[] = [
   {
     id: 3,
     codigo: "TRX-003",
-    valor: 540.0,
+    valor: 54.0,
     status: "PENDENTE",
     produtos: [
       {
         id: 104,
-        nome: "Monitor 24''",
-        quantidade: 1,
-        precoUnitario: 540.0,
+        nome: "Paracetamol 750mg",
+        quantidade: 3,
+        precoUnitario: 18.0,
       },
     ],
   },
@@ -78,9 +78,9 @@ export const transacoesMock: Transacao[] = [
     produtos: [
       {
         id: 105,
-        nome: "Headset Gamer",
-        quantidade: 1,
-        precoUnitario: 120.0,
+        nome: "Omeprazol 20mg",
+        quantidade: 2,
+        precoUnitario: 60.0,
       },
     ],
   },

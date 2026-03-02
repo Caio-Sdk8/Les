@@ -8,10 +8,9 @@ import {
   Legend,
   ChartOptions,
 } from "chart.js";
-
 import { Line } from "react-chartjs-2";
 import ChartDataLabels from "chartjs-plugin-datalabels";
-import { vendasPorCategoria } from "../../mock/grafico";
+import { vendasPorProduto } from "../../mock/grafico";
 
 ChartJS.register(
   LineElement,
@@ -20,23 +19,32 @@ ChartJS.register(
   LinearScale,
   Tooltip,
   Legend,
+  ChartDataLabels,
 );
 
-ChartJS.register(ChartDataLabels);
+interface Props {
+  produtoSelecionado: string;
+}
 
-export default function ProdutosPorCategoriaGrafico() {
+export default function ProdutosGrafico({ produtoSelecionado }: Props) {
+  const produto = vendasPorProduto.find(
+    (item) => item.produto === produtoSelecionado,
+  );
+
+  if (!produto) return null;
+
   const chartData = {
-    labels: vendasPorCategoria.map((item) => item.categoria),
+    labels: produto.vendas.map((item) => item.periodo),
     datasets: [
       {
-        label: "Produtos Vendidos",
-        data: vendasPorCategoria.map((item) => item.vendidos),
+        label: `Vendas de ${produtoSelecionado}`,
+        data: produto.vendas.map((item) => item.quantidade),
         borderColor: "#6A0DAD",
         backgroundColor: "#6A0DAD33",
         borderWidth: 3,
         pointBackgroundColor: "#6A0DAD",
         pointRadius: 5,
-        tension: 0.3, // deixa a linha levemente curva
+        tension: 0.3,
         fill: false,
       },
     ],
@@ -45,38 +53,32 @@ export default function ProdutosPorCategoriaGrafico() {
   const options: ChartOptions<"line"> = {
     responsive: true,
     maintainAspectRatio: false,
-
     plugins: {
-      legend: { display: false },
+      legend: { display: true },
       tooltip: { enabled: true },
       datalabels: {
         color: "#000",
         anchor: "end",
         align: "top",
-        formatter: (value) => value,
         font: {
           weight: 600,
           size: 14,
         },
       },
     },
-
     scales: {
       x: {
-        grid: { display: false },
-        ticks: {
-          color: "#000",
-          font: {
-            size: 12,
-            weight: 500,
-          },
+        title: {
+          display: true,
+          text: "Mês", // 👈 aqui você pode mudar para "Ano"
         },
+        grid: { display: false },
       },
       y: {
         beginAtZero: true,
-        ticks: {
-          stepSize: 50,
-          color: "#000",
+        title: {
+          display: true,
+          text: "Quantidade Vendida",
         },
       },
     },
