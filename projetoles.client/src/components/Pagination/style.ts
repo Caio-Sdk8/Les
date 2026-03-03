@@ -60,11 +60,10 @@ export const Pages = styled.button<{ $isActive: boolean }>`
   height: 24px;
   border-radius: var(--radius-sm);
   background-color: ${({ $isActive }) =>
-    $isActive ? "var(--color-primary)" : "transparent"};
+    $isActive ? "#6a006a" : "transparent"};
   cursor: pointer;
   border: 1px solid
-    ${({ $isActive }) =>
-      $isActive ? "var(--color-primary)" : "var(--color-border)"};
+    ${({ $isActive }) => ($isActive ? "#6a006a" : "var(--color-border)")};
   margin: 0;
 
   font-size: 16px;

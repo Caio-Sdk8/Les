@@ -1,5 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import CarrinhoIcon from "../../assets/Carrinho.png";
+import LogoPhoto from "../../assets/LogoPharma.png";
 import {
   CartButton,
   HeaderContainer,
@@ -24,7 +25,15 @@ export const StoreHeader = ({
   return (
     <HeaderContainer>
       <HeaderContent>
-        <Logo onClick={() => navigate("/loja")}>Les Farma</Logo>
+        <img
+          src={LogoPhoto}
+          alt="Logo"
+          style={{
+            width: "100px",
+            height: "50px",
+          }}
+          onClick={() => navigate("/loja")}
+        />
 
         <SearchInput
           value={searchValue}
@@ -36,7 +45,7 @@ export const StoreHeader = ({
           <NavLink onClick={() => navigate("/loja")}>Início</NavLink>
           <NavLink onClick={() => navigate("/clientes")}>Clientes</NavLink>
           <NavLink onClick={() => navigate("/IA")}>IA</NavLink>
-          <CartButton onClick={() => navigate("/carrinho")}> 
+          <CartButton onClick={() => navigate("/carrinho")}>
             <img src={CarrinhoIcon} alt="Carrinho" />
           </CartButton>
         </NavActions>

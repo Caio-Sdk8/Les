@@ -19,7 +19,7 @@ export const PageContent = styled.div`
 export const HeroBanner = styled.section`
   border-radius: var(--radius-md);
   border: 1px solid var(--color-border);
-  background: linear-gradient(120deg, #e0f2fe 0%, #ecfeff 100%);
+  background: linear-gradient(120deg, #ddd6fe 0%, #ecfeff 100%);
   padding: 18px;
 `;
 

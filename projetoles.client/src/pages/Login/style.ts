@@ -91,11 +91,7 @@ export const Input = styled.input`
     color: #9ca3af;
   }
 
-  &:focus {
-    border-color: var(--color-primary);
-    font-weight: 400;
-  }
-
+  
   &:focus {
     border-color: #6a006a;
     box-shadow: 0 0 0 3px rgba(106, 0, 106, 0.1);

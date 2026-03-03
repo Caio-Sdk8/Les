@@ -4,10 +4,10 @@ export const EditButton = styled.button`
   width: 200px;
   height: 52px;
   margin-top: 48px;
-  background-color: yellow;
+  background-color: #6a006a;
   border: none;
   border-radius: 8px;
-  color: black;
+  color: white;
   border: 1px solid gray;
   font-size: 16px;
   font-weight: 800;
@@ -15,6 +15,6 @@ export const EditButton = styled.button`
   transition: all 0.5s ease;
 
   &:hover {
-    scale: 0.98;
+    background-color: #8a008a;
   }
 `;

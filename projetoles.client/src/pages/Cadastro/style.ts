@@ -151,7 +151,9 @@ export const InputSing = styled.input`
   color: var(--color-text);
 
   &:focus {
-    border-color: var(--color-primary);
+    border-color: #6a006a;
+    box-shadow: 0 0 0 3px rgba(106, 0, 106, 0.1);
+    background-color: #fff;
   }
 
   &::placeholder {
@@ -231,9 +233,9 @@ export const DivSeparator = styled.div`
 
 export const NextButton = styled.button`
   width: 200px;
-  height: var(--control-height);
+  height: 52px;
   margin-top: 20px;
-  background-color: var(--color-primary);
+  background-color: #6a006a;
   border: none;
   border-radius: var(--radius-sm);
   color: white;
@@ -243,7 +245,7 @@ export const NextButton = styled.button`
   transition: all 0.2s ease;
 
   &:hover {
-    background-color: var(--color-primary-strong);
+    background-color: #8a008a;
   }
 `;
 
@@ -316,7 +318,8 @@ interface CardItemProps {
 export const CardItem = styled.div<CardItemProps>`
   width: 100%;
   border: 1px solid
-    ${({ $preferred }) => ($preferred ? "var(--color-primary)" : "var(--color-border)")};
+    ${({ $preferred }) =>
+      $preferred ? "var(--color-primary)" : "var(--color-border)"};
   border-radius: 12px;
   padding: 20px;
   display: flex;
@@ -343,7 +346,8 @@ interface CardBadgeProps {
 export const CardBadge = styled.span<CardBadgeProps>`
   font-size: 14px;
   font-weight: 700;
-  color: ${({ $preferred }) => ($preferred ? "var(--color-primary)" : "var(--color-muted)")};
+  color: ${({ $preferred }) =>
+    $preferred ? "var(--color-primary)" : "var(--color-muted)"};
   background: ${({ $preferred }) =>
     $preferred ? "var(--color-primary-soft)" : "#f3f4f6"};
   padding: 4px 12px;

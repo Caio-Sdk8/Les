@@ -61,7 +61,7 @@ export const Th = styled.th`
 
 export const Tr = styled.tr<{ $background: boolean }>`
   background-color: ${({ $background }) =>
-    $background ? "#f8fafc" : "#ffffff"};
+    $background ? "#F5F3FF" : "#ffffff"};
   text-align: center;
   width: 100%;
   max-height: 48px;

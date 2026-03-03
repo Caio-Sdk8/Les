@@ -49,7 +49,8 @@ export const SearchInput = styled.input`
   outline: none;
 
   &:focus {
-    border-color: var(--color-primary);
+    border-color: #6a006a;
+    box-shadow: 0 0 0 3px rgba(106, 0, 106, 0.1);
     background-color: #fff;
   }
 `;
