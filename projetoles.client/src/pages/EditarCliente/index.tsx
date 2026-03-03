@@ -5,21 +5,18 @@ import {
   DataContainer,
   DivLabel,
   DivSeparator,
-  DivTitle,
   InputSing,
   InputWrapper,
   Label,
-  Main,
   NextButton,
   SubTitle,
-  SubtitleContainer,
 } from "../Cadastro/style";
 import { EditButton } from "./style";
 import { useState } from "react";
 import ModalCartao from "../../components/Modals/Cartão";
 import ModalEndereco from "../../components/Modals/Endereco";
 import ModalSenha from "../../components/Modals/Senha";
-import { NavBar } from "../../components/NavBar/NavBar";
+import { AppShell } from "../../components/AppShell/AppShell";
 
 export default function Edicao() {
   const [modalCartao, setModalCartao] = useState(false);
@@ -32,13 +29,7 @@ export default function Edicao() {
   };
 
   return (
-    <Main>
-      <DivTitle>
-        <SubtitleContainer>
-          <SubTitle>Edição</SubTitle>
-        </SubtitleContainer>
-        <NavBar />
-      </DivTitle>
+    <AppShell title="Edição de Cliente">
 
       <DataContainer>
         <BodyData>
@@ -155,6 +146,6 @@ export default function Edicao() {
           width="700px"
         />
       )}
-    </Main>
+    </AppShell>
   );
 }

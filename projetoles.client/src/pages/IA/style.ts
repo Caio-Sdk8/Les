@@ -5,35 +5,38 @@ export const Container = styled.div`
   width: 100%;
   display: flex;
   flex-direction: column;
-  background-color: #f5f5f5;
+  background-color: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
 `;
 
 export const Content = styled.div`
   flex: 1;
   padding: 20px;
   overflow-y: auto;
+  color: var(--color-text);
 `;
 
 export const InputContainer = styled.div`
-  position: fixed;
+  position: sticky;
   bottom: 0;
-  left: 0;
   width: 100%;
-  padding: 20px;
-  background-color: white;
-  border-top: 1px solid #ddd;
+  padding: 12px;
+  background-color: var(--color-surface);
+  border-top: 1px solid var(--color-border);
 `;
 
 export const InputAI = styled.input`
   width: 100%;
-  height: 70px; /* 👈 maior */
-  border-radius: 12px;
-  border: 1px solid #ccc;
-  padding: 0 20px;
-  font-size: 16px;
+  height: var(--control-height);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-border);
+  padding: 0 14px;
+  font-size: 14px;
   outline: none;
 
   &:focus {
-    border-color: purple;
+    border-color: var(--color-primary);
   }
 `;

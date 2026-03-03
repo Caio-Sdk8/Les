@@ -1,88 +1,188 @@
-import { useState } from "react";
-
-import { DivPagination } from "../../components/Pagination/style";
-import Pagination from "../../components/Pagination/Paginations";
-import { DivTitle, Main, SubTitle, SubtitleContainer } from "../Cadastro/style";
-import { useNavigate } from "react-router-dom";
-import Plus from "../../assets/PlusIcon.svg";
-import { NavBar } from "../../components/NavBar/NavBar";
-
-import CarrinhoIcon from "../../assets/Carrinho.png";
-import {
-  DescriptionLabel,
-  DivGlobalItens,
-  HoverIcons,
-  IconBack,
-  IconButton,
-  IconDiv,
-  ImageWrapper,
-  PubliContainer,
-  PubliItens,
-  PubliLabel,
-} from "./style";
+import { useMemo, useState } from "react";
 import produtos from "../../mock/produtos";
+import { StoreCarouselSection } from "../../components/StoreCarouselSection/StoreCarouselSection";
+import {
+  StoreCategories,
+  StoreCategory,
+} from "../../components/StoreCategories/StoreCategories";
+import { StoreHeader } from "../../components/StoreHeader/StoreHeader";
+import { StoreHighlights } from "../../components/StoreHighlights/StoreHighlights";
+import { StoreImageTiles } from "../../components/StoreImageTiles/StoreImageTiles";
+import { StoreProduct } from "../../components/StoreProductCard/StoreProductCard";
+import {
+  BannerButton,
+  BannerDescription,
+  BannerTitle,
+  HeroBanner,
+  Main,
+  PageContent,
+  SectionStack,
+} from "./style";
+
+const categories: StoreCategory[] = [
+  { id: "all", name: "Todos", icon: "🛍️" },
+  { id: "med", name: "Medicamentos", icon: "💊" },
+  { id: "bem", name: "Bem-estar", icon: "🌿" },
+  { id: "dor", name: "Dor e Febre", icon: "🌡️" },
+  { id: "al", name: "Alergia", icon: "🤧" },
+  { id: "dig", name: "Digestivo", icon: "🧪" },
+  { id: "vit", name: "Vitaminas", icon: "🍊" },
+  { id: "hig", name: "Higiene", icon: "🧼" },
+];
+
+const careTiles = [
+  {
+    id: "tile-1",
+    title: "Cuidados com a pele",
+    image:
+      "https://images.unsplash.com/photo-1616394584738-fc6e612e71b9?w=420&h=260&fit=crop&q=80",
+  },
+  {
+    id: "tile-2",
+    title: "Hidratação diária",
+    image:
+      "https://images.unsplash.com/photo-1585238341986-3e0f95f57f5f?w=420&h=260&fit=crop&q=80",
+  },
+  {
+    id: "tile-3",
+    title: "Rotina facial",
+    image:
+      "https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?w=420&h=260&fit=crop&q=80",
+  },
+  {
+    id: "tile-4",
+    title: "Saúde e energia",
+    image:
+      "https://images.unsplash.com/photo-1488459716781-31db52582fe9?w=420&h=260&fit=crop&q=80",
+  },
+  {
+    id: "tile-5",
+    title: "Autocuidado",
+    image:
+      "https://images.unsplash.com/photo-1515377905703-c4788e51af15?w=420&h=260&fit=crop&q=80",
+  },
+];
 
 const Loja = () => {
-  const [currentPage, setCurrentPage] = useState(1);
+  const [activeCategory, setActiveCategory] = useState("Todos");
+  const [searchTerm, setSearchTerm] = useState("");
 
-  const handlePageChange = (pageNumber: number) => {
-    setCurrentPage(pageNumber);
-  };
-  const navigate = useNavigate();
+  const catalog = useMemo<StoreProduct[]>(() => {
+    const sequence = [
+      "Medicamentos",
+      "Dor e Febre",
+      "Bem-estar",
+      "Alergia",
+      "Digestivo",
+      "Vitaminas",
+    ];
+    const warnings = [
+      "Uso adulto",
+      "Genérico",
+      "Sem açúcar",
+      "Venda livre",
+      "Uso contínuo",
+      "Uso oral",
+    ];
+
+    return produtos.map((item, index) => ({
+      ...item,
+      categoria: sequence[index % sequence.length],
+      aviso: warnings[index % warnings.length],
+      desconto: 10 + ((item.id * 7) % 26),
+    }));
+  }, []);
+
+  const filteredProducts = useMemo(() => {
+    return catalog.filter((product) => {
+      const matchCategory =
+        activeCategory === "Todos" || product.categoria === activeCategory;
+
+      const term = searchTerm.trim().toLowerCase();
+      const matchSearch =
+        term.length === 0 ||
+        product.nome.toLowerCase().includes(term) ||
+        (product.descricao ?? "").toLowerCase().includes(term) ||
+        (product.categoria ?? "").toLowerCase().includes(term);
+
+      return matchCategory && matchSearch;
+    });
+  }, [activeCategory, catalog, searchTerm]);
+
+  const popularProducts = filteredProducts;
+  const offerProducts = [...filteredProducts]
+    .sort((a, b) => (b.desconto ?? 0) - (a.desconto ?? 0))
+    .slice(0, 8);
+  const weekProducts = [...filteredProducts]
+    .sort((a, b) => b.valor - a.valor)
+    .slice(0, 8);
 
   return (
     <Main>
-      <DivTitle>
-        <SubtitleContainer>
-          <SubTitle>Loja</SubTitle>
-        </SubtitleContainer>
-        <NavBar />
-      </DivTitle>
-      <IconDiv>
-        <img
-          src={CarrinhoIcon}
-          alt="Loja"
-          style={{ width: "50px", height: "50px", cursor: "pointer" }}
-          onClick={() => navigate("/carrinho")}
+      <StoreHeader searchValue={searchTerm} onSearchChange={setSearchTerm} />
+      <StoreCategories
+        categories={categories}
+        activeCategory={activeCategory}
+        onSelectCategory={setActiveCategory}
+      />
+
+      <PageContent>
+        <HeroBanner>
+          <BannerTitle>Farmácia online com ofertas todos os dias</BannerTitle>
+          <BannerDescription>
+            Um layout mais clean, leve e flexível, com foco em busca rápida,
+            categorias interativas e vitrines com carrossel.
+          </BannerDescription>
+          <BannerButton type="button">Aproveitar promoções</BannerButton>
+        </HeroBanner>
+
+        <StoreHighlights
+          items={[
+            {
+              id: "highlight-1",
+              title: "Entrega Expressa",
+              text: "Receba seus itens com agilidade",
+            },
+            {
+              id: "highlight-2",
+              title: "Preço Competitivo",
+              text: "Condições especiais da semana",
+            },
+            {
+              id: "highlight-3",
+              title: "Compra Segura",
+              text: "Produtos e marcas confiáveis",
+            },
+            {
+              id: "highlight-4",
+              title: "Retire na Loja",
+              text: "Mais conveniência para o cliente",
+            },
+          ]}
         />
-      </IconDiv>
-      <PubliContainer>
-        {produtos &&
-          produtos.map((item) => (
-            <DivGlobalItens>
-              <PubliItens key={item.id}>
-                <ImageWrapper>
-                  <img src={item.imagem} alt={item.nome} />
-                  <HoverIcons>
-                    <IconButton>
-                      <IconBack>
-                        <img
-                          src={Plus}
-                          alt={item.nome}
-                          style={{ width: "24px", height: "24px" }}
-                        />
-                      </IconBack>
-                    </IconButton>
-                  </HoverIcons>
-                </ImageWrapper>
-              </PubliItens>
-              <PubliLabel>{item.nome}</PubliLabel>
-              <DescriptionLabel>{item.descricao}</DescriptionLabel>
-            </DivGlobalItens>
-          ))}
-      </PubliContainer>
-      {produtos.length > 0 && (
-        <DivPagination>
-          <Pagination
-            currentPage={1}
-            currentCount={produtos.length}
-            totalCount={produtos.length}
-            totalPages={1}
-            onPageChange={handlePageChange}
-            type="níveis"
+
+        <SectionStack>
+          <StoreCarouselSection
+            title="Mais comprados"
+            products={popularProducts}
+            onAddToCart={(product) => console.log("adicionar", product.id)}
           />
-        </DivPagination>
-      )}
+
+          <StoreCarouselSection
+            title="Ofertas imperdíveis"
+            products={offerProducts}
+            onAddToCart={(product) => console.log("adicionar", product.id)}
+          />
+
+          <StoreImageTiles title="Cuidados que você merece" items={careTiles} />
+
+          <StoreCarouselSection
+            title="Destaques da semana"
+            products={weekProducts}
+            onAddToCart={(product) => console.log("adicionar", product.id)}
+          />
+        </SectionStack>
+      </PageContent>
     </Main>
   );
 };

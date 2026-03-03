@@ -4,48 +4,48 @@ export const ModalTitleError = styled.p`
   font-size: 20px;
   font-weight: 700;
   font-family: var(--font-raleway), sans-serif;
-  color: black;
+  color: var(--color-text);
 `;
 
 export const ModalButtonWarning = styled.button`
   width: 203px;
-  height: 40px;
+  height: var(--control-height);
 
   font-size: 16px;
   font-weight: 700;
   letter-spacing: -0.2px;
-  border-radius: 8px;
+  border-radius: var(--radius-sm);
   outline: 0;
 
   border: 0;
   color: white;
   font-family: var(--font-openSans), sans-serif;
-  background: green;
+  background: var(--color-primary);
   transition: all 0.3s ease;
 
   &:hover {
-    transform: scale(0.98);
+    background-color: var(--color-primary-strong);
   }
 `;
 
 export const ModalButtonWarningWhite = styled.button`
   width: 203px;
-  height: 40px;
+  height: var(--control-height);
 
   font-size: 16px;
   font-weight: 700;
-  border-radius: 8px;
+  border-radius: var(--radius-sm);
   outline: 0;
 
   border: 0;
-  color: green;
-  border: 1px solid green;
+  color: var(--color-primary);
+  border: 1px solid var(--color-primary);
   font-family: var(--font-openSans), sans-serif;
   background: white;
   transition: all 0.3s ease;
 
   &:hover {
-    transform: scale(0.98);
+    background: var(--color-primary-soft);
   }
 `;
 
@@ -69,7 +69,7 @@ export const ModalContainerSmall = styled.div<ModalProps>`
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  background-color: #fefefd;
+  background-color: var(--color-surface);
   z-index: 1000;
   width: ${({ width }) => width || "470px"};
   height: ${({ height }) => height || "230px"};
@@ -119,13 +119,13 @@ export const ModalButtons = styled.div`
   justify-content: space-between;
   align-items: center;
   gap: 10px;
-  color: black;
+  color: var(--color-text);
 `;
 
 export const ModalSubtitle = styled.p`
   font-size: 16px;
   font-weight: 400;
   font-family: var(--font-openSans), sans-serif;
-  color: black;
+  color: var(--color-text);
   text-align: center;
 `;

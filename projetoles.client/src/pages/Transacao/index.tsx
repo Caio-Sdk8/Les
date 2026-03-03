@@ -2,8 +2,6 @@ import { useState } from "react";
 
 import { DivPagination } from "../../components/Pagination/style";
 import Pagination from "../../components/Pagination/Paginations";
-import { DivTitle, Main, SubTitle, SubtitleContainer } from "../Cadastro/style";
-import { useNavigate } from "react-router-dom";
 import {
   Container,
   ContainerDad,
@@ -14,9 +12,8 @@ import {
   Tr,
 } from "../ListagemCliente/style";
 import { transacoesMock } from "../../mock/transacoes";
-import { NavBar } from "../../components/NavBar/NavBar";
+import { AppShell } from "../../components/AppShell/AppShell";
 const Transacao = () => {
-  const navigate = useNavigate();
   const [currentPage, setCurrentPage] = useState(1);
   const [isActive, setIsActive] = useState(false);
   const [isDesactive, setIsDesactive] = useState(false);
@@ -28,13 +25,7 @@ const Transacao = () => {
   };
 
   return (
-    <Main>
-      <DivTitle>
-        <SubtitleContainer>
-          <SubTitle>Transações</SubTitle>
-        </SubtitleContainer>
-        <NavBar />
-      </DivTitle>
+    <AppShell title="Transações">
       <MainTable>
         <ContainerDad>
           <Container>
@@ -96,7 +87,7 @@ const Transacao = () => {
           </Container>
         </ContainerDad>
       </MainTable>
-    </Main>
+    </AppShell>
   );
 };
 

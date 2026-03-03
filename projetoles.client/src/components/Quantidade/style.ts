@@ -14,8 +14,8 @@ export const QuantityButton = styled.button`
   justify-content: center;
   height: 32px;
   border: none;
-  border-radius: 6px;
-  background-color: purple;
+  border-radius: var(--radius-sm);
+  background-color: var(--color-primary);
   color: white;
   font-size: 18px;
   font-weight: bold;
@@ -23,7 +23,7 @@ export const QuantityButton = styled.button`
   transition: 0.2s ease;
 
   &:hover:not(:disabled) {
-    background-color: #7b2cbf;
+    background-color: var(--color-primary-strong);
     transform: scale(1.05);
   }
 

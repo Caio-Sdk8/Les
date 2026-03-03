@@ -12,11 +12,10 @@ import { ToggleSwitch } from "../../components/Switch/Switch";
 import { DivPagination } from "../../components/Pagination/style";
 import Pagination from "../../components/Pagination/Paginations";
 import { usuariosMock } from "../../mock/usuáriosMock";
-import { DivTitle, Main, SubTitle, SubtitleContainer } from "../Cadastro/style";
 import PencilIcon from "../../assets/PencilIcon.svg";
 import CarrinhoIcon from "../../assets/Carrinho.png";
 import { useNavigate } from "react-router-dom";
-import { NavBar } from "../../components/NavBar/NavBar";
+import { AppShell } from "../../components/AppShell/AppShell";
 const ListagemCliente = () => {
   const navigate = useNavigate();
   const [currentPage, setCurrentPage] = useState(1);
@@ -38,13 +37,7 @@ const ListagemCliente = () => {
   };
 
   return (
-    <Main>
-      <DivTitle>
-        <SubtitleContainer>
-          <SubTitle>Listagem de Clientes</SubTitle>
-        </SubtitleContainer>
-        <NavBar />
-      </DivTitle>
+    <AppShell title="Listagem de Clientes">
       <MainTable>
         <ContainerDad>
           <Container>
@@ -135,7 +128,7 @@ const ListagemCliente = () => {
           </Container>
         </ContainerDad>
       </MainTable>
-    </Main>
+    </AppShell>
   );
 };
 

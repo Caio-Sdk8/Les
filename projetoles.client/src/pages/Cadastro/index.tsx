@@ -11,21 +11,18 @@ import {
     DataContainer,
     DivLabel,
     DivSeparator,
-    DivTitle,
     InputSing,
     InputSelect,
     InputWrapper,
     Label,
-    Main,
     NextButton,
     PreferredBadge,
     RemoveButton,
     SetPreferredButton,
     AddCardButton,
     SubTitle,
-    SubtitleContainer,
 } from "./style";
-import { NavBar } from "../../components/NavBar/NavBar";
+import { AppShell } from "../../components/AppShell/AppShell";
 
 
 const GENDER_OPTIONS = ["Masculino", "Feminino", "Não-binário", "Prefiro não informar"];
@@ -117,16 +114,7 @@ export default function Cadastro() {
     };
 
     return (
-        <Main>
-            <DivTitle>
-                <SubtitleContainer>
-                    <SubTitle style={{ fontSize: 24, height: "auto", color: "white" }}>
-                        Cadastro do Usuário
-                    </SubTitle>
-                </SubtitleContainer>
-                <NavBar />
-            </DivTitle>
-
+        <AppShell title="Cadastro do Usuário">
             <DataContainer>
                 <BodyData>
 
@@ -391,6 +379,6 @@ export default function Cadastro() {
 
                 </BodyData>
             </DataContainer>
-        </Main>
+        </AppShell>
     );
 }

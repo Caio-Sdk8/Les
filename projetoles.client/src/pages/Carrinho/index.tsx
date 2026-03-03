@@ -5,23 +5,20 @@ import {
   DataContainer,
   DivLabel,
   DivSeparator,
-  DivTitle,
   InputSing,
   InputWrapper,
   Label,
-  Main,
   NextButton,
   SubTitle,
-  SubtitleContainer,
 } from "../Cadastro/style";
 import { useState } from "react";
 import ModalCartao from "../../components/Modals/Cartão";
-import { NavBar } from "../../components/NavBar/NavBar";
 import { EditButton } from "../EditarCliente/style";
 import { ImageWrapper } from "../Loja/style";
 import produtos from "../../mock/produtos";
 import { ProdDiv } from "./style";
 import QuantitySelector from "../../components/Quantidade/Quantidade";
+import { AppShell } from "../../components/AppShell/AppShell";
 
 export default function Carrinho() {
   const [modalCartao, setModalCartao] = useState(false);
@@ -33,13 +30,7 @@ export default function Carrinho() {
   const [quantity, setQuantity] = useState(1);
 
   return (
-    <Main>
-      <DivTitle>
-        <SubtitleContainer>
-          <SubTitle>Carrinho</SubTitle>
-        </SubtitleContainer>
-        <NavBar />
-      </DivTitle>
+    <AppShell title="Carrinho">
 
       <DataContainer>
         <BodyData>
@@ -111,6 +102,6 @@ export default function Carrinho() {
           back={() => setModalCartao(false)}
         />
       )}
-    </Main>
+    </AppShell>
   );
 }

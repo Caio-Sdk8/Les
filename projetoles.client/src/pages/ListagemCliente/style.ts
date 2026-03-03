@@ -11,6 +11,10 @@ export const Container = styled.div`
   height: 100%;
   flex-direction: column;
   gap: 24px;
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 8px;
 `;
 export const TableContainer = styled.table`
   width: 100%;
@@ -32,9 +36,9 @@ export const TableContainer = styled.table`
 `;
 
 export const Th = styled.th`
-  border-bottom: 1px solid black;
+  border-bottom: 1px solid var(--color-border);
   height: 48px;
-  color: gray;
+  color: var(--color-muted);
   font-family: var(--font-openSans), sans-serif;
   font-weight: 700;
   font-style: bold;
@@ -57,7 +61,7 @@ export const Th = styled.th`
 
 export const Tr = styled.tr<{ $background: boolean }>`
   background-color: ${({ $background }) =>
-    $background ? "#E6EAED" : "#FEFEFD"};
+    $background ? "#f8fafc" : "#ffffff"};
   text-align: center;
   width: 100%;
   max-height: 48px;
@@ -68,7 +72,7 @@ export const Td = styled.td<{ $isFirst?: boolean }>`
   text-overflow: ellipsis;
   white-space: nowrap;
   text-align: left;
-  color: black;
+  color: var(--color-text);
   font-size: 14px;
   font-weight: ${({ $isFirst }) => ($isFirst ? 700 : 400)};
 

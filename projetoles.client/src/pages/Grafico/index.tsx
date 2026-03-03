@@ -1,20 +1,13 @@
-import { DivTitle, Main, SubTitle, SubtitleContainer } from "../Cadastro/style";
-import { NavBar } from "../../components/NavBar/NavBar";
 import { ContainerPage } from "./sryle";
 import ProdutosGrafico from "../../components/Grafico/Grafico";
 import { useState } from "react";
+import { AppShell } from "../../components/AppShell/AppShell";
 
 export default function Grafico() {
   const [produtoSelecionado, setProdutoSelecionado] = useState("Dipirona");
 
   return (
-    <Main>
-      <DivTitle>
-        <SubtitleContainer>
-          <SubTitle>Gráfico</SubTitle>
-        </SubtitleContainer>
-        <NavBar />
-      </DivTitle>
+    <AppShell title="Gráfico">
       <ContainerPage>
         <select
           onChange={(e) => setProdutoSelecionado(e.target.value)}
@@ -26,6 +19,6 @@ export default function Grafico() {
 
         <ProdutosGrafico produtoSelecionado={produtoSelecionado} />
       </ContainerPage>
-    </Main>
+    </AppShell>
   );
 }

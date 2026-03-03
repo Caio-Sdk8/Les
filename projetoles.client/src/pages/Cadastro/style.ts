@@ -7,8 +7,9 @@ export const Main = styled.main`
   flex-direction: column;
   min-height: 100vh;
   width: 100%;
-  padding: 90px;
+  padding: 24px 16px;
   box-sizing: border-box;
+  background-color: var(--color-bg);
 `;
 
 export const Header = styled.div`
@@ -59,8 +60,10 @@ export const MainForm = styled.div`
 export const DataContainer = styled.div`
   width: 100%;
   height: auto;
-  border-radius: 12px;
+  border-radius: var(--radius-md);
   padding: 20px;
+  border: 1px solid var(--color-border);
+  background-color: var(--color-surface);
 `;
 
 export const DataContainerEtapa1 = styled.div`
@@ -76,8 +79,9 @@ export const SubTitle = styled.h1`
   display: flex;
   align-items: center;
   text-align: center;
-  font-size: 35px;
+  font-size: 28px;
   font-weight: 700;
+  color: var(--color-text);
 `;
 
 export const SubtitleContainer = styled.div`
@@ -107,6 +111,7 @@ export const Label = styled.h1`
   margin-bottom: 4px;
   display: flex;
   flex-direction: row;
+  color: var(--color-muted);
 `;
 
 export const ImageDiv = styled.div`
@@ -135,19 +140,22 @@ export const BodyDataEtapa1 = styled.div`
 
 export const InputSing = styled.input`
   width: 100%;
-  height: 46px;
+  height: var(--control-height);
   outline: none;
   font-size: 14px;
   padding: 11px 12px;
   font-weight: 500;
-  border: 1px solid gray;
-  border-radius: 8px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background-color: #fff;
+  color: var(--color-text);
 
   &:focus {
-    border-color: purple;
+    border-color: var(--color-primary);
   }
 
   &::placeholder {
+    color: #9ca3af;
   }
 `;
 
@@ -158,20 +166,25 @@ export const InputSingBig = styled.textarea`
   font-size: 14px;
   padding: 11px 12px;
   font-weight: 500;
-  border-radius: 8px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-border);
+  background-color: #fff;
+  color: var(--color-text);
 
   &::placeholder {
+    color: #9ca3af;
   }
 `;
 
 export const InputSingArchive = styled.input`
   width: 100%;
-  height: 46px;
+  height: var(--control-height);
   outline: none;
   font-size: 14px;
   padding: 11px 12px;
   font-weight: 500;
-  border-radius: 8px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-border);
 
   &::placeholder {
     text-decoration: underline;
@@ -188,7 +201,7 @@ export const InputsDiv = styled.div`
 
 export const InputWrapper = styled.div`
   width: 100%;
-  height: 64px;
+  height: 72px;
 `;
 
 export const Required = styled.h1`
@@ -208,24 +221,29 @@ export const DivSeparator = styled.div`
   display: flex;
   flex-direction: row;
   justify-content: space-between;
-  gap: 40px;
+  gap: 20px;
+
+  @media (max-width: 900px) {
+    flex-direction: column;
+    gap: 14px;
+  }
 `;
 
 export const NextButton = styled.button`
   width: 200px;
-  height: 52px;
-  margin-top: 48px;
-  background-color: green;
+  height: var(--control-height);
+  margin-top: 20px;
+  background-color: var(--color-primary);
   border: none;
-  border-radius: 8px;
+  border-radius: var(--radius-sm);
   color: white;
-  font-size: 16px;
-  font-weight: 800;
+  font-size: 14px;
+  font-weight: 700;
   cursor: pointer;
-  transition: all 0.5s ease;
+  transition: all 0.2s ease;
 
   &:hover {
-    scale: 0.98;
+    background-color: var(--color-primary-strong);
   }
 `;
 
@@ -239,10 +257,12 @@ export const ButtonDiv = styled.div`
 
 export const DivTitle = styled.div`
   width: 100%;
-  height: 80px;
-  background-color: purple;
+  height: 68px;
+  background-color: var(--color-surface);
   color: white;
-  padding: 0 40px;
+  border-bottom: 1px solid var(--color-border);
+  padding: 0 16px;
+  z-index: 100;
 
   display: flex;
   align-items: center;
@@ -257,18 +277,19 @@ export const DivTitle = styled.div`
 
 export const InputSelect = styled.select`
   width: 100%;
-  height: 46px;
+  height: var(--control-height);
   outline: none;
   font-size: 14px;
   padding: 0 12px;
   font-weight: 500;
-  border: 1px solid gray;
-  border-radius: 8px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
   background: white;
   cursor: pointer;
+  color: var(--color-text);
 
   &:focus {
-    border-color: purple;
+    border-color: var(--color-primary);
   }
 `;
 
@@ -294,13 +315,15 @@ interface CardItemProps {
 
 export const CardItem = styled.div<CardItemProps>`
   width: 100%;
-  border: 2px solid ${({ $preferred }) => ($preferred ? "purple" : "#d1d5db")};
+  border: 1px solid
+    ${({ $preferred }) => ($preferred ? "var(--color-primary)" : "var(--color-border)")};
   border-radius: 12px;
   padding: 20px;
   display: flex;
   flex-direction: column;
   gap: 20px;
-  background-color: ${({ $preferred }) => ($preferred ? "#faf5ff" : "#ffffff")};
+  background-color: ${({ $preferred }) =>
+    $preferred ? "var(--color-primary-soft)" : "#ffffff"};
   transition:
     border-color 0.2s,
     background-color 0.2s;
@@ -320,8 +343,9 @@ interface CardBadgeProps {
 export const CardBadge = styled.span<CardBadgeProps>`
   font-size: 14px;
   font-weight: 700;
-  color: ${({ $preferred }) => ($preferred ? "purple" : "#6b7280")};
-  background: ${({ $preferred }) => ($preferred ? "#f3e8ff" : "#f3f4f6")};
+  color: ${({ $preferred }) => ($preferred ? "var(--color-primary)" : "var(--color-muted)")};
+  background: ${({ $preferred }) =>
+    $preferred ? "var(--color-primary-soft)" : "#f3f4f6"};
   padding: 4px 12px;
   border-radius: 999px;
 `;
@@ -330,10 +354,10 @@ export const CardBadge = styled.span<CardBadgeProps>`
 export const PreferredBadge = styled.p`
   font-size: 12px;
   font-weight: 600;
-  color: purple;
+  color: var(--color-primary);
   margin: 0;
   padding: 8px 12px;
-  background: #f3e8ff;
+  background: var(--color-primary-soft);
   border-radius: 6px;
 `;
 
@@ -346,15 +370,15 @@ export const SetPreferredButton = styled.button`
   border-radius: 6px;
   font-size: 12px;
   font-weight: 600;
-  color: #6b7280;
+  color: var(--color-muted);
   cursor: pointer;
   transition: all 0.2s;
   font-family: inherit;
 
   &:hover {
-    border-color: purple;
-    color: purple;
-    background: #faf5ff;
+    border-color: var(--color-primary);
+    color: var(--color-primary);
+    background: var(--color-primary-soft);
   }
 `;
 
@@ -388,14 +412,14 @@ export const AddCardButton = styled.button`
   border-radius: 10px;
   font-size: 14px;
   font-weight: 600;
-  color: #9ca3af;
+  color: var(--color-muted);
   cursor: pointer;
   transition: all 0.2s;
   font-family: inherit;
 
   &:hover {
-    border-color: purple;
-    color: purple;
-    background: #faf5ff;
+    border-color: var(--color-primary);
+    color: var(--color-primary);
+    background: var(--color-primary-soft);
   }
 `;

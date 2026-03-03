@@ -1,20 +1,12 @@
-import { DivTitle, Main, SubTitle, SubtitleContainer } from "../Cadastro/style";
-import { NavBar } from "../../components/NavBar/NavBar";
 import { Container, Content, InputAI, InputContainer } from "./style";
 import { useState } from "react";
+import { AppShell } from "../../components/AppShell/AppShell";
 
 export default function IA() {
   const [message, setMessage] = useState("");
 
   return (
-    <Main>
-      <DivTitle>
-        <SubtitleContainer>
-          <SubTitle>Recomendação com IA</SubTitle>
-        </SubtitleContainer>
-        <NavBar />
-      </DivTitle>
-
+    <AppShell title="Recomendação com IA">
       <Container>
         <Content>
           <h2>Assistente IA</h2>
@@ -28,6 +20,6 @@ export default function IA() {
           />
         </InputContainer>
       </Container>
-    </Main>
+    </AppShell>
   );
 }

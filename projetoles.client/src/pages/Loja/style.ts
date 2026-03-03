@@ -1,119 +1,74 @@
 import styled from "styled-components";
 
-export const PubliContainer = styled.div`
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
+export const Main = styled.main`
+  min-height: 100vh;
   width: 100%;
-  height: auto;
-  gap: 20px;
+  background-color: var(--color-bg);
 `;
 
-export const DivGlobalItens = styled.div`
+export const PageContent = styled.div`
+  width: 100%;
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 16px 16px 28px;
   display: flex;
   flex-direction: column;
-  width: 100%;
-  height: 100%;
-  text-align: center;
-  justify-content: center;
+  gap: 14px;
 `;
 
-export const PubliItens = styled.div`
-  padding: 10px;
+export const HeroBanner = styled.section`
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
+  background: linear-gradient(120deg, #e0f2fe 0%, #ecfeff 100%);
+  padding: 18px;
+`;
+
+export const BannerTitle = styled.h1`
+  margin: 0;
+  font-size: 30px;
+  color: var(--color-text);
+
+  @media (max-width: 900px) {
+    font-size: 24px;
+  }
+`;
+
+export const BannerDescription = styled.p`
+  margin: 8px 0 0;
+  color: var(--color-muted);
+  font-size: 14px;
+  max-width: 760px;
+`;
+
+export const BannerButton = styled.button`
+  margin-top: 12px;
+  border: 1px solid var(--color-border);
+  background-color: var(--color-surface);
+  color: var(--color-text);
+  border-radius: var(--radius-pill);
+  padding: 10px 14px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+`;
+
+export const SectionStack = styled.div`
   display: flex;
   flex-direction: column;
-  width: 100%;
-  height: auto;
-  gap: 10px;
-  background-color: #f5f7fa;
-  border-bottom: 1px solid #e5e7eb;
-  border-radius: 12px;
+  gap: 24px;
 `;
 
 export const ImageWrapper = styled.div`
   position: relative;
   width: 100%;
-  height: 250px;
+  height: 200px;
   border-radius: 12px;
   overflow: hidden;
-  cursor: pointer;
+  background-color: #f8fafc;
 
-  &:hover div {
-    opacity: 1;
-    pointer-events: all;
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
   }
-`;
-
-export const HoverIcons = styled.div`
-  position: absolute;
-  top: 8px;
-  right: 8px;
-
-  display: flex;
-  gap: 8px;
-
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.2s ease-in-out;
-`;
-
-export const IconButton = styled.button`
-  background: rgba(0, 0, 0, 0.6);
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  &:hover {
-    background: rgba(0, 0, 0, 0.8);
-  }
-`;
-
-export const IconBack = styled.div`
-  display: flex;
-  width: 30px;
-  height: 30px;
-  border-radius: 8px;
-  background-color: rgba(255, 255, 255, 0.6);
-  align-items: center;
-  justify-content: center;
-`;
-
-export const PubliLabel = styled.p`
-  width: 100%;
-  height: auto;
-  font-weight: 700;
-  margin-bottom: 5px;
-  color: black;
-  font-family: var(--font-raleway);
-
-  @media (max-width: 1065px) {
-    width: 300px;
-    font-size: 0.9rem;
-    font-weight: 800;
-  }
-`;
-
-export const DescriptionLabel = styled.p`
-  width: 100%;
-  height: auto;
-  font-weight: 600;
-  font-family: var(--font-raleway);
-  margin-bottom: 10px;
-  color: black;
-
-  @media (max-width: 1065px) {
-    width: 300px;
-    font-size: 14px;
-  }
-`;
-
-export const IconDiv = styled.div`
-  width: 100%;
-  height: auto;
-  display: flex;
-  justify-content: end;
-  margin: 20px 0px;
 `;

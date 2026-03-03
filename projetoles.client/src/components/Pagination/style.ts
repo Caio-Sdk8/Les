@@ -58,17 +58,19 @@ export const Pages = styled.button<{ $isActive: boolean }>`
 
   width: 24px;
   height: 24px;
-  border-radius: 6px;
-  background-color: ${({ $isActive, theme }) =>
-    $isActive ? "purple" : "transparent"};
+  border-radius: var(--radius-sm);
+  background-color: ${({ $isActive }) =>
+    $isActive ? "var(--color-primary)" : "transparent"};
   cursor: pointer;
-  border: none;
+  border: 1px solid
+    ${({ $isActive }) =>
+      $isActive ? "var(--color-primary)" : "var(--color-border)"};
   margin: 0;
 
   font-size: 16px;
   font-family: var(--font-openSans), sans-serif;
   font-weight: ${({ $isActive }) => ($isActive ? "700" : "400")};
-  color: ${({ $isActive, theme }) => ($isActive ? "white" : "black")};
+  color: ${({ $isActive }) => ($isActive ? "white" : "var(--color-text)")};
 `;
 
 export const Text = styled.p`
@@ -76,7 +78,7 @@ export const Text = styled.p`
   font-family: var(--font-openSans), sans-serif;
   font-weight: 700;
   font-size: 16px;
-  color: black;
+  color: var(--color-text);
 `;
 
 export const Icon = styled.img`
