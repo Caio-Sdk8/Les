@@ -11,6 +11,7 @@ export const Container = styled.div`
 
 export const FormContainer = styled.form`
   background: var(--color-bg);
+
   height: 100%;
   width: 100%;
   display: flex;
@@ -41,6 +42,7 @@ export const Title = styled.h1`
 export const SubTitle = styled.p`
   margin-top: 20px;
   width: 100%;
+  width: 450px;
   font-weight: 700;
   font-size: 24px;
   color: var(--color-primary);
@@ -55,13 +57,12 @@ export const SubTitle = styled.p`
 export const Label = styled.p`
   display: flex;
   justify-content: start;
-  width: 90%;
-  font-size: 14px;
-  font-weight: 600;
+
+  width: 100%;
+  font-size: 16px;
   font-family: var(--font-raleway), sans-serif;
-  margin-top: 0.6rem;
-  margin-bottom: 5px;
-  color: var(--color-muted);
+  font-weight: 600;
+  color: #1f2937;
 
   @media (max-width: 1065px) {
     width: 300px;
@@ -69,11 +70,11 @@ export const Label = styled.p`
 `;
 
 export const Input = styled.input`
-  border: 1px solid var(--color-border);
-  background: white;
-  border-radius: var(--radius-sm);
+  border: 1px solid #d1d5db;
+  background: #f8f9fa;
+  border-radius: 8px;
 
-  padding: 0 14px;
+  padding: 0 45px 0 45px;
   width: 498px;
   min-height: var(--control-height);
   margin-top: 8px;
@@ -82,7 +83,8 @@ export const Input = styled.input`
   font-size: 0.9rem;
   font-weight: 400;
   font-family: var(--font-openSans, sans-serif);
-  color: var(--color-text);
+
+  color: #1f2937;
   outline: none;
 
   &::placeholder {
@@ -91,18 +93,21 @@ export const Input = styled.input`
 
   &:focus {
     border-color: var(--color-primary);
+    font-weight: 400;
   }
 
-  @media (max-width: 1065px) {
-    width: 300px;
+  &:focus {
+    border-color: #6a006a;
+    box-shadow: 0 0 0 3px rgba(106, 0, 106, 0.1);
+    background-color: #fff;
   }
 `;
 
 export const Button = styled.button`
-  width: 90%;
-  height: var(--control-height);
-  margin: 20px 8px 10px 8px;
-  background-color: var(--color-primary);
+  width: 100%;
+  height: 48px;
+  margin: 44px 8px 10px 8px;
+  background-color: #6a006a;
   font-family: var(--font-openSans), sans-serif;
   font-weight: 700;
   border: none;
@@ -114,6 +119,27 @@ export const Button = styled.button`
 
   &:hover {
     background-color: var(--color-primary-strong);
+  }
+`;
+
+export const SingButton = styled.button`
+  width: 100%;
+  height: 48px;
+  margin: 10px 8px 10px 8px;
+  background-color: transparent;
+  font-family: var(--font-openSans), sans-serif;
+  font-weight: 700;
+  border: 1px solid #6a006a;
+  border-radius: 8px;
+  color: #6a006a;
+  font-size: 16px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+
+  &:hover {
+    border: none;
+    color: white;
+    background-color: #6a006a;
   }
 `;
 
@@ -185,15 +211,16 @@ export const Form = styled.div`
   width: 546px;
   display: flex;
   flex-direction: column;
-  border: 1px solid var(--color-border);
-  background-color: var(--color-surface);
+  border: 1px solid purple;
+  background: linear-gradient(to right, #e5e7eb 65%, #f9fafb 100%);
   border-radius: 16px;
   justify-content: center;
   align-items: center;
-  padding: 20px 15px;
+  padding: 25px;
 `;
 
 export const Main = styled.main`
+  background-color: #f3f4f6;
   display: flex;
   flex-direction: column;
   min-height: 100vh;
@@ -212,4 +239,18 @@ export const TitleForm = styled.h1`
   font-weight: 800;
   color: var(--color-primary);
   text-align: center;
+`;
+
+export const ContainerInput = styled.div`
+  position: relative;
+  width: 100%;
+`;
+
+export const Icon = styled.img`
+  position: absolute;
+  left: 12px;
+  top: 45%;
+  transform: translateY(-50%);
+  width: 22px;
+  height: 22px;
 `;
