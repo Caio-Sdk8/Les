@@ -45,7 +45,7 @@ export const SubTitle = styled.p`
   width: 450px;
   font-weight: 700;
   font-size: 24px;
-  color: var(--color-primary);
+  color: #6a006a;
   text-align: center;
 
   @media (max-width: 1065px) {
@@ -118,7 +118,7 @@ export const Button = styled.button`
   transition: all 0.2s ease;
 
   &:hover {
-    background-color: var(--color-primary-strong);
+    background-color: #8a008a;
   }
 `;
 
@@ -137,9 +137,9 @@ export const SingButton = styled.button`
   transition: all 0.3s ease;
 
   &:hover {
-    border: none;
+    background-color: #520052;
+    border-color: #520052;
     color: white;
-    background-color: #6a006a;
   }
 `;
 
