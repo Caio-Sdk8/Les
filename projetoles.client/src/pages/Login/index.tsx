@@ -1,12 +1,14 @@
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Logo from "../../assets/LogoPharma.png";
 import Cadeado from "../../assets/Senha.png";
 import Email from "../../assets/Email.png";
+import { authService } from "../../services/auth/authService";
 import {
   Button,
   Container,
   ContainerInput,
-  Field,
+  ErrorMessage,
   Form,
   FormContainer,
   Icon,
@@ -20,9 +22,40 @@ import {
 
 const Login = () => {
   const navigate = useNavigate();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = () => {
-    navigate("/loja");
+  const handleSubmit = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    setError("");
+
+    if (!email || !password) {
+      setError("Preencha e-mail e senha.");
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const data = await authService.login(email, password);
+      const roles = data.user.roles;
+
+      if (roles.includes("Admin") || roles.includes("Employee")) {
+        navigate("/clientes");
+      } else {
+        navigate("/loja");
+      }
+    } catch {
+      setError("E-mail ou senha inválidos.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleRegister = (e: React.MouseEvent) => {
+    e.preventDefault();
+    navigate("/cadastro");
   };
 
   return (
@@ -46,7 +79,12 @@ const Login = () => {
             <Label>E-mail</Label>
             <ContainerInput>
               <Icon src={Email} alt="email" />
-              <Input type="email" placeholder="Digite seu e-mail" />
+              <Input
+                type="email"
+                placeholder="Digite seu e-mail"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+              />
             </ContainerInput>
 
             <Label>Senha</Label>
@@ -56,13 +94,20 @@ const Login = () => {
                 alt="cadeado"
                 style={{ width: "26px", height: "26px" }}
               />
-              <Input type={"password"} placeholder="Digite a senha" />
+              <Input
+                type="password"
+                placeholder="Digite a senha"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+              />
             </ContainerInput>
 
-            <Button type="submit" onClick={handleSubmit}>
-              Entrar
+            {error && <ErrorMessage>{error}</ErrorMessage>}
+
+            <Button type="submit" onClick={handleSubmit} disabled={loading}>
+              {loading ? "Entrando..." : "Entrar"}
             </Button>
-            <SingButton type="submit" onClick={handleSubmit}>
+            <SingButton type="button" onClick={handleRegister}>
               Cadastrar
             </SingButton>
           </Form>

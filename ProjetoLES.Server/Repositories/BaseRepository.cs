@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using ProjetoLES.Server.Data;
 using ProjetoLES.Server.Interfaces.Repositories;
 using ProjetoLES.Server.Models.Base;
@@ -32,8 +32,15 @@ namespace ProjetoLES.Server.Repositories
         public virtual void Update(TEntity entity)
             => _dbSet.Update(entity);
 
+        /// <summary>
+        /// Soft-delete: marca a entidade como excluída sem remover do banco.
+        /// </summary>
         public virtual void Remove(TEntity entity)
-            => _dbSet.Remove(entity);
+        {
+            entity.IsDeleted = true;
+            entity.DeletedAt = DateTime.UtcNow;
+            _dbSet.Update(entity);
+        }
 
         public virtual async Task<bool> ExistsAsync(Guid uuid, CancellationToken cancellationToken = default)
             => await _dbSet.AnyAsync(e => e.Uuid == uuid, cancellationToken);

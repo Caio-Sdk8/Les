@@ -129,6 +129,31 @@ namespace ProjetoLES.Server.Services
                     await _context.Set<CreditCardModel>().AddRangeAsync(createdCards, cancellationToken);
 
                 await _context.SaveChangesAsync(cancellationToken);
+
+                // ── Criar conta de usuário vinculada ao cliente ───────────────
+                var customerRole = await _context.Set<RoleModel>()
+                    .FirstOrDefaultAsync(r => r.Name == "Customer", cancellationToken);
+
+                var userAccount = new UserModel
+                {
+                    Username = DTO.Name,
+                    Email = DTO.Email,
+                    PasswordHash = BCrypt.Net.BCrypt.HashPassword(DTO.Password),
+                    IsActive = true,
+                    CustomerId = customer.Id,
+                    CreatedAt = DateTime.UtcNow,
+                    UpdatedAt = DateTime.UtcNow
+                };
+                await _context.Set<UserModel>().AddAsync(userAccount, cancellationToken);
+                await _context.SaveChangesAsync(cancellationToken);
+
+                if (customerRole is not null)
+                {
+                    _context.Set<UserRoleModel>().Add(
+                        new UserRoleModel { UserId = userAccount.Id, RoleId = customerRole.Id });
+                    await _context.SaveChangesAsync(cancellationToken);
+                }
+
                 await transaction.CommitAsync(cancellationToken);
 
                 var cardResponses = createdCards.Select(c => new CreditCardResponseDTO(

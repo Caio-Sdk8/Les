@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using ProjetoLES.Server.DTO_s.Address;
 using ProjetoLES.Server.DTO_s.CreditCard;
 using ProjetoLES.Server.DTO_s.Customer;
@@ -10,6 +11,7 @@ namespace ProjetoLES.Server.Controllers
     [ApiController]
     [Route("api/customers")]
     [Produces("application/json")]
+    [Authorize]
     public class CustomerController : ControllerBase
     {
         private readonly ICustomerService _customerService;
@@ -19,6 +21,7 @@ namespace ProjetoLES.Server.Controllers
 
 
         [HttpGet]
+        [Authorize(Roles = "Admin,Employee")]
         public async Task<IActionResult> GetAll(
             [FromQuery] CustomerFilterDTO filter,
             CancellationToken cancellationToken)
@@ -29,40 +32,69 @@ namespace ProjetoLES.Server.Controllers
 
 
         [HttpGet("{uuid:guid}")]
+        [Authorize(Roles = "Admin,Employee")]
         public async Task<IActionResult> GetById(Guid uuid, CancellationToken cancellationToken)
         {
             var customer = await _customerService.GetByUuidAsync(uuid, cancellationToken);
             return customer is null ? NotFound() : Ok(customer);
         }
 
+        /// <summary>
+        /// Cadastro público — não exige autenticação.
+        /// Cria cliente + conta de usuário vinculada com role Customer.
+        /// </summary>
         [HttpPost("register")]
+        [AllowAnonymous]
         public async Task<IActionResult> Register(
             [FromBody] CustomerRegisterDTO dto,
             CancellationToken cancellationToken)
         {
-            var result = await _customerService.RegisterAsync(dto, cancellationToken);
-            return CreatedAtAction(nameof(GetById), new { uuid = result.Uuid }, result);
+            try
+            {
+                var result = await _customerService.RegisterAsync(dto, cancellationToken);
+                return CreatedAtAction(nameof(GetById), new { uuid = result.Uuid }, result);
+            }
+            catch (InvalidOperationException ex)
+            {
+                return Conflict(new { message = ex.Message });
+            }
         }
 
 
         [HttpPost]
+        [Authorize(Roles = "Admin,Employee")]
         public async Task<IActionResult> Create(
             [FromBody] CustomerCreateDTO dto,
             CancellationToken cancellationToken)
         {
-            var result = await _customerService.CreateAsync(dto, cancellationToken);
-            return CreatedAtAction(nameof(GetById), new { uuid = result.Uuid }, result);
+            try
+            {
+                var result = await _customerService.CreateAsync(dto, cancellationToken);
+                return CreatedAtAction(nameof(GetById), new { uuid = result.Uuid }, result);
+            }
+            catch (InvalidOperationException ex)
+            {
+                return Conflict(new { message = ex.Message });
+            }
         }
 
 
         [HttpPut("{uuid:guid}")]
+        [Authorize(Roles = "Admin,Employee")]
         public async Task<IActionResult> Update(
             Guid uuid,
             [FromBody] CustomerUpdateDTO dto,
             CancellationToken cancellationToken)
         {
-            var result = await _customerService.UpdateAsync(uuid, dto, cancellationToken);
-            return Ok(result);
+            try
+            {
+                var result = await _customerService.UpdateAsync(uuid, dto, cancellationToken);
+                return Ok(result);
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new { message = ex.Message });
+            }
         }
 
 
@@ -72,16 +104,31 @@ namespace ProjetoLES.Server.Controllers
             [FromBody] CustomerChangePasswordDTO dto,
             CancellationToken cancellationToken)
         {
-            await _customerService.ChangePasswordAsync(uuid, dto, cancellationToken);
-            return NoContent();
+            try
+            {
+                await _customerService.ChangePasswordAsync(uuid, dto, cancellationToken);
+                return NoContent();
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return Unauthorized(new { message = ex.Message });
+            }
         }
 
 
         [HttpPatch("{uuid:guid}/deactivate")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Deactivate(Guid uuid, CancellationToken cancellationToken)
         {
-            await _customerService.DeactivateAsync(uuid, cancellationToken);
-            return NoContent();
+            try
+            {
+                await _customerService.DeactivateAsync(uuid, cancellationToken);
+                return NoContent();
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new { message = ex.Message });
+            }
         }
 
 
@@ -109,8 +156,15 @@ namespace ProjetoLES.Server.Controllers
             [FromBody] AddressUpdateDTO dto,
             CancellationToken cancellationToken)
         {
-            var result = await _customerService.UpdateAddressAsync(uuid, addressUuid, dto, cancellationToken);
-            return Ok(result);
+            try
+            {
+                var result = await _customerService.UpdateAddressAsync(uuid, addressUuid, dto, cancellationToken);
+                return Ok(result);
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new { message = ex.Message });
+            }
         }
 
 

@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 using ProjetoLES.Server.Models;
 using ProjetoLES.Server.Models.Base;
 
@@ -8,18 +9,32 @@ namespace ProjetoLES.Server.Data
     {
         public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
 
+        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        {
+            // Suprime o aviso de validação de RelationShip com filtro de soft-delete
+            // e o warning de pending changes do EF 10 que ocorre com HasQueryFilter
+            optionsBuilder.ConfigureWarnings(w =>
+            {
+                w.Ignore(RelationalEventId.PendingModelChangesWarning);
+                w.Ignore(CoreEventId.ManyServiceProvidersCreatedWarning);
+            });
+        }
+
         public DbSet<CustomerModel> Customers => Set<CustomerModel>();
         public DbSet<CustomerPhoneModel> CustomerPhones => Set<CustomerPhoneModel>();
         public DbSet<CustomerAddressModel> CustomerAddresses => Set<CustomerAddressModel>();
         public DbSet<CreditCardModel> CreditCards => Set<CreditCardModel>();
         public DbSet<CardBrandModel> CardBrands => Set<CardBrandModel>();
         public DbSet<TransactionModel> Transactions => Set<TransactionModel>();
+        public DbSet<UserModel> Users => Set<UserModel>();
+        public DbSet<RoleModel> Roles => Set<RoleModel>();
+        public DbSet<UserRoleModel> UserRoles => Set<UserRoleModel>();
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
 
-            // ── BaseEntity: Id autoincrement + Uuid ──────────────────────
+            // ── BaseEntity: Id autoincrement + Uuid ───────────────────────────
             foreach (var entityType in modelBuilder.Model.GetEntityTypes())
             {
                 if (typeof(BaseEntity).IsAssignableFrom(entityType.ClrType))
@@ -37,6 +52,16 @@ namespace ProjetoLES.Server.Data
                         .IsUnique();
                 }
             }
+
+            // ── Soft-delete global query filters ─────────────────────────────
+            modelBuilder.Entity<CustomerModel>().HasQueryFilter(e => !e.IsDeleted);
+            modelBuilder.Entity<CustomerPhoneModel>().HasQueryFilter(e => !e.IsDeleted);
+            modelBuilder.Entity<CustomerAddressModel>().HasQueryFilter(e => !e.IsDeleted);
+            modelBuilder.Entity<CreditCardModel>().HasQueryFilter(e => !e.IsDeleted);
+            modelBuilder.Entity<CardBrandModel>().HasQueryFilter(e => !e.IsDeleted);
+            modelBuilder.Entity<TransactionModel>().HasQueryFilter(e => !e.IsDeleted);
+            modelBuilder.Entity<UserModel>().HasQueryFilter(e => !e.IsDeleted);
+            modelBuilder.Entity<RoleModel>().HasQueryFilter(e => !e.IsDeleted);
 
             // ── Customer ───────────────────────────────────────────────────────
             modelBuilder.Entity<CustomerModel>(e =>
@@ -135,6 +160,54 @@ namespace ProjetoLES.Server.Data
                  .WithMany()
                  .HasForeignKey(t => t.CreditCardId)
                  .OnDelete(DeleteBehavior.SetNull);
+            });
+
+            // ── Role ───────────────────────────────────────────────────────────
+            modelBuilder.Entity<RoleModel>(e =>
+            {
+                e.ToTable("Roles");
+                e.Property(r => r.Name).IsRequired().HasMaxLength(50);
+                e.HasIndex(r => r.Name).IsUnique();
+                e.Property(r => r.Description).HasMaxLength(200);
+
+                e.HasData(
+                    new RoleModel { Id = 1, Uuid = Guid.Parse("11111111-0000-4000-8000-000000000001"), Name = "Admin", Description = "Administrador do sistema", IsActive = true },
+                    new RoleModel { Id = 2, Uuid = Guid.Parse("11111111-0000-4000-8000-000000000002"), Name = "Employee", Description = "Funcionário", IsActive = true },
+                    new RoleModel { Id = 3, Uuid = Guid.Parse("11111111-0000-4000-8000-000000000003"), Name = "Customer", Description = "Cliente", IsActive = true }
+                );
+            });
+
+            // ── User ───────────────────────────────────────────────────────────
+            modelBuilder.Entity<UserModel>(e =>
+            {
+                e.ToTable("Users");
+                e.HasIndex(u => u.Email).IsUnique();
+                // Username é o nome de exibição do usuário, não um identificador único — login é sempre por Email
+                e.Property(u => u.Username).IsRequired().HasMaxLength(200);
+                e.Property(u => u.Email).IsRequired().HasMaxLength(255);
+                e.Property(u => u.PasswordHash).IsRequired();
+
+                e.HasOne(u => u.Customer)
+                 .WithOne(c => c.User)
+                 .HasForeignKey<UserModel>(u => u.CustomerId)
+                 .OnDelete(DeleteBehavior.SetNull);
+            });
+
+            // ── UserRole (tabela de junção) ────────────────────────────────────
+            modelBuilder.Entity<UserRoleModel>(e =>
+            {
+                e.ToTable("UserRoles");
+                e.HasKey(ur => new { ur.UserId, ur.RoleId });
+
+                e.HasOne(ur => ur.User)
+                 .WithMany(u => u.UserRoles)
+                 .HasForeignKey(ur => ur.UserId)
+                 .OnDelete(DeleteBehavior.Cascade);
+
+                e.HasOne(ur => ur.Role)
+                 .WithMany(r => r.UserRoles)
+                 .HasForeignKey(ur => ur.RoleId)
+                 .OnDelete(DeleteBehavior.Cascade);
             });
         }
     }

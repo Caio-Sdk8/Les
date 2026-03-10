@@ -29,5 +29,8 @@ namespace ProjetoLES.Server.Models
         public ICollection<CustomerAddressModel> Addresses { get; set; } = new List<CustomerAddressModel>();
         public ICollection<CreditCardModel> CreditCards { get; set; } = new List<CreditCardModel>();
         public ICollection<TransactionModel> Transactions { get; set; } = new List<TransactionModel>();
+
+        // ── Conta de usuário vinculada ────────────────────────────────────────
+        public UserModel? User { get; set; }
     }
 }
