@@ -361,7 +361,6 @@ export default function Cadastro() {
             Endereço de entrega igual ao de cobrança
           </label>
 
-          {/* Endereço de Entrega */}
           <SubTitle>Endereço de entrega</SubTitle>
           <AddressInputs
             prefix="deliveryAddress"

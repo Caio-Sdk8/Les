@@ -1,8 +1,8 @@
 import { useState } from "react";
-
 import { DivPagination } from "../../components/Pagination/style";
 import Pagination from "../../components/Pagination/Paginations";
-import Refound from "../../assets/Refound.png";
+import PencilIcon from "../../assets/PencilIcon.svg";
+import { useNavigate } from "react-router-dom";
 import {
   Container,
   ContainerDad,
@@ -11,51 +11,60 @@ import {
   Td,
   Th,
   Tr,
-} from "../ListagemCliente/style";
-import { transacoesMock } from "../../mock/transacoes";
-import { AppShell } from "../../components/AppShell/AppShell";
-import ModalTroca from "../../components/Modals/Troca";
-const Transacao = () => {
+} from "../../pages/ListagemCliente/style";
+import { enderecosMock } from "../../mock/endereco";
+import { Title } from "./style";
+const EnderecoTable = () => {
+  const navigate = useNavigate();
   const [currentPage, setCurrentPage] = useState(1);
-  const [refound, setRefound] = useState(false);
-  const [isDesactive, setIsDesactive] = useState(false);
-
-  const [documentId, setDocumentId] = useState("");
 
   const handlePageChange = (pageNumber: number) => {
     setCurrentPage(pageNumber);
   };
 
+  const handleEdit = () => {
+    navigate("/editarEndereco");
+  };
+
   return (
-    <AppShell title="Transações">
+    <>
+      <Title>Endereços</Title>
+
       <MainTable>
         <ContainerDad>
           <Container>
             <TableContainer>
               <thead>
                 <tr>
-                  <Th style={{ width: "18%", paddingLeft: "5px" }}>CÓDIGO</Th>
-                  <Th style={{ width: "10%", height: "48px" }}>PRODUTOS</Th>
-                  <Th style={{ width: "18%", height: "48px" }}>VALOR</Th>
+                  <Th style={{ width: "16.8%", paddingLeft: "5px" }}>NOME</Th>
+                  <Th style={{ width: "16.8%", height: "48px" }}>CEP</Th>
+                  <Th style={{ width: "16.8%", height: "48px" }}>ESTADO</Th>
+                  <Th style={{ width: "16.8%", height: "48px" }}>CIDADE</Th>
+                  <Th style={{ width: "16,8%", height: "48px" }}>TIPO</Th>
 
-                  <Th style={{ width: "21%", textAlign: "center" }}>STATUS</Th>
+                  <Th style={{ width: "16,8%", textAlign: "center" }}>AÇÕES</Th>
                 </tr>
               </thead>
 
-              {transacoesMock.map((transacao, index) => (
-                <tbody key={transacao.id}>
+              {enderecosMock.map((endereco, index) => (
+                <tbody key={endereco.id}>
                   <Tr $background={index % 2 === 0}>
                     <Td style={{ textAlign: "left", paddingLeft: "5px" }}>
-                      <p>{transacao.codigo}</p>
+                      <p>{endereco.apelido || "----------"}</p>
                     </Td>
                     <Td>
-                      {transacao.produtos.map((produto) => (
-                        <p key={produto.id}>{produto.nome}</p>
-                      ))}
+                      <p>{endereco.cep}</p>
                     </Td>
                     <Td>
-                      <p>R${transacao.valor}</p>
+                      <p>{endereco.estado}</p>
                     </Td>
+                    <Td>
+                      <p>{endereco.cidade}</p>
+                    </Td>
+                    <Td>
+                      <p>{endereco.tipo}</p>
+                    </Td>
+
                     <Td
                       style={{
                         textAlign: "center",
@@ -68,28 +77,27 @@ const Transacao = () => {
                       }}
                     >
                       <img
-                        src={Refound}
-                        alt="Transações"
-                        onClick={() => setRefound(true)}
+                        src={PencilIcon}
+                        alt="Editar"
+                        onClick={handleEdit}
                         style={{
                           width: "24px",
                           height: "24px",
                           cursor: "pointer",
                         }}
                       />
-                      <p>{transacao.status}</p>
                     </Td>
                   </Tr>
                 </tbody>
               ))}
             </TableContainer>
 
-            {(transacoesMock.length ?? 0) > 0 && (
+            {(enderecosMock.length ?? 0) > 0 && (
               <DivPagination>
                 <Pagination
                   currentPage={currentPage}
-                  currentCount={transacoesMock.length}
-                  totalCount={transacoesMock.length}
+                  currentCount={enderecosMock.length}
+                  totalCount={enderecosMock.length}
                   totalPages={1}
                   onPageChange={handlePageChange}
                   type="níveis"
@@ -99,18 +107,8 @@ const Transacao = () => {
           </Container>
         </ContainerDad>
       </MainTable>
-      {refound && (
-        <ModalTroca
-          title="Troca de Produtos"
-          message2="Selecione a o produto que deseja trocar e digite o motivo"
-          button="Trocar"
-          button2="Cancelar"
-          next={() => setRefound(false)}
-          back={() => setRefound(false)}
-        />
-      )}
-    </AppShell>
+    </>
   );
 };
 
-export default Transacao;
+export default EnderecoTable;

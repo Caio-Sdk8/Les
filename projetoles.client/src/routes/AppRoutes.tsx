@@ -9,6 +9,7 @@ import IA from "../pages/IA";
 import Grafico from "../pages/Grafico";
 import LoginForm from "../pages/Login/index";
 import PrivateRoute from "../components/PrivateRoute";
+import EdicaoEndereco from "../pages/EditarEndereco";
 
 export default function AppRoutes() {
   return (
@@ -58,6 +59,14 @@ export default function AppRoutes() {
           element={
             <PrivateRoute roles={["Admin", "Employee"]}>
               <Edicao />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/editarEndereco"
+          element={
+            <PrivateRoute roles={["Admin", "Employee"]}>
+              <EdicaoEndereco />
             </PrivateRoute>
           }
         />

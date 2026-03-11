@@ -17,6 +17,8 @@ import ModalCartao from "../../components/Modals/Cartão";
 import ModalEndereco from "../../components/Modals/Endereco";
 import ModalSenha from "../../components/Modals/Senha";
 import { AppShell } from "../../components/AppShell/AppShell";
+import EnderecoTable from "../../components/Tables/EnderecoTable";
+import CartaoTable from "../../components/Tables/CartaoTable";
 
 export default function Edicao() {
   const [modalCartao, setModalCartao] = useState(false);
@@ -30,7 +32,6 @@ export default function Edicao() {
 
   return (
     <AppShell title="Edição de Cliente">
-
       <DataContainer>
         <BodyData>
           <DivSeparator>
@@ -100,6 +101,10 @@ export default function Edicao() {
               <InputSing placeholder="Digite o tipo de telefone" />
             </InputWrapper>
           </DivSeparator>
+
+          <EnderecoTable />
+
+          <CartaoTable />
 
           <ButtonDiv>
             <EditButton onClick={() => setModalSenha(true)}>

@@ -20,11 +20,11 @@ export const ModalButtonWarning = styled.button`
   border: 0;
   color: white;
   font-family: var(--font-openSans), sans-serif;
-  background: var(--color-primary);
+  background-color: #6a006a;
   transition: all 0.3s ease;
 
   &:hover {
-    background-color: var(--color-primary-strong);
+    background-color: #8a008a;
   }
 `;
 
@@ -38,14 +38,15 @@ export const ModalButtonWarningWhite = styled.button`
   outline: 0;
 
   border: 0;
-  color: var(--color-primary);
-  border: 1px solid var(--color-primary);
+  color: #6a006a;
+  border: 1px solid #6a006a;
   font-family: var(--font-openSans), sans-serif;
   background: white;
   transition: all 0.3s ease;
 
   &:hover {
-    background: var(--color-primary-soft);
+    background-color: #6a006a;
+    color: white;
   }
 `;
 
@@ -128,4 +129,30 @@ export const ModalSubtitle = styled.p`
   font-family: var(--font-openSans), sans-serif;
   color: var(--color-text);
   text-align: center;
+`;
+
+export const ProductWrapper = styled.div`
+  width: 100%;
+  border: 1px solid #d1d5db;
+  border-radius: 12px;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px;
+  height: 80px;
+`;
+
+export const ImageWrapper = styled.div`
+  width: 60px;
+  height: 60px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+`;
+
+export const TextItem = styled.div`
+  text-align: center;
+  font-size: 15px;
+  color: #374151;
+  font-weight: 600;
 `;
