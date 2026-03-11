@@ -1,6 +1,5 @@
-﻿using ProjetoLES.Server.Enums;
+using ProjetoLES.Server.Enums;
 using ProjetoLES.Server.Models.Base;
-using System.Reflection;
 
 namespace ProjetoLES.Server.Models
 {
@@ -13,10 +12,6 @@ namespace ProjetoLES.Server.Models
         public DateOnly BirthDate { get; set; }
 
         public string Cpf { get; set; } = string.Empty;
-
-        public string Email { get; set; } = string.Empty;
-
-        public string PasswordHash { get; set; } = string.Empty;
 
         public bool IsActive { get; set; } = true;
 

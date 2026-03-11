@@ -72,7 +72,6 @@ using (var scope = app.Services.CreateScope())
         var adminRole = db.Roles.IgnoreQueryFilters().FirstOrDefault(r => r.Name == "Admin");
         var adminUser = new ProjetoLES.Server.Models.UserModel
         {
-            Username = "admin",
             Email = "admin@pharma.com",
             PasswordHash = BCrypt.Net.BCrypt.HashPassword("Admin@123!"),
             IsActive = true,
@@ -101,8 +100,10 @@ if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
 }
-
-app.UseHttpsRedirection();
+else
+{
+    app.UseHttpsRedirection();
+}
 
 app.UseAuthentication();
 app.UseAuthorization();

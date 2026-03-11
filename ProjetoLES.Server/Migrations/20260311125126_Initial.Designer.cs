@@ -11,7 +11,7 @@ using ProjetoLES.Server.Data;
 namespace ProjetoLES.Server.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260310195043_Initial")]
+    [Migration("20260311125126_Initial")]
     partial class Initial
     {
         /// <inheritdoc />
@@ -228,11 +228,6 @@ namespace ProjetoLES.Server.Migrations
                     b.Property<DateTime?>("DeletedAt")
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("Email")
-                        .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("TEXT");
-
                     b.Property<int>("Gender")
                         .HasColumnType("INTEGER");
 
@@ -245,10 +240,6 @@ namespace ProjetoLES.Server.Migrations
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(200)
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("PasswordHash")
-                        .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.Property<int>("Ranking")
@@ -268,9 +259,6 @@ namespace ProjetoLES.Server.Migrations
                         .IsUnique();
 
                     b.HasIndex("CustomerCode")
-                        .IsUnique();
-
-                    b.HasIndex("Email")
                         .IsUnique();
 
                     b.HasIndex("Uuid")
@@ -479,11 +467,6 @@ namespace ProjetoLES.Server.Migrations
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("Username")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("TEXT");
-
                     b.Property<Guid>("Uuid")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("TEXT")
@@ -495,9 +478,6 @@ namespace ProjetoLES.Server.Migrations
                         .IsUnique();
 
                     b.HasIndex("Email")
-                        .IsUnique();
-
-                    b.HasIndex("Username")
                         .IsUnique();
 
                     b.HasIndex("Uuid")

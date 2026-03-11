@@ -1,4 +1,4 @@
-﻿using ProjetoLES.Server.DTO_s.Customer;
+using ProjetoLES.Server.DTO_s.Customer;
 using ProjetoLES.Server.Models;
 
 namespace ProjetoLES.Server.Interfaces.Repositories
@@ -12,10 +12,6 @@ namespace ProjetoLES.Server.Interfaces.Repositories
             CancellationToken cancellationToken = default);
 
         Task<bool> ExistsByCpfAsync(string cpf, CancellationToken cancellationToken = default);
-
-        Task<bool> ExistsByEmailAsync(string email, CancellationToken cancellationToken = default);
-
-        Task<CustomerModel?> GetByEmailAsync(string email, CancellationToken cancellationToken = default);
 
         Task<(IEnumerable<TransactionModel> Items, int TotalCount)> GetTransactionsAsync(
             Guid customerUuid,

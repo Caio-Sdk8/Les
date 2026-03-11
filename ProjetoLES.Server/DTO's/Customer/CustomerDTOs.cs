@@ -1,23 +1,21 @@
-﻿using ProjetoLES.Server.Enums;
-using System.Reflection;
+using ProjetoLES.Server.Enums;
 
 namespace ProjetoLES.Server.DTO_s.Customer
 {
+    // Criação pelo admin — apenas dados de perfil; credenciais ficam em UserModel
     public record CustomerCreateDTO(
-    string Name,
-    GenderEnum Gender,
-    DateOnly BirthDate,
-    string Cpf,
-    string Email,
-    string Password,
-    string PasswordConfirmation
-);
-
-    public record CustomerUpdateDTO(
         string Name,
         GenderEnum Gender,
         DateOnly BirthDate,
-        string Email
+        string Cpf,
+        int Ranking = 0
+    );
+
+    // Atualização de perfil — email e senha gerenciados via UserModel
+    public record CustomerUpdateDTO(
+        string Name,
+        GenderEnum Gender,
+        DateOnly BirthDate
     );
 
     public record CustomerChangePasswordDTO(
@@ -26,6 +24,7 @@ namespace ProjetoLES.Server.DTO_s.Customer
         string NewPasswordConfirmation
     );
 
+    // Email é opcional: null quando o cliente ainda não tem conta de usuário vinculada
     public record CustomerResponseDTO(
         Guid Uuid,
         string CustomerCode,
@@ -33,7 +32,7 @@ namespace ProjetoLES.Server.DTO_s.Customer
         GenderEnum Gender,
         DateOnly BirthDate,
         string Cpf,
-        string Email,
+        string? Email,
         bool IsActive,
         int Ranking,
         DateTime CreatedAt,
@@ -44,13 +43,14 @@ namespace ProjetoLES.Server.DTO_s.Customer
         Guid Uuid,
         string CustomerCode,
         string Name,
-        string Email,
+        string? Email,
         string Cpf,
         bool IsActive,
         int Ranking
     );
 
     public record CustomerFilterDTO(
+        string? Search = null,
         string? Name = null,
         string? Email = null,
         string? Cpf = null,

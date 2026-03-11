@@ -33,9 +33,6 @@ namespace ProjetoLES.Server.Services
             if (await _userRepository.ExistsByEmailAsync(dto.Email, cancellationToken))
                 throw new InvalidOperationException("E-mail já cadastrado.");
 
-            if (await _userRepository.ExistsByUsernameAsync(dto.Username, cancellationToken))
-                throw new InvalidOperationException("Username já cadastrado.");
-
             int? customerId = null;
             if (dto.CustomerUuid.HasValue)
             {
@@ -47,7 +44,6 @@ namespace ProjetoLES.Server.Services
 
             var user = new UserModel
             {
-                Username = dto.Username,
                 Email = dto.Email,
                 PasswordHash = BCrypt.Net.BCrypt.HashPassword(dto.Password),
                 IsActive = true,
@@ -85,7 +81,10 @@ namespace ProjetoLES.Server.Services
         {
             var (items, totalCount) = await _userRepository.GetPagedAsync(search, isActive, page, pageSize, cancellationToken);
             var dtos = items.Select(u => new UserSummaryDTO(
-                u.Uuid, u.Username, u.Email, u.IsActive,
+                u.Uuid,
+                u.Email,
+                u.IsActive,
+                u.Customer?.Name,
                 u.UserRoles.Select(ur => ur.Role.Name)));
             return new PagedResultDTO<UserSummaryDTO>(dtos, totalCount, page, pageSize);
         }
@@ -97,10 +96,7 @@ namespace ProjetoLES.Server.Services
 
             if (user.Email != dto.Email && await _userRepository.ExistsByEmailAsync(dto.Email, cancellationToken))
                 throw new InvalidOperationException("E-mail já cadastrado.");
-            if (user.Username != dto.Username && await _userRepository.ExistsByUsernameAsync(dto.Username, cancellationToken))
-                throw new InvalidOperationException("Username já cadastrado.");
 
-            user.Username = dto.Username;
             user.Email = dto.Email;
             user.UpdatedAt = DateTime.UtcNow;
             _userRepository.Update(user);
@@ -177,12 +173,12 @@ namespace ProjetoLES.Server.Services
 
         private static UserResponseDTO MapToResponse(UserModel u) => new(
             u.Uuid,
-            u.Username,
             u.Email,
             u.IsActive,
             u.CreatedAt,
             u.UpdatedAt,
             u.Customer?.Uuid,
+            u.Customer?.Name,
             u.UserRoles.Select(ur => ur.Role.Name));
     }
 }

@@ -69,13 +69,10 @@ namespace ProjetoLES.Server.Data
                 e.ToTable("Customers");
                 e.HasIndex(c => c.CustomerCode).IsUnique();
                 e.HasIndex(c => c.Cpf).IsUnique();
-                e.HasIndex(c => c.Email).IsUnique();
 
                 e.Property(c => c.CustomerCode).IsRequired().HasMaxLength(20);
                 e.Property(c => c.Name).IsRequired().HasMaxLength(200);
                 e.Property(c => c.Cpf).IsRequired().HasMaxLength(11);
-                e.Property(c => c.Email).IsRequired().HasMaxLength(255);
-                e.Property(c => c.PasswordHash).IsRequired();
                 e.Property(c => c.Gender).HasConversion<int>();
             });
 
@@ -122,6 +119,17 @@ namespace ProjetoLES.Server.Data
                 e.ToTable("CardBrands");
                 e.Property(b => b.Name).IsRequired().HasMaxLength(50);
                 e.HasIndex(b => b.Name).IsUnique();
+
+                e.HasData(
+                    new CardBrandModel { Id = 1, Uuid = Guid.Parse("22222222-0000-4000-8000-000000000001"), Name = "Visa", IsActive = true },
+                    new CardBrandModel { Id = 2, Uuid = Guid.Parse("22222222-0000-4000-8000-000000000002"), Name = "Mastercard", IsActive = true },
+                    new CardBrandModel { Id = 3, Uuid = Guid.Parse("22222222-0000-4000-8000-000000000003"), Name = "Elo", IsActive = true },
+                    new CardBrandModel { Id = 4, Uuid = Guid.Parse("22222222-0000-4000-8000-000000000004"), Name = "American Express", IsActive = true },
+                    new CardBrandModel { Id = 5, Uuid = Guid.Parse("22222222-0000-4000-8000-000000000005"), Name = "Hipercard", IsActive = true },
+                    new CardBrandModel { Id = 6, Uuid = Guid.Parse("22222222-0000-4000-8000-000000000006"), Name = "Hiper", IsActive = true },
+                    new CardBrandModel { Id = 7, Uuid = Guid.Parse("22222222-0000-4000-8000-000000000007"), Name = "Diners Club", IsActive = true },
+                    new CardBrandModel { Id = 8, Uuid = Guid.Parse("22222222-0000-4000-8000-000000000008"), Name = "Cabal", IsActive = true }
+                );
             });
 
             // ── CreditCard ─────────────────────────────────────────────────────
@@ -182,8 +190,6 @@ namespace ProjetoLES.Server.Data
             {
                 e.ToTable("Users");
                 e.HasIndex(u => u.Email).IsUnique();
-                // Username é o nome de exibição do usuário, não um identificador único — login é sempre por Email
-                e.Property(u => u.Username).IsRequired().HasMaxLength(200);
                 e.Property(u => u.Email).IsRequired().HasMaxLength(255);
                 e.Property(u => u.PasswordHash).IsRequired();
 

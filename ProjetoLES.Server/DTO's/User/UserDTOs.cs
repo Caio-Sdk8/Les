@@ -1,7 +1,7 @@
 namespace ProjetoLES.Server.DTO_s.User
 {
+    // Usuário criado pelo admin — login é sempre por email
     public record UserCreateDTO(
-        string Username,
         string Email,
         string Password,
         string PasswordConfirmation,
@@ -9,7 +9,6 @@ namespace ProjetoLES.Server.DTO_s.User
         IEnumerable<Guid>? RoleUuids);
 
     public record UserUpdateDTO(
-        string Username,
         string Email);
 
     public record UserChangePasswordDTO(
@@ -19,18 +18,18 @@ namespace ProjetoLES.Server.DTO_s.User
 
     public record UserResponseDTO(
         Guid Uuid,
-        string Username,
         string Email,
         bool IsActive,
         DateTime CreatedAt,
         DateTime UpdatedAt,
         Guid? CustomerUuid,
+        string? CustomerName,
         IEnumerable<string> Roles);
 
     public record UserSummaryDTO(
         Guid Uuid,
-        string Username,
         string Email,
         bool IsActive,
+        string? CustomerName,
         IEnumerable<string> Roles);
 }

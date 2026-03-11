@@ -43,7 +43,7 @@ namespace ProjetoLES.Server.Services
             if (await _customerRepository.ExistsByCpfAsync(DTO.Cpf, cancellationToken))
                 throw new InvalidOperationException("CPF já cadastrado.");
 
-            if (await _customerRepository.ExistsByEmailAsync(DTO.Email, cancellationToken))
+            if (await _context.Set<UserModel>().AnyAsync(u => u.Email == DTO.Email, cancellationToken))
                 throw new InvalidOperationException("E-mail já cadastrado.");
 
             var cards = DTO.CreditCards ?? new List<CreditCardRegisterDTO>();
@@ -69,8 +69,6 @@ namespace ProjetoLES.Server.Services
                     Gender = DTO.Gender,
                     BirthDate = DTO.BirthDate,
                     Cpf = DTO.Cpf,
-                    Email = DTO.Email,
-                    PasswordHash = BCrypt.Net.BCrypt.HashPassword(DTO.Password),
                     IsActive = true,
                     Ranking = 0,
                     CreatedAt = DateTime.UtcNow,
@@ -136,7 +134,6 @@ namespace ProjetoLES.Server.Services
 
                 var userAccount = new UserModel
                 {
-                    Username = DTO.Name,
                     Email = DTO.Email,
                     PasswordHash = BCrypt.Net.BCrypt.HashPassword(DTO.Password),
                     IsActive = true,
@@ -169,7 +166,7 @@ namespace ProjetoLES.Server.Services
                     customer.Uuid,
                     customer.CustomerCode,
                     customer.Name,
-                    customer.Email,
+                    DTO.Email,
                     MapToAddressDTO(billingAddress),
                     MapToAddressDTO(deliveryAddress),
                     cardResponses);
@@ -184,12 +181,8 @@ namespace ProjetoLES.Server.Services
         public async Task<CustomerResponseDTO> CreateAsync(
             CustomerCreateDTO DTO, CancellationToken cancellationToken = default)
         {
-            if (DTO.Password != DTO.PasswordConfirmation)
-                throw new InvalidOperationException("As senhas não conferem.");
             if (await _customerRepository.ExistsByCpfAsync(DTO.Cpf, cancellationToken))
                 throw new InvalidOperationException("CPF já cadastrado.");
-            if (await _customerRepository.ExistsByEmailAsync(DTO.Email, cancellationToken))
-                throw new InvalidOperationException("E-mail já cadastrado.");
 
             var customer = new CustomerModel
             {
@@ -198,10 +191,8 @@ namespace ProjetoLES.Server.Services
                 Gender = DTO.Gender,
                 BirthDate = DTO.BirthDate,
                 Cpf = DTO.Cpf,
-                Email = DTO.Email,
-                PasswordHash = BCrypt.Net.BCrypt.HashPassword(DTO.Password),
                 IsActive = true,
-                Ranking = 0,
+                Ranking = DTO.Ranking,
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow
             };
@@ -217,25 +208,27 @@ namespace ProjetoLES.Server.Services
             customer.Name = DTO.Name;
             customer.Gender = DTO.Gender;
             customer.BirthDate = DTO.BirthDate;
-            customer.Email = DTO.Email;
             customer.UpdatedAt = DateTime.UtcNow;
             _customerRepository.Update(customer);
             await _customerRepository.SaveChangesAsync(cancellationToken);
-            return MapToResponseDTO(customer);
+            var full = await _customerRepository.GetFullProfileAsync(uuid, cancellationToken);
+            return MapToResponseDTO(full!);
         }
 
         public async Task ChangePasswordAsync(
             Guid uuid, CustomerChangePasswordDTO DTO, CancellationToken cancellationToken = default)
         {
             var customer = await GetTrackedAsync(uuid, cancellationToken);
-            if (!BCrypt.Net.BCrypt.Verify(DTO.CurrentPassword, customer.PasswordHash))
+            var userAccount = await _context.Set<UserModel>()
+                .FirstOrDefaultAsync(u => u.CustomerId == customer.Id, cancellationToken)
+                ?? throw new KeyNotFoundException("Conta de usuário não encontrada para este cliente.");
+            if (!BCrypt.Net.BCrypt.Verify(DTO.CurrentPassword, userAccount.PasswordHash))
                 throw new UnauthorizedAccessException("Senha atual incorreta.");
             if (DTO.NewPassword != DTO.NewPasswordConfirmation)
                 throw new InvalidOperationException("As senhas não conferem.");
-            customer.PasswordHash = BCrypt.Net.BCrypt.HashPassword(DTO.NewPassword);
-            customer.UpdatedAt = DateTime.UtcNow;
-            _customerRepository.Update(customer);
-            await _customerRepository.SaveChangesAsync(cancellationToken);
+            userAccount.PasswordHash = BCrypt.Net.BCrypt.HashPassword(DTO.NewPassword);
+            userAccount.UpdatedAt = DateTime.UtcNow;
+            await _context.SaveChangesAsync(cancellationToken);
         }
 
         public async Task DeactivateAsync(Guid uuid, CancellationToken cancellationToken = default)
@@ -250,7 +243,7 @@ namespace ProjetoLES.Server.Services
         public async Task<CustomerResponseDTO?> GetByUuidAsync(
             Guid uuid, CancellationToken cancellationToken = default)
         {
-            var c = await _customerRepository.GetByUuidAsync(uuid, cancellationToken);
+            var c = await _customerRepository.GetFullProfileAsync(uuid, cancellationToken);
             return c is null ? null : MapToResponseDTO(c);
         }
 
@@ -259,7 +252,7 @@ namespace ProjetoLES.Server.Services
         {
             var (items, totalCount) = await _customerRepository.GetPagedAsync(filter, cancellationToken);
             var DTOs = items.Select(c => new CustomerSummaryDTO(
-                c.Uuid, c.CustomerCode, c.Name, c.Email, c.Cpf, c.IsActive, c.Ranking));
+                c.Uuid, c.CustomerCode, c.Name, c.User?.Email, c.Cpf, c.IsActive, c.Ranking));
             return new PagedResultDTO<CustomerSummaryDTO>(DTOs, totalCount, filter.Page, filter.PageSize);
         }
 
@@ -420,7 +413,7 @@ namespace ProjetoLES.Server.Services
 
         private static CustomerResponseDTO MapToResponseDTO(CustomerModel c) => new(
             c.Uuid, c.CustomerCode, c.Name, c.Gender, c.BirthDate,
-            c.Cpf, c.Email, c.IsActive, c.Ranking, c.CreatedAt, c.UpdatedAt);
+            c.Cpf, c.User?.Email, c.IsActive, c.Ranking, c.CreatedAt, c.UpdatedAt);
 
         private static AddressResponseDTO MapToAddressDTO(CustomerAddressModel a) => new(
             a.Uuid, a.AddressType, a.Label, a.ResidenceType, a.StreetType,

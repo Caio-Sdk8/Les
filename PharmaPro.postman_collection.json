@@ -1,0 +1,486 @@
+{
+  "info": {
+    "name": "PharmaPro API",
+    "description": "Collection completa da API PharmaPro.\n\n## Primeiro uso\n\nO usuário admin é criado automaticamente ao iniciar a aplicação.\n\n**Credenciais do admin:**\n- Email: `admin@pharma.com`\n- Senha: `Admin@123!`\n\n## Fluxo sugerido\n1. **Login** → token salvo automaticamente\n2. **Register** → cria cliente + conta Customer\n3. Use os UUIDs retornados para os demais endpoints",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl",      "value": "http://localhost:5035", "type": "string" },
+    { "key": "token",        "value": "",                       "type": "string" },
+    { "key": "customerUuid", "value": "",                       "type": "string" },
+    { "key": "addressUuid",  "value": "",                       "type": "string" },
+    { "key": "cardUuid",     "value": "",                       "type": "string" },
+    { "key": "userUuid",     "value": "",                       "type": "string" },
+    { "key": "roleUuid",     "value": "",                       "type": "string" }
+  ],
+  "auth": {
+    "type": "bearer",
+    "bearer": [{ "key": "token", "value": "{{token}}", "type": "string" }]
+  },
+  "item": [
+
+    {
+      "name": "🔑 Auth",
+      "item": [
+        {
+          "name": "Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const json = pm.response.json();",
+                  "    pm.collectionVariables.set('token', json.token);",
+                  "    pm.collectionVariables.set('userUuid', json.user.uuid);",
+                  "    console.log('Login OK. Roles:', json.user.roles);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@pharmapro.com\",\n  \"password\": \"Admin@123\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/api/auth/login", "host": ["{{baseUrl}}"], "path": ["api", "auth", "login"] }
+          }
+        }
+      ]
+    },
+
+    {
+      "name": "👥 Customers",
+      "item": [
+
+        {
+          "name": "Register (anônimo)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    pm.collectionVariables.set('customerUuid', pm.response.json().uuid);",
+                  "    console.log('customerUuid salvo:', pm.response.json().uuid);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"João da Silva\",\n  \"gender\": 1,\n  \"birthDate\": \"1990-05-15\",\n  \"cpf\": \"12345678901\",\n  \"email\": \"joao.silva@email.com\",\n  \"phoneType\": 1,\n  \"areaCode\": \"11\",\n  \"phoneNumber\": \"987654321\",\n  \"password\": \"Senha@123\",\n  \"passwordConfirmation\": \"Senha@123\",\n  \"billingAddress\": {\n    \"label\": \"Cobrança Principal\",\n    \"addressType\": 1,\n    \"residenceType\": 1,\n    \"streetType\": \"Rua\",\n    \"street\": \"das Flores\",\n    \"number\": \"100\",\n    \"neighborhood\": \"Centro\",\n    \"zipCode\": \"01310100\",\n    \"city\": \"São Paulo\",\n    \"state\": \"SP\",\n    \"country\": \"Brasil\",\n    \"observations\": \"\"\n  },\n  \"deliveryAddress\": {\n    \"label\": \"Entrega Principal\",\n    \"addressType\": 2,\n    \"residenceType\": 1,\n    \"streetType\": \"Avenida\",\n    \"street\": \"Paulista\",\n    \"number\": \"1000\",\n    \"neighborhood\": \"Bela Vista\",\n    \"zipCode\": \"01310100\",\n    \"city\": \"São Paulo\",\n    \"state\": \"SP\",\n    \"country\": \"Brasil\",\n    \"observations\": \"Ap 42\"\n  },\n  \"creditCards\": [\n    {\n      \"cardBrandName\": \"Visa\",\n      \"cardNumber\": \"4111111111111111\",\n      \"printedName\": \"JOAO SILVA\",\n      \"securityCode\": \"123\",\n      \"expirationDate\": \"2027-12-01\",\n      \"isPreferred\": true\n    }\n  ]\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/api/customers/register", "host": ["{{baseUrl}}"], "path": ["api", "customers", "register"] }
+          }
+        },
+
+        {
+          "name": "List Customers",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/customers?page=1&pageSize=10",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "customers"],
+              "query": [
+                { "key": "page",         "value": "1" },
+                { "key": "pageSize",     "value": "10" },
+                { "key": "search",       "value": "", "disabled": true },
+                { "key": "name",         "value": "", "disabled": true },
+                { "key": "email",        "value": "", "disabled": true },
+                { "key": "cpf",          "value": "", "disabled": true },
+                { "key": "customerCode", "value": "", "disabled": true },
+                { "key": "isActive",     "value": "true", "disabled": true }
+              ]
+            }
+          }
+        },
+
+        {
+          "name": "Get Customer by UUID",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/api/customers/{{customerUuid}}", "host": ["{{baseUrl}}"], "path": ["api", "customers", "{{customerUuid}}"] }
+          }
+        },
+
+        {
+          "name": "Create Customer (admin)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    pm.collectionVariables.set('customerUuid', pm.response.json().uuid);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Maria Oliveira\",\n  \"gender\": 2,\n  \"birthDate\": \"1985-08-20\",\n  \"cpf\": \"98765432100\",\n  \"email\": \"maria.oliveira@email.com\",\n  \"password\": \"Senha@123\",\n  \"passwordConfirmation\": \"Senha@123\",\n  \"ranking\": 0\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/api/customers", "host": ["{{baseUrl}}"], "path": ["api", "customers"] }
+          }
+        },
+
+        {
+          "name": "Update Customer",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"João da Silva Atualizado\",\n  \"gender\": 1,\n  \"birthDate\": \"1990-05-15\",\n  \"ranking\": 1\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/api/customers/{{customerUuid}}", "host": ["{{baseUrl}}"], "path": ["api", "customers", "{{customerUuid}}"] }
+          }
+        },
+
+        {
+          "name": "Change Password",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"currentPassword\": \"Senha@123\",\n  \"newPassword\": \"NovaSenha@456\",\n  \"newPasswordConfirmation\": \"NovaSenha@456\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/api/customers/{{customerUuid}}/password", "host": ["{{baseUrl}}"], "path": ["api", "customers", "{{customerUuid}}", "password"] }
+          }
+        },
+
+        {
+          "name": "Deactivate Customer",
+          "request": {
+            "method": "PATCH",
+            "url": { "raw": "{{baseUrl}}/api/customers/{{customerUuid}}/deactivate", "host": ["{{baseUrl}}"], "path": ["api", "customers", "{{customerUuid}}", "deactivate"] }
+          }
+        },
+
+        {
+          "name": "Get Addresses",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/api/customers/{{customerUuid}}/addresses", "host": ["{{baseUrl}}"], "path": ["api", "customers", "{{customerUuid}}", "addresses"] }
+          }
+        },
+
+        {
+          "name": "Add Address",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    const list = pm.response.json();",
+                  "    if (Array.isArray(list) && list.length > 0) {",
+                  "        pm.collectionVariables.set('addressUuid', list[list.length - 1].uuid);",
+                  "    }",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"label\": \"Casa\",\n  \"addressType\": 2,\n  \"residenceType\": 1,\n  \"streetType\": \"Rua\",\n  \"street\": \"Nova\",\n  \"number\": \"50\",\n  \"neighborhood\": \"Vila Madalena\",\n  \"zipCode\": \"05435000\",\n  \"city\": \"São Paulo\",\n  \"state\": \"SP\",\n  \"country\": \"Brasil\",\n  \"observations\": \"Portão azul\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/api/customers/{{customerUuid}}/addresses", "host": ["{{baseUrl}}"], "path": ["api", "customers", "{{customerUuid}}", "addresses"] }
+          }
+        },
+
+        {
+          "name": "Update Address",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"label\": \"Casa Atualizado\",\n  \"addressType\": 2,\n  \"residenceType\": 1,\n  \"streetType\": \"Rua\",\n  \"street\": \"Nova Atualizada\",\n  \"number\": \"55\",\n  \"neighborhood\": \"Vila Madalena\",\n  \"zipCode\": \"05435000\",\n  \"city\": \"São Paulo\",\n  \"state\": \"SP\",\n  \"country\": \"Brasil\",\n  \"observations\": \"\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/api/customers/{{customerUuid}}/addresses/{{addressUuid}}", "host": ["{{baseUrl}}"], "path": ["api", "customers", "{{customerUuid}}", "addresses", "{{addressUuid}}"] }
+          }
+        },
+
+        {
+          "name": "Add Phone",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"phoneType\": 2,\n  \"areaCode\": \"11\",\n  \"number\": \"33334444\",\n  \"isMain\": false\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/api/customers/{{customerUuid}}/phones", "host": ["{{baseUrl}}"], "path": ["api", "customers", "{{customerUuid}}", "phones"] }
+          }
+        },
+
+        {
+          "name": "Get Credit Cards",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/api/customers/{{customerUuid}}/credit-cards", "host": ["{{baseUrl}}"], "path": ["api", "customers", "{{customerUuid}}", "credit-cards"] }
+          }
+        },
+
+        {
+          "name": "Add Credit Card",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    const list = pm.response.json();",
+                  "    if (Array.isArray(list) && list.length > 0) {",
+                  "        pm.collectionVariables.set('cardUuid', list[list.length - 1].uuid);",
+                  "    }",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"cardBrandName\": \"Mastercard\",\n  \"cardNumber\": \"5500005555555559\",\n  \"printedName\": \"JOAO SILVA\",\n  \"securityCode\": \"321\",\n  \"expirationDate\": \"2026-06-01\",\n  \"isPreferred\": false\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/api/customers/{{customerUuid}}/credit-cards", "host": ["{{baseUrl}}"], "path": ["api", "customers", "{{customerUuid}}", "credit-cards"] }
+          }
+        },
+
+        {
+          "name": "Set Preferred Card",
+          "request": {
+            "method": "PATCH",
+            "url": { "raw": "{{baseUrl}}/api/customers/{{customerUuid}}/credit-cards/{{cardUuid}}/set-preferred", "host": ["{{baseUrl}}"], "path": ["api", "customers", "{{customerUuid}}", "credit-cards", "{{cardUuid}}", "set-preferred"] }
+          }
+        },
+
+        {
+          "name": "Get Transactions",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/customers/{{customerUuid}}/transactions?page=1&pageSize=20",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "customers", "{{customerUuid}}", "transactions"],
+              "query": [
+                { "key": "page",     "value": "1" },
+                { "key": "pageSize", "value": "20" }
+              ]
+            }
+          }
+        }
+
+      ]
+    },
+
+    {
+      "name": "👤 Users",
+      "item": [
+
+        {
+          "name": "List Users",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/users?page=1&pageSize=10",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "users"],
+              "query": [
+                { "key": "page",     "value": "1" },
+                { "key": "pageSize", "value": "10" },
+                { "key": "search",   "value": "", "disabled": true },
+                { "key": "isActive", "value": "true", "disabled": true }
+              ]
+            }
+          }
+        },
+
+        {
+          "name": "Get User by UUID",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/api/users/{{userUuid}}", "host": ["{{baseUrl}}"], "path": ["api", "users", "{{userUuid}}"] }
+          }
+        },
+
+        {
+          "name": "Create User (funcionário/admin)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    pm.collectionVariables.set('userUuid', pm.response.json().uuid);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"carlos@pharmapro.com\",\n  \"password\": \"Func@123\",\n  \"passwordConfirmation\": \"Func@123\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/api/users", "host": ["{{baseUrl}}"], "path": ["api", "users"] }
+          }
+        },
+
+        {
+          "name": "Update User",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"carlos.novo@pharmapro.com\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/api/users/{{userUuid}}", "host": ["{{baseUrl}}"], "path": ["api", "users", "{{userUuid}}"] }
+          }
+        },
+
+        {
+          "name": "Change Password (User)",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"currentPassword\": \"Func@123\",\n  \"newPassword\": \"NovaFunc@456\",\n  \"newPasswordConfirmation\": \"NovaFunc@456\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/api/users/{{userUuid}}/password", "host": ["{{baseUrl}}"], "path": ["api", "users", "{{userUuid}}", "password"] }
+          }
+        },
+
+        {
+          "name": "Deactivate User",
+          "request": {
+            "method": "PATCH",
+            "url": { "raw": "{{baseUrl}}/api/users/{{userUuid}}/deactivate", "host": ["{{baseUrl}}"], "path": ["api", "users", "{{userUuid}}", "deactivate"] }
+          }
+        },
+
+        {
+          "name": "Assign Role to User",
+          "request": {
+            "method": "POST",
+            "url": { "raw": "{{baseUrl}}/api/users/{{userUuid}}/roles/{{roleUuid}}", "host": ["{{baseUrl}}"], "path": ["api", "users", "{{userUuid}}", "roles", "{{roleUuid}}"] }
+          }
+        },
+
+        {
+          "name": "Remove Role from User",
+          "request": {
+            "method": "DELETE",
+            "url": { "raw": "{{baseUrl}}/api/users/{{userUuid}}/roles/{{roleUuid}}", "host": ["{{baseUrl}}"], "path": ["api", "users", "{{userUuid}}", "roles", "{{roleUuid}}"] }
+          }
+        }
+
+      ]
+    },
+
+    {
+      "name": "🎭 Roles",
+      "item": [
+
+        {
+          "name": "List Roles",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/api/roles", "host": ["{{baseUrl}}"], "path": ["api", "roles"] }
+          }
+        },
+
+        {
+          "name": "Get Role by UUID",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/api/roles/{{roleUuid}}", "host": ["{{baseUrl}}"], "path": ["api", "roles", "{{roleUuid}}"] }
+          }
+        },
+
+        {
+          "name": "Create Role",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    pm.collectionVariables.set('roleUuid', pm.response.json().uuid);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Supervisor\",\n  \"description\": \"Supervisiona operações da loja\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/api/roles", "host": ["{{baseUrl}}"], "path": ["api", "roles"] }
+          }
+        },
+
+        {
+          "name": "Update Role",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Supervisor\",\n  \"description\": \"Supervisiona operações e relatórios\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/api/roles/{{roleUuid}}", "host": ["{{baseUrl}}"], "path": ["api", "roles", "{{roleUuid}}"] }
+          }
+        },
+
+        {
+          "name": "Delete Role",
+          "request": {
+            "method": "DELETE",
+            "url": { "raw": "{{baseUrl}}/api/roles/{{roleUuid}}", "host": ["{{baseUrl}}"], "path": ["api", "roles", "{{roleUuid}}"] }
+          }
+        }
+
+      ]
+    }
+
+  ]
+}

@@ -5,7 +5,6 @@ export interface LoginResponse {
   expiresAt: string;
   user: {
     uuid: string;
-    username: string;
     email: string;
     roles: string[];
   };

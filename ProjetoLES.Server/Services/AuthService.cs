@@ -39,16 +39,16 @@ namespace ProjetoLES.Server.Services
                 .ToList();
 
             var expiresAt = DateTime.UtcNow.AddHours(_jwtSettings.ExpiresInHours);
-            var token = GenerateToken(user.Id, user.Uuid, user.Email, user.Username, roles, expiresAt);
+            var token = GenerateToken(user.Id, user.Uuid, user.Email, roles, expiresAt);
 
             return new LoginResponseDTO(
                 token,
                 expiresAt,
-                new AuthUserDTO(user.Uuid, user.Username, user.Email, roles));
+                new AuthUserDTO(user.Uuid, user.Email, roles));
         }
 
         private string GenerateToken(
-            int userId, Guid userUuid, string email, string username,
+            int userId, Guid userUuid, string email,
             IEnumerable<string> roles, DateTime expiresAt)
         {
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtSettings.Key));
@@ -60,7 +60,6 @@ namespace ProjetoLES.Server.Services
                 new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
                 new(JwtRegisteredClaimNames.Email, email),
                 new("uuid", userUuid.ToString()),
-                new("username", username),
             };
 
             foreach (var role in roles)

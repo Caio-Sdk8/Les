@@ -11,7 +11,6 @@ namespace ProjetoLES.Server.DTO_s.Auth
 
     public record AuthUserDTO(
         Guid Uuid,
-        string Username,
         string Email,
         IEnumerable<string> Roles);
 }

@@ -41,8 +41,6 @@ namespace ProjetoLES.Server.Migrations
                     Gender = table.Column<int>(type: "INTEGER", nullable: false),
                     BirthDate = table.Column<DateOnly>(type: "TEXT", nullable: false),
                     Cpf = table.Column<string>(type: "TEXT", maxLength: 11, nullable: false),
-                    Email = table.Column<string>(type: "TEXT", maxLength: 255, nullable: false),
-                    PasswordHash = table.Column<string>(type: "TEXT", nullable: false),
                     IsActive = table.Column<bool>(type: "INTEGER", nullable: false),
                     Ranking = table.Column<int>(type: "INTEGER", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "TEXT", nullable: false),
@@ -176,7 +174,6 @@ namespace ProjetoLES.Server.Migrations
                 {
                     Id = table.Column<int>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
-                    Username = table.Column<string>(type: "TEXT", maxLength: 100, nullable: false),
                     Email = table.Column<string>(type: "TEXT", maxLength: 255, nullable: false),
                     PasswordHash = table.Column<string>(type: "TEXT", nullable: false),
                     IsActive = table.Column<bool>(type: "INTEGER", nullable: false),
@@ -328,12 +325,6 @@ namespace ProjetoLES.Server.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_Customers_Email",
-                table: "Customers",
-                column: "Email",
-                unique: true);
-
-            migrationBuilder.CreateIndex(
                 name: "IX_Customers_Uuid",
                 table: "Customers",
                 column: "Uuid",
@@ -382,12 +373,6 @@ namespace ProjetoLES.Server.Migrations
                 name: "IX_Users_Email",
                 table: "Users",
                 column: "Email",
-                unique: true);
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Users_Username",
-                table: "Users",
-                column: "Username",
                 unique: true);
 
             migrationBuilder.CreateIndex(

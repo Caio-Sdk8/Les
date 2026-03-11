@@ -11,8 +11,8 @@ using ProjetoLES.Server.Data;
 namespace ProjetoLES.Server.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260310195817_FixUsernameDisplayName")]
-    partial class FixUsernameDisplayName
+    [Migration("20260311133613_SeedCardBrands")]
+    partial class SeedCardBrands
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -54,6 +54,72 @@ namespace ProjetoLES.Server.Migrations
                         .IsUnique();
 
                     b.ToTable("CardBrands", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            IsActive = true,
+                            IsDeleted = false,
+                            Name = "Visa",
+                            Uuid = new Guid("22222222-0000-4000-8000-000000000001")
+                        },
+                        new
+                        {
+                            Id = 2,
+                            IsActive = true,
+                            IsDeleted = false,
+                            Name = "Mastercard",
+                            Uuid = new Guid("22222222-0000-4000-8000-000000000002")
+                        },
+                        new
+                        {
+                            Id = 3,
+                            IsActive = true,
+                            IsDeleted = false,
+                            Name = "Elo",
+                            Uuid = new Guid("22222222-0000-4000-8000-000000000003")
+                        },
+                        new
+                        {
+                            Id = 4,
+                            IsActive = true,
+                            IsDeleted = false,
+                            Name = "American Express",
+                            Uuid = new Guid("22222222-0000-4000-8000-000000000004")
+                        },
+                        new
+                        {
+                            Id = 5,
+                            IsActive = true,
+                            IsDeleted = false,
+                            Name = "Hipercard",
+                            Uuid = new Guid("22222222-0000-4000-8000-000000000005")
+                        },
+                        new
+                        {
+                            Id = 6,
+                            IsActive = true,
+                            IsDeleted = false,
+                            Name = "Hiper",
+                            Uuid = new Guid("22222222-0000-4000-8000-000000000006")
+                        },
+                        new
+                        {
+                            Id = 7,
+                            IsActive = true,
+                            IsDeleted = false,
+                            Name = "Diners Club",
+                            Uuid = new Guid("22222222-0000-4000-8000-000000000007")
+                        },
+                        new
+                        {
+                            Id = 8,
+                            IsActive = true,
+                            IsDeleted = false,
+                            Name = "Cabal",
+                            Uuid = new Guid("22222222-0000-4000-8000-000000000008")
+                        });
                 });
 
             modelBuilder.Entity("ProjetoLES.Server.Models.CreditCardModel", b =>
@@ -228,11 +294,6 @@ namespace ProjetoLES.Server.Migrations
                     b.Property<DateTime?>("DeletedAt")
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("Email")
-                        .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("TEXT");
-
                     b.Property<int>("Gender")
                         .HasColumnType("INTEGER");
 
@@ -245,10 +306,6 @@ namespace ProjetoLES.Server.Migrations
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(200)
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("PasswordHash")
-                        .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.Property<int>("Ranking")
@@ -268,9 +325,6 @@ namespace ProjetoLES.Server.Migrations
                         .IsUnique();
 
                     b.HasIndex("CustomerCode")
-                        .IsUnique();
-
-                    b.HasIndex("Email")
                         .IsUnique();
 
                     b.HasIndex("Uuid")
@@ -477,11 +531,6 @@ namespace ProjetoLES.Server.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("Username")
-                        .IsRequired()
-                        .HasMaxLength(200)
                         .HasColumnType("TEXT");
 
                     b.Property<Guid>("Uuid")
