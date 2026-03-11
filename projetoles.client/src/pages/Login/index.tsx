@@ -6,19 +6,37 @@ import Email from "../../assets/Email.png";
 import { authService } from "../../services/auth/authService";
 import {
   Button,
-  Container,
   ContainerInput,
+  Divider,
   ErrorMessage,
-  Form,
-  FormContainer,
+  FormSubtitle,
+  FormTitle,
+  FormWrapper,
   Icon,
   Input,
   Label,
+  LeftHeadline,
+  LeftPanel,
+  LeftTagline,
   Main,
+  RightPanel,
   SingButton,
-  SubTitle,
-  TitleForm,
+  TogglePassword,
 } from "./style";
+
+const EyeOpen = () => (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+    <circle cx="12" cy="12" r="3" />
+  </svg>
+);
+
+const EyeOff = () => (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24" />
+    <line x1="1" y1="1" x2="23" y2="23" />
+  </svg>
+);
 
 const Login = () => {
   const navigate = useNavigate();
@@ -26,8 +44,9 @@ const Login = () => {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
-  const handleSubmit = async (e: React.MouseEvent) => {
+  const handleSubmit = async (e: React.FormEvent | React.MouseEvent) => {
     e.preventDefault();
     setError("");
 
@@ -53,66 +72,78 @@ const Login = () => {
     }
   };
 
-  const handleRegister = (e: React.MouseEvent) => {
-    e.preventDefault();
-    navigate("/cadastro");
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter") handleSubmit(e as unknown as React.FormEvent);
   };
 
   return (
     <Main>
-      <Container>
-        <FormContainer>
-          <Form>
-            <TitleForm>
-              <img
-                src={Logo}
-                alt="Logo"
-                style={{
-                  width: "302px",
-                  height: "158px",
-                }}
-              />
-            </TitleForm>
+      <LeftPanel>
+        <LeftHeadline>Sua saúde,<br />na palma da mão.</LeftHeadline>
+        <LeftTagline>
+          Medicamentos, vitaminas e produtos de saúde com entrega rápida e
+          segurança direto na sua porta.
+        </LeftTagline>
+      </LeftPanel>
 
-            <SubTitle>Login</SubTitle>
+      <RightPanel>
+        <FormWrapper>
+          <img
+            src={Logo}
+            alt="PharmaPro"
+            style={{ width: 200, marginBottom: 24, alignSelf: "center" }}
+          />
+          <FormTitle>Bem-vindo de volta</FormTitle>
+          <FormSubtitle>Entre para ver seus pedidos e continuar comprando</FormSubtitle>
 
-            <Label>E-mail</Label>
-            <ContainerInput>
-              <Icon src={Email} alt="email" />
-              <Input
-                type="email"
-                placeholder="Digite seu e-mail"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-              />
-            </ContainerInput>
+          <Label htmlFor="email">E-mail</Label>
+          <ContainerInput>
+            <Icon src={Email} alt="" />
+            <Input
+              id="email"
+              type="email"
+              placeholder="seu@email.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              onKeyDown={handleKeyDown}
+              autoComplete="email"
+            />
+          </ContainerInput>
 
-            <Label>Senha</Label>
-            <ContainerInput>
-              <Icon
-                src={Cadeado}
-                alt="cadeado"
-                style={{ width: "26px", height: "26px" }}
-              />
-              <Input
-                type="password"
-                placeholder="Digite a senha"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-              />
-            </ContainerInput>
+          <Label htmlFor="password">Senha</Label>
+          <ContainerInput>
+            <Icon src={Cadeado} alt="" style={{ width: 20, height: 20 }} />
+            <Input
+              id="password"
+              type={showPassword ? "text" : "password"}
+              placeholder="Digite sua senha"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              onKeyDown={handleKeyDown}
+              autoComplete="current-password"
+            />
+            <TogglePassword
+              type="button"
+              onClick={() => setShowPassword((v) => !v)}
+              tabIndex={-1}
+            >
+              {showPassword ? <EyeOff /> : <EyeOpen />}
+            </TogglePassword>
+          </ContainerInput>
 
-            {error && <ErrorMessage>{error}</ErrorMessage>}
+          {error && <ErrorMessage>{error}</ErrorMessage>}
 
-            <Button type="submit" onClick={handleSubmit} disabled={loading}>
-              {loading ? "Entrando..." : "Entrar"}
-            </Button>
-            <SingButton type="button" onClick={handleRegister}>
-              Cadastrar
-            </SingButton>
-          </Form>
-        </FormContainer>
-      </Container>
+          <Button type="submit" onClick={handleSubmit} disabled={loading}>
+            {loading ? "Entrando..." : "Entrar"}
+          </Button>
+
+          <Divider>ou</Divider>
+
+          <SingButton type="button" onClick={() => navigate("/cadastro")}>
+            Criar conta
+          </SingButton>
+        </FormWrapper>
+      </RightPanel>
     </Main>
   );
 };

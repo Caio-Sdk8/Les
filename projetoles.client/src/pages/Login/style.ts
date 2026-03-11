@@ -1,252 +1,238 @@
 import styled from "styled-components";
 
-export const Container = styled.div`
-  display: flex;
-  width: 100%;
-  height: 100%;
-  flex-direction: column;
-  gap: 24px;
-  background-color: var(--color-bg);
-`;
-
-export const FormContainer = styled.form`
-  background: var(--color-bg);
-
-  height: 100%;
-  width: 100%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  flex-direction: row;
-  color: var(--color-text);
-  gap: 32px;
-`;
-
-export const Title = styled.h1`
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 24px 24px 0 24px;
-  color: var(--color-text);
-  font-family: var(--font-raleway), sans-serif;
-  width: 450px;
-  font-size: 32px;
-  margin-bottom: 32px;
-
-  @media (max-width: 1065px) {
-    font-size: 1.4rem;
-    width: 300px;
-  }
-`;
-
-export const SubTitle = styled.p`
-  margin-top: 20px;
-  width: 100%;
-  width: 450px;
-  font-weight: 700;
-  font-size: 24px;
-  color: #6a006a;
-  text-align: center;
-
-  @media (max-width: 1065px) {
-    width: 300px;
-    font-size: 0.95rem;
-  }
-`;
-
-export const Label = styled.p`
-  display: flex;
-  justify-content: start;
-
-  width: 100%;
-  font-size: 16px;
-  font-family: var(--font-raleway), sans-serif;
-  font-weight: 600;
-  color: #1f2937;
-
-  @media (max-width: 1065px) {
-    width: 300px;
-  }
-`;
-
-export const Input = styled.input`
-  border: 1px solid #d1d5db;
-  background: #f8f9fa;
-  border-radius: 8px;
-
-  padding: 0 45px 0 45px;
-  width: 498px;
-  min-height: var(--control-height);
-  margin-top: 8px;
-  margin-bottom: 10px;
-
-  font-size: 0.9rem;
-  font-weight: 400;
-  font-family: var(--font-openSans, sans-serif);
-
-  color: #1f2937;
-  outline: none;
-
-  &::placeholder {
-    color: #9ca3af;
-  }
-
-  
-  &:focus {
-    border-color: #6a006a;
-    box-shadow: 0 0 0 3px rgba(106, 0, 106, 0.1);
-    background-color: #fff;
-  }
-`;
-
-export const Button = styled.button`
-  width: 100%;
-  height: 48px;
-  margin: 44px 8px 10px 8px;
-  background-color: #6a006a;
-  font-family: var(--font-openSans), sans-serif;
-  font-weight: 700;
-  border: none;
-  border-radius: var(--radius-sm);
-  color: white;
-  font-size: 14px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-
-  &:hover {
-    background-color: #8a008a;
-  }
-`;
-
-export const SingButton = styled.button`
-  width: 100%;
-  height: 48px;
-  margin: 10px 8px 10px 8px;
-  background-color: transparent;
-  font-family: var(--font-openSans), sans-serif;
-  font-weight: 700;
-  border: 1px solid #6a006a;
-  border-radius: 8px;
-  color: #6a006a;
-  font-size: 16px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-
-  &:hover {
-    background-color: #520052;
-    border-color: #520052;
-    color: white;
-  }
-`;
-
-export const ErrorMessage = styled.h3`
-  width: 90%;
-  font-size: 14px;
-  font-family: var(--font-openSans), sans-serif;
-  font-weight: 400;
-  color: red;
-
-  @media (max-width: 1065px) {
-    width: 300px;
-  }
-`;
-
-export const RegisterText = styled.h3`
-  width: 450px;
-  font-size: 10pt;
-  font-weight: 500;
-  color: var(--color-muted);
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 0.3rem;
-  text-decoration: none;
-  margin-top: 1rem;
-
-  span {
-    color: var(--color-muted);
-  }
-
-  label {
-    font-size: 10pt;
-    font-weight: 500;
-    color: var(--color-muted);
-    user-select: none;
-  }
-
-  input {
-    height: 15px;
-    width: 15px;
-  }
-
-  @media (max-width: 1065px) {
-    width: 300px;
-  }
-`;
-
-export const CheckboxLabel = styled.label``;
-
-export const Field = styled.div`
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  width: 100%;
-  align-items: center;
-
-  .icon {
-    position: absolute;
-    right: 40px;
-    bottom: 24px;
-    cursor: pointer;
-  }
-`;
-
-export const Form = styled.div`
-  min-height: 442px;
-  height: auto;
-  width: 546px;
-  display: flex;
-  flex-direction: column;
-  border: 1px solid purple;
-  background: linear-gradient(to right, #e5e7eb 65%, #f9fafb 100%);
-  border-radius: 16px;
-  justify-content: center;
-  align-items: center;
-  padding: 25px;
-`;
+// ── Layout ─────────────────────────────────────────────────────────────────
 
 export const Main = styled.main`
-  background-color: #f3f4f6;
   display: flex;
-  flex-direction: column;
   min-height: 100vh;
   width: 100%;
-  padding: 24px 16px;
-  box-sizing: border-box;
-  align-items: center;
-  justify-content: center;
-  background-color: var(--color-bg);
 `;
 
-export const TitleForm = styled.h1`
-  width: 100%;
-  height: auto;
-  font-size: 30px;
+export const LeftPanel = styled.div`
+  flex: 1;
+  background: linear-gradient(
+    160deg,
+    var(--color-primary) 0%,
+    var(--color-primary-hover) 55%,
+    var(--color-primary-dark) 100%
+  );
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 40px;
+  gap: 28px;
+
+  @media (max-width: 768px) {
+    display: none;
+  }
+`;
+
+export const LeftHeadline = styled.h2`
+  color: #ffffff;
+  font-size: 2.5rem;
   font-weight: 800;
-  color: var(--color-primary);
   text-align: center;
+  max-width: 340px;
+  line-height: 1.2;
+  letter-spacing: -0.5px;
+`;
+
+export const LeftTagline = styled.p`
+  color: rgba(255, 255, 255, 0.78);
+  font-size: 1rem;
+  text-align: center;
+  max-width: 320px;
+  line-height: 1.75;
+`;
+
+export const RightPanel = styled.div`
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 32px;
+  background: var(--color-surface);
+
+  @media (max-width: 768px) {
+    flex: none;
+    width: 100%;
+    padding: 40px 24px;
+  }
+`;
+
+// ── Form wrapper ────────────────────────────────────────────────────────────
+
+export const FormWrapper = styled.div`
+  width: 100%;
+  max-width: 400px;
+  display: flex;
+  flex-direction: column;
+`;
+
+export const FormTitle = styled.h2`
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: var(--color-text);
+  margin-bottom: 6px;
+  line-height: 1.2;
+`;
+
+export const FormSubtitle = styled.p`
+  font-size: 0.9rem;
+  color: var(--color-muted);
+  margin-bottom: 32px;
+`;
+
+// ── Fields ──────────────────────────────────────────────────────────────────
+
+export const Label = styled.label`
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--color-text);
+  margin-bottom: 6px;
+  display: block;
 `;
 
 export const ContainerInput = styled.div`
   position: relative;
   width: 100%;
+  margin-bottom: 20px;
+`;
+
+export const Input = styled.input`
+  width: 100%;
+  height: var(--control-height);
+  padding: 0 44px;
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-bg);
+  font-size: 0.9rem;
+  color: var(--color-text);
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+
+  &::placeholder {
+    color: #9ca3af;
+  }
+
+  &:focus {
+    border-color: var(--color-primary);
+    background: var(--color-surface);
+    box-shadow: 0 0 0 3px var(--color-primary-soft);
+  }
 `;
 
 export const Icon = styled.img`
   position: absolute;
-  left: 12px;
-  top: 45%;
+  left: 13px;
+  top: 50%;
   transform: translateY(-50%);
-  width: 22px;
-  height: 22px;
+  width: 20px;
+  height: 20px;
+  opacity: 0.45;
+  pointer-events: none;
+`;
+
+export const TogglePassword = styled.button`
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  color: var(--color-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+
+  &:hover {
+    color: var(--color-primary);
+  }
+
+  &:focus {
+    outline: none;
+  }
+`;
+
+// ── Actions ─────────────────────────────────────────────────────────────────
+
+export const Button = styled.button`
+  width: 100%;
+  height: 48px;
+  margin-top: 4px;
+  background-color: var(--color-primary);
+  color: #fff;
+  font-size: 0.95rem;
+  font-weight: 700;
+  border: none;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: background-color 0.2s, transform 0.1s;
+  letter-spacing: 0.3px;
+
+  &:hover:not(:disabled) {
+    background-color: var(--color-primary-hover);
+  }
+
+  &:active:not(:disabled) {
+    transform: scale(0.99);
+  }
+
+  &:disabled {
+    opacity: 0.65;
+    cursor: not-allowed;
+  }
+`;
+
+export const Divider = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 20px 0 16px;
+  color: var(--color-muted);
+  font-size: 0.8rem;
+
+  &::before,
+  &::after {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background: var(--color-border);
+  }
+`;
+
+export const SingButton = styled.button`
+  width: 100%;
+  height: 46px;
+  background: transparent;
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  color: var(--color-text);
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: border-color 0.2s, color 0.2s, background 0.2s;
+
+  &:hover {
+    border-color: var(--color-primary);
+    color: var(--color-primary);
+    background: var(--color-primary-soft);
+  }
+`;
+
+export const ErrorMessage = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: var(--radius-sm);
+  color: #dc2626;
+  font-size: 0.85rem;
+  margin-bottom: 14px;
 `;
