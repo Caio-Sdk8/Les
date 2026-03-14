@@ -66,6 +66,19 @@ export const DataContainer = styled.div`
   background-color: var(--color-surface);
 `;
 
+export const PageTitle = styled.h2`
+  margin: 0;
+  color: var(--color-text);
+  font-size: 24px;
+  font-weight: 800;
+`;
+
+export const PageSubtitle = styled.p`
+  margin: 6px 0 0;
+  color: var(--color-muted);
+  font-size: 14px;
+`;
+
 export const DataContainerEtapa1 = styled.div`
   width: 100%;
   height: auto;
@@ -151,8 +164,8 @@ export const InputSing = styled.input`
   color: var(--color-text);
 
   &:focus {
-    border-color: #6a006a;
-    box-shadow: 0 0 0 3px rgba(106, 0, 106, 0.1);
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px var(--color-primary-soft);
     background-color: #fff;
   }
 
@@ -235,7 +248,7 @@ export const NextButton = styled.button`
   width: 200px;
   height: 52px;
   margin-top: 20px;
-  background-color: #6a006a;
+  background-color: var(--color-primary);
   border: none;
   border-radius: var(--radius-sm);
   color: white;
@@ -245,7 +258,7 @@ export const NextButton = styled.button`
   transition: all 0.2s ease;
 
   &:hover {
-    background-color: #8a008a;
+    background-color: var(--color-primary-hover);
   }
 `;
 

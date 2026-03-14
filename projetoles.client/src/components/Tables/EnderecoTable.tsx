@@ -76,16 +76,27 @@ const EnderecoTable = () => {
                         gap: "20px",
                       }}
                     >
-                      <img
-                        src={PencilIcon}
-                        alt="Editar"
+                      <button
+                        type="button"
                         onClick={handleEdit}
                         style={{
-                          width: "24px",
-                          height: "24px",
+                          width: "36px",
+                          height: "36px",
+                          borderRadius: "999px",
+                          border: "1px solid var(--color-border)",
+                          backgroundColor: "var(--color-surface)",
                           cursor: "pointer",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
                         }}
-                      />
+                      >
+                        <img
+                          src={PencilIcon}
+                          alt="Editar"
+                          style={{ width: "18px", height: "18px" }}
+                        />
+                      </button>
                     </Td>
                   </Tr>
                 </tbody>

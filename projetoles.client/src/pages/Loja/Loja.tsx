@@ -5,7 +5,6 @@ import {
   StoreCategories,
   StoreCategory,
 } from "../../components/StoreCategories/StoreCategories";
-import { StoreHeader } from "../../components/StoreHeader/StoreHeader";
 import { StoreHighlights } from "../../components/StoreHighlights/StoreHighlights";
 import { StoreImageTiles } from "../../components/StoreImageTiles/StoreImageTiles";
 import { StoreProduct } from "../../components/StoreProductCard/StoreProductCard";
@@ -13,11 +12,13 @@ import {
   BannerButton,
   BannerDescription,
   BannerTitle,
+  CatalogSearchInput,
   HeroBanner,
   Main,
   PageContent,
   SectionStack,
 } from "./style";
+import { AppShell } from "../../components/AppShell/AppShell";
 
 const categories: StoreCategory[] = [
   { id: "all", name: "Todos", icon: "🛍️" },
@@ -118,8 +119,8 @@ const Loja = () => {
     .slice(0, 8);
 
   return (
-    <Main>
-      <StoreHeader searchValue={searchTerm} onSearchChange={setSearchTerm} />
+    <AppShell title="Loja">
+      <Main>
       <StoreCategories
         categories={categories}
         activeCategory={activeCategory}
@@ -127,6 +128,12 @@ const Loja = () => {
       />
 
       <PageContent>
+        <CatalogSearchInput
+          value={searchTerm}
+          onChange={(event) => setSearchTerm(event.target.value)}
+          placeholder="Buscar produto, categoria ou marca"
+        />
+
         <HeroBanner>
           <BannerTitle>Farmácia online com ofertas todos os dias</BannerTitle>
           <BannerDescription>
@@ -183,7 +190,8 @@ const Loja = () => {
           />
         </SectionStack>
       </PageContent>
-    </Main>
+      </Main>
+    </AppShell>
   );
 };
 

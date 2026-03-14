@@ -24,9 +24,11 @@ export const ButtonPrefer = styled.button<Props>`
   font-size: 12px;
   transition: 0.5s all ease;
 
-  background-color: ${({ preferido }) => (preferido ? "#6A0DAD33" : "#E5E5E5")};
+  background-color: ${({ preferido }) =>
+    preferido ? "var(--color-primary-soft)" : "#E5E7EB"};
 
-  color: ${({ preferido }) => (preferido ? "#6A0DAD" : "#6B6B6B")};
+  color: ${({ preferido }) =>
+    preferido ? "var(--color-primary)" : "var(--color-muted)"};
 
   &:hover {
     scale: 0.95;

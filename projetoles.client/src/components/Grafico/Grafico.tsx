@@ -39,10 +39,10 @@ export default function ProdutosGrafico({ produtoSelecionado }: Props) {
       {
         label: `Vendas de ${produtoSelecionado}`,
         data: produto.vendas.map((item) => item.quantidade),
-        borderColor: "#6A0DAD",
-        backgroundColor: "#6A0DAD33",
+        borderColor: "#2563EB",
+        backgroundColor: "#2563EB33",
         borderWidth: 3,
-        pointBackgroundColor: "#6A0DAD",
+        pointBackgroundColor: "#2563EB",
         pointRadius: 5,
         tension: 0.3,
         fill: false,

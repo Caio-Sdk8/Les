@@ -1,8 +1,6 @@
 import { useState } from "react";
 import { DivPagination } from "../../components/Pagination/style";
 import Pagination from "../../components/Pagination/Paginations";
-import PencilIcon from "../../assets/PencilIcon.svg";
-import { useNavigate } from "react-router-dom";
 import {
   Container,
   ContainerDad,
@@ -46,8 +44,8 @@ const CartaoTable = () => {
                     style={
                       cartao.preferencial
                         ? {
-                            backgroundColor: "#6A0DAD1A",
-                            border: "2px dashed #6A0DAD",
+                            backgroundColor: "var(--color-primary-soft)",
+                            border: "2px dashed var(--color-primary)",
                           }
                         : {}
                     }

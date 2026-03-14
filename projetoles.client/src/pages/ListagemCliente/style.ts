@@ -14,7 +14,7 @@ export const Container = styled.div`
   background-color: var(--color-surface);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
-  padding: 8px;
+  padding: 12px;
 `;
 export const TableContainer = styled.table`
   width: 100%;
@@ -28,16 +28,17 @@ export const TableContainer = styled.table`
   }
   tr {
     padding: 0 10px;
-    height: 48px;
+    height: 52px;
   }
   thead {
     padding: 0 10px;
+    background-color: var(--color-bg);
   }
 `;
 
 export const Th = styled.th`
   border-bottom: 1px solid var(--color-border);
-  height: 48px;
+  height: 52px;
   color: var(--color-muted);
   font-family: var(--font-openSans), sans-serif;
   font-weight: 700;
@@ -61,14 +62,18 @@ export const Th = styled.th`
 
 export const Tr = styled.tr<{ $background: boolean }>`
   background-color: ${({ $background }) =>
-    $background ? "#F5F3FF" : "#ffffff"};
+    $background ? "var(--color-primary-soft)" : "#ffffff"};
   text-align: center;
   width: 100%;
-  max-height: 48px;
+  max-height: 52px;
+
+  &:hover {
+    background-color: #eaf2ff;
+  }
 `;
 
 export const Td = styled.td<{ $isFirst?: boolean }>`
-  max-height: 48px;
+  max-height: 52px;
   text-overflow: ellipsis;
   white-space: nowrap;
   text-align: left;
@@ -92,7 +97,7 @@ export const Td = styled.td<{ $isFirst?: boolean }>`
     justify-content: start;
     align-items: center;
     margin: 0;
-    padding: 2px 15px 0 0;
+    padding: 0 15px 0 0;
     max-width: 100%;
     overflow: hidden;
     white-space: nowrap;

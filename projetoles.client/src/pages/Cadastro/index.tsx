@@ -22,6 +22,8 @@ import {
   RemoveButton,
   SetPreferredButton,
   AddCardButton,
+  PageSubtitle,
+  PageTitle,
   SubTitle,
 } from "./style";
 import { AppShell } from "../../components/AppShell/AppShell";
@@ -179,6 +181,14 @@ export default function Cadastro() {
     <AppShell title="Cadastro do Usuário">
       <DataContainer>
         <BodyData>
+          <div>
+            <PageTitle>Cadastro de cliente</PageTitle>
+            <PageSubtitle>
+              Preencha os dados pessoais, endereços e cartões para concluir o
+              cadastro.
+            </PageSubtitle>
+          </div>
+
           {/* Dados Pessoais */}
           <DivSeparator>
             <InputWrapper>

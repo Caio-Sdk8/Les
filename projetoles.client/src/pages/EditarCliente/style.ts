@@ -4,7 +4,7 @@ export const EditButton = styled.button`
   width: 200px;
   height: 52px;
   margin-top: 48px;
-  background-color: #6a006a;
+  background-color: var(--color-primary);
   border: none;
   border-radius: 8px;
   color: white;
@@ -15,6 +15,6 @@ export const EditButton = styled.button`
   transition: all 0.5s ease;
 
   &:hover {
-    background-color: #8a008a;
+    background-color: var(--color-primary-hover);
   }
 `;

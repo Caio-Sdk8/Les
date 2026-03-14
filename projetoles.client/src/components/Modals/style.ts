@@ -20,11 +20,11 @@ export const ModalButtonWarning = styled.button`
   border: 0;
   color: white;
   font-family: var(--font-openSans), sans-serif;
-  background-color: #6a006a;
+  background-color: var(--color-primary);
   transition: all 0.3s ease;
 
   &:hover {
-    background-color: #8a008a;
+    background-color: var(--color-primary-hover);
   }
 `;
 
@@ -38,14 +38,14 @@ export const ModalButtonWarningWhite = styled.button`
   outline: 0;
 
   border: 0;
-  color: #6a006a;
-  border: 1px solid #6a006a;
+  color: var(--color-primary);
+  border: 1px solid var(--color-primary);
   font-family: var(--font-openSans), sans-serif;
   background: white;
   transition: all 0.3s ease;
 
   &:hover {
-    background-color: #6a006a;
+    background-color: var(--color-primary);
     color: white;
   }
 `;

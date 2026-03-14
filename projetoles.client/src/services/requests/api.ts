@@ -2,7 +2,7 @@ import axios from "axios";
 import { authService } from "../auth/authService";
 
 const api = axios.create({
-  baseURL: "https://localhost:7170",
+  baseURL: import.meta.env.VITE_API_BASE_URL || "/",
   headers: {
     "Content-Type": "application/json",
   },
@@ -21,7 +21,10 @@ api.interceptors.request.use((config) => {
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response?.status === 401) {
+    const requestUrl = error.config?.url || "";
+    const isLoginRequest = requestUrl.includes("/api/auth/login");
+
+    if (error.response?.status === 401 && !isLoginRequest) {
       authService.logout();
       window.location.href = "/";
     }

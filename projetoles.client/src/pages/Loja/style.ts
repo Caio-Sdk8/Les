@@ -16,10 +16,27 @@ export const PageContent = styled.div`
   gap: 14px;
 `;
 
+export const CatalogSearchInput = styled.input`
+  width: 100%;
+  height: 42px;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--color-border);
+  background-color: var(--color-surface);
+  color: var(--color-text);
+  padding: 0 14px;
+  font-size: 14px;
+  outline: none;
+
+  &:focus {
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px var(--color-primary-soft);
+  }
+`;
+
 export const HeroBanner = styled.section`
   border-radius: var(--radius-md);
   border: 1px solid var(--color-border);
-  background: linear-gradient(120deg, #ddd6fe 0%, #ecfeff 100%);
+  background: linear-gradient(120deg, #dbeafe 0%, #ecfeff 100%);
   padding: 18px;
 `;
 
