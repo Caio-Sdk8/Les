@@ -28,9 +28,15 @@ export default function Edicao() {
   const location = useLocation();
 
   const customerName =
-    (location.state as { customerName?: string } | null)?.customerName?.trim() ?? "";
+    (
+      location.state as { customerName?: string } | null
+    )?.customerName?.trim() ?? "";
 
-  const pageTitle = customerName ? `Edição de ${customerName}` : "Edição de Cliente";
+  const pageTitle = customerName
+    ? `Edição de ${customerName}`
+    : "Edição de Cliente";
+
+  const customerUuid = location.state?.uuid;
 
   const handleSalvar = () => {
     navigate("/clientes");
@@ -134,6 +140,7 @@ export default function Edicao() {
           button="Cadastrar"
           button2="Cancelar"
           back={() => setModalCartao(false)}
+          uuid={customerUuid}
         />
       )}
 
@@ -155,6 +162,7 @@ export default function Edicao() {
           button2="Cancelar"
           back={() => setModalEndereco(false)}
           width="700px"
+          uuid={customerUuid}
         />
       )}
     </AppShell>

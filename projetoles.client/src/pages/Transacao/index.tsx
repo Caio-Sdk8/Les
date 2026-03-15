@@ -15,9 +15,17 @@ import {
 import { transacoesMock } from "../../mock/transacoes";
 import { AppShell } from "../../components/AppShell/AppShell";
 import ModalTroca from "../../components/Modals/Troca";
+import { GetTransactionClientRequest } from "../../services/requests/getTransactionClient";
+import { useLocation } from "react-router-dom";
 const Transacao = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [refound, setRefound] = useState(false);
+
+  const location = useLocation();
+  const customerUuid = location.state?.uuid;
+
+  const { data, isLoading } = GetTransactionClientRequest(customerUuid, 1, 20);
+
   const [isDesactive, setIsDesactive] = useState(false);
 
   const [documentId, setDocumentId] = useState("");
@@ -42,19 +50,15 @@ const Transacao = () => {
                 </tr>
               </thead>
 
-              {transacoesMock.map((transacao, index) => (
+              {data?.items.map((transacao, index) => (
                 <tbody key={transacao.id}>
                   <Tr $background={index % 2 === 0}>
                     <Td style={{ textAlign: "left", paddingLeft: "5px" }}>
-                      <p>{transacao.codigo}</p>
+                      <p>R${transacao.amount}</p>
                     </Td>
+                    <Td>{transacao.description}</Td>
                     <Td>
-                      {transacao.produtos.map((produto) => (
-                        <p key={produto.id}>{produto.nome}</p>
-                      ))}
-                    </Td>
-                    <Td>
-                      <p>R${transacao.valor}</p>
+                      <p>{transacao.createdAt}</p>
                     </Td>
                     <Td
                       style={{
@@ -82,15 +86,40 @@ const Transacao = () => {
                   </Tr>
                 </tbody>
               ))}
+
+              <tbody>
+                <Tr $background={true}>
+                  <Td style={{ textAlign: "left", paddingLeft: "5px" }}>
+                    <p>------</p>
+                  </Td>
+                  <Td>------</Td>
+                  <Td>
+                    <p>------</p>
+                  </Td>
+                  <Td
+                    style={{
+                      textAlign: "center",
+                      verticalAlign: "middle",
+                      display: "flex",
+                      justifyContent: "center",
+                      alignItems: "center",
+                      height: "inherit",
+                      gap: "20px",
+                    }}
+                  >
+                    <p>------</p>
+                  </Td>
+                </Tr>
+              </tbody>
             </TableContainer>
 
-            {(transacoesMock.length ?? 0) > 0 && (
+            {data && (data?.totalCount ?? 0) > 0 && (
               <DivPagination>
                 <Pagination
-                  currentPage={currentPage}
-                  currentCount={transacoesMock.length}
-                  totalCount={transacoesMock.length}
-                  totalPages={1}
+                  currentPage={data?.page}
+                  currentCount={data.items.length}
+                  totalCount={data.totalCount}
+                  totalPages={data.totalPages}
                   onPageChange={handlePageChange}
                   type="níveis"
                 />

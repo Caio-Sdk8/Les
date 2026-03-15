@@ -6,8 +6,6 @@ import {
   StreetTypeEnum,
 } from "../interfaces/interfaces";
 
-// enums simulados (ajuste conforme backend)
-
 // endereço
 export const AddressSchema = yup.object({
   zipCode: yup.string().required("CEP é obrigatório"),
@@ -17,15 +15,19 @@ export const AddressSchema = yup.object({
   state: yup.string().required("Estado é obrigatório"),
   city: yup.string().required("Cidade é obrigatória"),
   country: yup.string().required("País é obrigatório"),
+
   residenceType: yup
-    .mixed<(typeof ResidenceTypeEnum)[number]>()
-    .oneOf(ResidenceTypeEnum)
-    .required(),
+    .number()
+    .oneOf(Object.values(ResidenceTypeEnum), "Tipo de residência inválido")
+    .required("Tipo de residência é obrigatório"),
+
   streetType: yup
     .mixed<(typeof StreetTypeEnum)[number]>()
-    .oneOf(StreetTypeEnum)
-    .required(),
+    .oneOf(StreetTypeEnum, "Tipo de logradouro inválido")
+    .required("Tipo de logradouro é obrigatório"),
+
   observations: yup.string().optional(),
+  label: yup.string().optional(),
 });
 
 // cartão de crédito
@@ -40,18 +42,21 @@ export const CardSchema = yup.object({
 // formulário completo
 export const CadastroClienteSchema = yup.object({
   name: yup.string().required("Nome é obrigatório"),
+
   gender: yup
-    .mixed<1 | 2 | 3 | 4>()
-    .oneOf(GenderEnum)
+    .number()
+    .oneOf(Object.values(GenderEnum), "Gênero inválido")
     .required("Gênero é obrigatório"),
+
   birthDate: yup.string().required("Data de nascimento é obrigatória"),
   cpf: yup.string().required("CPF é obrigatório"),
   email: yup.string().email("E-mail inválido").required("E-mail é obrigatório"),
 
   phoneType: yup
-    .mixed<(typeof PhoneTypeEnum)[number]>()
-    .oneOf(PhoneTypeEnum)
+    .number()
+    .oneOf(Object.values(PhoneTypeEnum), "Tipo de telefone inválido")
     .required("Tipo de telefone é obrigatório"),
+
   areaCode: yup.string().required("DDD é obrigatório"),
   phoneNumber: yup.string().required("Telefone é obrigatório"),
 
@@ -67,7 +72,8 @@ export const CadastroClienteSchema = yup.object({
   cards: yup
     .array()
     .of(CardSchema)
-    .min(1, "É necessário ter pelo menos um cartão"),
+    .min(1, "É necessário ter pelo menos um cartão")
+    .required("É necessário ter pelo menos um cartão"),
 });
 
 // interface para React Hook Form

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useForm, SubmitHandler } from "react-hook-form";
+import { useForm, SubmitHandler, Path } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 
 import {
@@ -40,15 +40,28 @@ const GENDER_OPTIONS = [
   { label: "Não-binário", value: 3 },
   { label: "Prefiro não informar", value: 4 },
 ];
-const PHONE_TYPE_OPTIONS = ["Celular", "Residencial", "Comercial", "Outro"];
-const RESIDENCE_OPTIONS = [
-  "Casa",
-  "Apartamento",
-  "Condomínio",
-  "Comercial",
-  "Outro",
+
+export const RESIDENCE_OPTIONS = [
+  { label: "Casa", value: 1 },
+  { label: "Apartamento", value: 2 },
+  { label: "Condomínio", value: 3 },
+  { label: "Comercial", value: 4 },
+  { label: "Outro", value: 5 },
 ];
-const STREET_OPTIONS = [
+
+export const ADDRESS_TYPE_OPTIONS = [
+  { label: "Cobrança", value: 1 },
+  { label: "Entrega", value: 2 },
+  { label: "Residencial", value: 3 },
+];
+
+export const PHONE_TYPE_OPTIONS = [
+  { label: "Celular", value: 1 },
+  { label: "Residencial", value: 2 },
+  { label: "Trabalho", value: 3 },
+  { label: "Outro", value: 4 },
+];
+export const STREET_OPTIONS = [
   "Rua",
   "Avenida",
   "Alameda",
@@ -90,12 +103,13 @@ export default function Cadastro() {
     resolver: yupResolver(CadastroClienteSchema),
     defaultValues: {
       name: "",
+      gender: 0,
       birthDate: "",
       cpf: "",
       email: "",
       phoneNumber: "",
       areaCode: "",
-      phoneType: "Celular",
+      phoneType: 1,
       password: "",
       passwordConfirmation: "",
       billingAddress: {
@@ -106,7 +120,7 @@ export default function Cadastro() {
         state: "",
         city: "",
         country: "Brasil",
-        residenceType: "Casa",
+        residenceType: 1,
         streetType: "Rua",
         observations: "",
       },
@@ -118,7 +132,7 @@ export default function Cadastro() {
         state: "",
         city: "",
         country: "Brasil",
-        residenceType: "Casa",
+        residenceType: 1,
         streetType: "Rua",
         observations: "",
       },
@@ -135,13 +149,15 @@ export default function Cadastro() {
     setSameAddress(checked);
     if (checked) {
       Object.entries(watchBilling).forEach(([k, v]) =>
-        setValue(`deliveryAddress.${k}`, v),
+        setValue(`deliveryAddress.${k}` as Path<CadastroClienteForm>, v),
       );
     }
   }
 
-  function handleCardChange(idx: number, name: string, value: string) {
-    setValue(`cards.${idx}.${name}`, value);
+  type CardField = keyof CadastroClienteForm["cards"][number];
+
+  function handleCardChange(idx: number, name: CardField, value: string) {
+    setValue(`cards.${idx}.${name}` as Path<CadastroClienteForm>, value);
   }
 
   const onSubmit: SubmitHandler<CadastroClienteForm> = async (data) => {
@@ -163,10 +179,11 @@ export default function Cadastro() {
         CardNumber: card.cardNumber,
         PrintedName: card.printedName,
         SecurityCode: card.securityCode,
-        ExpirationDate: card.expirationDate,
+        ExpirationDate: card.expirationDate + "-01",
         IsPreferred: idx === preferredIdx,
       })),
     };
+
     try {
       const { dataClient } = await SingClient(payload);
 
@@ -295,10 +312,15 @@ export default function Cadastro() {
               <DivLabel>
                 <Label>Tipo de Telefone</Label>
               </DivLabel>
-              <InputSelect {...register("phoneType")}>
+              <InputSelect
+                {...register("phoneType", {
+                  setValueAs: (v) => Number(v),
+                })}
+              >
+                <option value="">Selecione</option>
                 {PHONE_TYPE_OPTIONS.map((o) => (
-                  <option key={o} value={o}>
-                    {o}
+                  <option key={o.value} value={o.value}>
+                    {o.label}
                   </option>
                 ))}
               </InputSelect>
@@ -619,13 +641,15 @@ function AddressInputs({ prefix, register, errors, disabled }: any) {
             <Label>Tipo de Residência</Label>
           </DivLabel>
           <InputSelect
-            {...register(`${prefix}.residenceType`)}
+            {...register(`${prefix}.residenceType`, {
+              setValueAs: (v) => Number(v),
+            })}
             disabled={disabled}
             style={{ opacity: disabled ? 0.5 : 1 }}
           >
             {RESIDENCE_OPTIONS.map((o) => (
-              <option key={o} value={o}>
-                {o}
+              <option key={o.value} value={o.value}>
+                {o.label}
               </option>
             ))}
           </InputSelect>

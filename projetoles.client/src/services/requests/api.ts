@@ -2,7 +2,8 @@ import axios from "axios";
 import { authService } from "../auth/authService";
 
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL || "/",
+  baseURL: "http://localhost:5035",
+
   headers: {
     "Content-Type": "application/json",
   },
@@ -29,7 +30,7 @@ api.interceptors.response.use(
       window.location.href = "/";
     }
     return Promise.reject(error);
-  }
+  },
 );
 
 export default api;

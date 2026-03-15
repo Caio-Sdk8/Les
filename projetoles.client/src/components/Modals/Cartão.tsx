@@ -1,3 +1,4 @@
+import { useForm } from "react-hook-form";
 import {
   DivLabel,
   DivSeparator,
@@ -17,6 +18,12 @@ import {
   ModalTitleError,
   Overlay,
 } from "./style";
+import {
+  CardFormData,
+  cardSchema,
+} from "../../validations/schemas/CadastroCartao";
+import { yupResolver } from "@hookform/resolvers/yup";
+import { createCreditCard } from "../../services/requests/sinCredit";
 
 type Props = {
   back?: () => void;
@@ -28,11 +35,13 @@ type Props = {
   button2?: string;
   height?: string;
   width?: string;
+  uuid?: string;
 };
 
 const ModalCartao = ({
   back,
   next,
+  uuid,
   title,
   message,
   message2,
@@ -41,6 +50,36 @@ const ModalCartao = ({
   height,
   width,
 }: Props) => {
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<CardFormData>({
+    resolver: yupResolver(cardSchema),
+  });
+
+  const onSubmit = async (formData: CardFormData) => {
+    try {
+      if (!uuid) return;
+
+      const payload = {
+        CardBrandUuid: "11111111-1111-1111-1111-111111111111",
+        CardNumber: formData.cardNumber.replace(/\s/g, ""),
+        PrintedName: formData.printedName,
+        SecurityCode: formData.securityCode,
+        ExpirationDate: formData.expirationDate,
+        IsPreferred: true,
+      };
+
+      const response = await createCreditCard(uuid, payload);
+
+      console.log("Cartão cadastrado com sucesso:", response);
+      next();
+    } catch (error) {
+      console.error("Erro ao cadastrar cartão:", error);
+    }
+  };
+
   return (
     <Overlay>
       <ModalContainerSmall width={width ?? "auto"} height={height ?? "auto"}>
@@ -57,7 +96,11 @@ const ModalCartao = ({
               <Label>Nome do titular</Label>
             </DivLabel>
 
-            <InputSing placeholder="Digite o nome do titular" />
+            <InputSing
+              placeholder="Digite o nome do titular"
+              {...register("printedName")}
+            />
+            {errors.printedName && <span>{errors.printedName.message}</span>}
           </InputWrapper>
 
           <InputWrapper>
@@ -65,7 +108,11 @@ const ModalCartao = ({
               <Label>Número do Cartão</Label>
             </DivLabel>
 
-            <InputSing placeholder="Digite o número do cartão" />
+            <InputSing
+              placeholder="Digite o número do cartão"
+              {...register("cardNumber")}
+            />
+            {errors.cardNumber && <span>{errors.cardNumber.message}</span>}
           </InputWrapper>
 
           <DivSeparator>
@@ -74,7 +121,11 @@ const ModalCartao = ({
                 <Label>Bandeira</Label>
               </DivLabel>
 
-              <InputSing placeholder="Digite a bandeira" />
+              <InputSing
+                placeholder="Digite a bandeira"
+                {...register("cardBrand")}
+              />
+              {errors.cardBrand && <span>{errors.cardBrand.message}</span>}
             </InputWrapper>
 
             <InputWrapper>
@@ -82,9 +133,25 @@ const ModalCartao = ({
                 <Label>Código de Segurança</Label>
               </DivLabel>
 
-              <InputSing placeholder="Digite o código de segurança" />
+              <InputSing
+                placeholder="Digite o código de segurança"
+                {...register("securityCode")}
+              />
+              {errors.securityCode && (
+                <span>{errors.securityCode.message}</span>
+              )}
             </InputWrapper>
           </DivSeparator>
+          <InputWrapper>
+            <DivLabel>
+              <Label>Data de Validade</Label>
+            </DivLabel>
+
+            <InputSing type="date" {...register("expirationDate")} />
+            {errors.expirationDate && (
+              <span>{errors.expirationDate.message}</span>
+            )}
+          </InputWrapper>
         </ModalSection>
         <ModalButtons>
           {button2 && (
@@ -93,7 +160,9 @@ const ModalCartao = ({
             </ModalButtonWarningWhite>
           )}
           {button && (
-            <ModalButtonWarning onClick={next}>{button}</ModalButtonWarning>
+            <ModalButtonWarning type="button" onClick={handleSubmit(onSubmit)}>
+              {button}
+            </ModalButtonWarning>
           )}
         </ModalButtons>
       </ModalContainerSmall>
