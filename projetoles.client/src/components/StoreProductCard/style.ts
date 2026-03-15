@@ -1,8 +1,13 @@
 import styled from "styled-components";
 
-export const ProductCardContainer = styled.article<{ $compact: boolean }>`
+export const ProductCardContainer = styled.article<{
+  $compact: boolean;
+  $clickable: boolean;
+}>`
   width: ${({ $compact }) => ($compact ? "210px" : "240px")};
+  min-width: ${({ $compact }) => ($compact ? "210px" : "240px")};
   min-height: ${({ $compact }) => ($compact ? "290px" : "320px")};
+  flex: 0 0 ${({ $compact }) => ($compact ? "210px" : "240px")};
   border: 1px solid var(--color-border);
   border-radius: 14px;
   background-color: var(--color-surface);
@@ -11,6 +16,7 @@ export const ProductCardContainer = styled.article<{ $compact: boolean }>`
   flex-direction: column;
   position: relative;
   transition: box-shadow 0.2s ease, transform 0.2s ease;
+  cursor: ${({ $clickable }) => ($clickable ? "pointer" : "default")};
 
   &:hover {
     transform: translateY(-2px);
@@ -67,10 +73,30 @@ export const Name = styled.h4`
   overflow: hidden;
 `;
 
-export const WarningTag = styled.span`
+export const WarningTag = styled.span<{
+  $tone?: "free" | "yellow" | "red" | "black" | "neutral";
+}>`
   font-size: 10px;
-  background-color: #fef3c7;
-  color: #92400e;
+  background-color: ${({ $tone }) =>
+    $tone === "free"
+      ? "#dcfce7"
+      : $tone === "yellow"
+        ? "#fef3c7"
+        : $tone === "red"
+          ? "#fee2e2"
+          : $tone === "black"
+            ? "#111827"
+            : "#e5e7eb"};
+  color: ${({ $tone }) =>
+    $tone === "free"
+      ? "#166534"
+      : $tone === "yellow"
+        ? "#92400e"
+        : $tone === "red"
+          ? "#991b1b"
+          : $tone === "black"
+            ? "#f9fafb"
+            : "#374151"};
   border-radius: 999px;
   padding: 3px 7px;
   white-space: nowrap;
@@ -105,15 +131,21 @@ export const AddButton = styled.button`
   width: 32px;
   height: 32px;
   border-radius: 999px;
-  border: 1px solid var(--color-border);
-  background-color: #fff;
+  border: 1px solid transparent;
+  background-color: var(--color-primary);
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
+  box-shadow: 0 6px 14px rgba(15, 23, 42, 0.16);
+
+  &:hover {
+    background-color: var(--color-primary-hover);
+  }
 
   img {
-    width: 14px;
-    height: 14px;
+    width: 16px;
+    height: 16px;
+    display: block;
   }
 `;

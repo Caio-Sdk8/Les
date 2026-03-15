@@ -28,8 +28,12 @@ const ListagemCliente = () => {
     setCurrentPage(pageNumber);
   };
 
-  const handleEdit = () => {
-    navigate("/editarUsuario");
+  const handleEdit = (nome: string) => {
+    navigate("/editarUsuario", {
+      state: {
+        customerName: nome,
+      },
+    });
   };
 
   const handleTransacao = () => {
@@ -90,7 +94,7 @@ const ListagemCliente = () => {
                       <img
                         src={PencilIcon}
                         alt="Editar"
-                        onClick={handleEdit}
+                        onClick={() => handleEdit(usuario.nome)}
                         style={{
                           width: "24px",
                           height: "24px",

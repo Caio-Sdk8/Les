@@ -1,8 +1,10 @@
 import { ItemsContainer, NavItems } from "./style";
 import { useNavigate } from "react-router-dom";
+import { authService } from "../../services/auth/authService";
 
 export const NavBar = () => {
   const navigate = useNavigate();
+  const isStaff = authService.hasAnyRole("Admin", "Employee");
 
   return (
     <ItemsContainer>
@@ -11,6 +13,9 @@ export const NavBar = () => {
       <NavItems onClick={() => navigate("/carrinho")}>Carrinho</NavItems>
       <NavItems onClick={() => navigate("/IA")}>Recomendação</NavItems>
       <NavItems onClick={() => navigate("/grafico")}>Gráfico</NavItems>
+      {isStaff && (
+        <NavItems onClick={() => navigate("/estoque")}>Estoque</NavItems>
+      )}
       <NavItems onClick={() => navigate("/transacao")}>Transações</NavItems>
     </ItemsContainer>
   );

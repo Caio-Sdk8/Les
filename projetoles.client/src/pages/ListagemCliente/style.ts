@@ -5,55 +5,53 @@ export const ContainerDad = styled.div`
   max-width: 100%;
   height: auto;
 `;
+
 export const Container = styled.div`
   display: flex;
   width: 100%;
   height: 100%;
   flex-direction: column;
-  gap: 24px;
+  gap: 16px;
   background-color: var(--color-surface);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
-  padding: 12px;
+  padding: 0;
+  overflow: hidden;
 `;
+
 export const TableContainer = styled.table`
   width: 100%;
   border-collapse: collapse;
   height: 100%;
-  font-family: var(--font-noka), sans-serif;
+  table-layout: fixed;
 
   th {
     vertical-align: middle;
-    padding-top: 12px;
   }
+
   tr {
-    padding: 0 10px;
     height: 52px;
   }
+
   thead {
-    padding: 0 10px;
     background-color: var(--color-bg);
   }
 `;
 
 export const Th = styled.th`
   border-bottom: 1px solid var(--color-border);
-  height: 52px;
+  height: 48px;
   color: var(--color-muted);
-  font-family: var(--font-openSans), sans-serif;
   font-weight: 700;
-  font-style: bold;
-  font-size: 14px;
+  font-size: 12px;
   text-align: left;
+  padding: 12px 16px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
 
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-
-  table {
-    table-layout: fixed;
-    width: 100%;
-  }
 
   &.acao {
     text-align: center;
@@ -62,13 +60,17 @@ export const Th = styled.th`
 
 export const Tr = styled.tr<{ $background: boolean }>`
   background-color: ${({ $background }) =>
-    $background ? "var(--color-primary-soft)" : "#ffffff"};
+    $background ? "var(--color-bg)" : "var(--color-surface)"};
   text-align: center;
   width: 100%;
   max-height: 52px;
 
   &:hover {
-    background-color: #eaf2ff;
+    background-color: #eef2f7;
+  }
+
+  &:last-child td {
+    border-bottom: none;
   }
 `;
 
@@ -80,24 +82,20 @@ export const Td = styled.td<{ $isFirst?: boolean }>`
   color: var(--color-text);
   font-size: 14px;
   font-weight: ${({ $isFirst }) => ($isFirst ? 700 : 400)};
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--color-border);
 
   display: table-cell;
-  vertical-align: center;
-  font-family: var(--font-openSans), sans-serif;
+  vertical-align: middle;
 
   &.center {
     text-align: center;
-    display: flex;
-    justify-content: center;
+    display: table-cell;
   }
 
   p {
-    font-family: var(--font-openSans), sans-serif;
-    display: flex;
-    justify-content: start;
-    align-items: center;
     margin: 0;
-    padding: 0 15px 0 0;
+    padding: 0;
     max-width: 100%;
     overflow: hidden;
     white-space: nowrap;
@@ -110,5 +108,5 @@ export const MainTable = styled.div`
   height: 100%;
   display: flex;
   justify-content: center;
-  align-items: center;
+  align-items: flex-start;
 `;

@@ -1,4 +1,4 @@
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import {
   BodyData,
   ButtonDiv,
@@ -25,13 +25,19 @@ export default function Edicao() {
   const [modalEndereco, setModalEndereco] = useState(false);
   const [modalSenha, setModalSenha] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
+
+  const customerName =
+    (location.state as { customerName?: string } | null)?.customerName?.trim() ?? "";
+
+  const pageTitle = customerName ? `Edição de ${customerName}` : "Edição de Cliente";
 
   const handleSalvar = () => {
     navigate("/clientes");
   };
 
   return (
-    <AppShell title="Edição de Cliente">
+    <AppShell title={pageTitle}>
       <DataContainer>
         <BodyData>
           <DivSeparator>

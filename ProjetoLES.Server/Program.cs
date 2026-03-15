@@ -11,15 +11,12 @@ using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// ── Configurações ─────────────────────────────────────────────────────────────
 builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("Jwt"));
 var jwtSettings = builder.Configuration.GetSection("Jwt").Get<JwtSettings>()!;
 
-// ── Banco de dados ────────────────────────────────────────────────────────────
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-// ── Autenticação JWT ──────────────────────────────────────────────────────────
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -42,26 +39,28 @@ builder.Services.AddAuthentication(options =>
 
 builder.Services.AddAuthorization();
 
-// ── Repositórios ──────────────────────────────────────────────────────────────
 builder.Services.AddScoped<ICustomerRepository, CustomerRepository>();
 builder.Services.AddScoped<ICustomerAddressRepository, CustomerAddressRepository>();
 builder.Services.AddScoped<ICreditCardRepository, CreditCardRepository>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IRoleRepository, RoleRepository>();
+builder.Services.AddScoped<IProductRepository, ProductRepository>();
+builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
+builder.Services.AddScoped<IStockRepository, StockRepository>();
+builder.Services.AddScoped<ISupplierRepository, SupplierRepository>();
 
-// ── Services ──────────────────────────────────────────────────────────────────
 builder.Services.AddScoped<ICustomerService, CustomerService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IRoleService, RoleService>();
+builder.Services.AddScoped<IProductService, ProductService>();
+builder.Services.AddScoped<IStockService, StockService>();
 
-// ── Controllers + OpenAPI ─────────────────────────────────────────────────────
 builder.Services.AddControllers();
 builder.Services.AddOpenApi();
 
 var app = builder.Build();
 
-// ── Seed: garante que o usuário admin padrão existe ───────────────────────────
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();

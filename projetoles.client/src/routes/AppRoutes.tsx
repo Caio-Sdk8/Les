@@ -10,6 +10,8 @@ import Grafico from "../pages/Grafico";
 import LoginForm from "../pages/Login/index";
 import PrivateRoute from "../components/PrivateRoute";
 import EdicaoEndereco from "../pages/EditarEndereco";
+import Estoque from "../pages/Estoque";
+import Produto from "../pages/Produto";
 
 export default function AppRoutes() {
   return (
@@ -25,6 +27,14 @@ export default function AppRoutes() {
           element={
             <PrivateRoute>
               <Loja />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/produto/:uuid"
+          element={
+            <PrivateRoute>
+              <Produto />
             </PrivateRoute>
           }
         />
@@ -75,6 +85,16 @@ export default function AppRoutes() {
           element={
             <PrivateRoute roles={["Admin", "Employee"]}>
               <Grafico />
+            </PrivateRoute>
+          }
+        />
+
+        {/* Estoque (Admin e Employee) */}
+        <Route
+          path="/estoque"
+          element={
+            <PrivateRoute roles={["Admin", "Employee"]}>
+              <Estoque />
             </PrivateRoute>
           }
         />

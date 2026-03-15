@@ -22,8 +22,13 @@ const EnderecoTable = () => {
     setCurrentPage(pageNumber);
   };
 
-  const handleEdit = () => {
-    navigate("/editarEndereco");
+  const handleEdit = (apelido?: string, cidade?: string) => {
+    navigate("/editarEndereco", {
+      state: {
+        addressNickname: apelido,
+        addressCity: cidade,
+      },
+    });
   };
 
   return (
@@ -78,7 +83,7 @@ const EnderecoTable = () => {
                     >
                       <button
                         type="button"
-                        onClick={handleEdit}
+                        onClick={() => handleEdit(endereco.apelido, endereco.cidade)}
                         style={{
                           width: "36px",
                           height: "36px",

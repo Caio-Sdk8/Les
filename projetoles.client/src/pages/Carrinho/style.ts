@@ -132,6 +132,14 @@ export const CartItemsSection = styled.div`
   gap: 10px;
 `;
 
+export const CartEmptyState = styled.div`
+  border: 1px dashed var(--color-border);
+  border-radius: var(--radius-sm);
+  padding: 14px;
+  color: var(--color-muted);
+  font-size: 14px;
+`;
+
 export const CartItem = styled.article`
   width: 100%;
   display: flex;
@@ -147,6 +155,17 @@ export const CartItem = styled.article`
     flex-direction: column;
     align-items: flex-start;
   }
+`;
+
+export const RemoveItemButton = styled.button`
+  height: 36px;
+  border-radius: var(--radius-pill);
+  border: 1px solid #fecaca;
+  background-color: #fff1f2;
+  color: #b91c1c;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 0 12px;
 `;
 
 export const ProductThumb = styled.div`
@@ -249,4 +268,31 @@ export const PrimaryButton = styled.button`
     opacity: 0.6;
     cursor: not-allowed;
   }
+`;
+
+export const InteractionList = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+`;
+
+export const InteractionAlert = styled.div<{ $severity: number }>`
+  border-radius: var(--radius-sm);
+  border: 1px solid
+    ${({ $severity }) => ($severity >= 3 ? "#fca5a5" : $severity === 2 ? "#fcd34d" : "#93c5fd")};
+  background-color: ${({ $severity }) =>
+    $severity >= 3 ? "#fef2f2" : $severity === 2 ? "#fffbeb" : "#eff6ff"};
+  padding: 12px;
+`;
+
+export const InteractionAlertTitle = styled.strong`
+  display: block;
+  font-size: 12px;
+  margin-bottom: 4px;
+`;
+
+export const InteractionMeta = styled.p`
+  margin: 0;
+  color: var(--color-text);
+  font-size: 13px;
 `;

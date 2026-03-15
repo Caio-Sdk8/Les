@@ -119,6 +119,138 @@ namespace ProjetoLES.Server.Migrations
                         });
                 });
 
+            modelBuilder.Entity("ProjetoLES.Server.Models.CategoryModel", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(500)
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("Uuid")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT")
+                        .HasDefaultValueSql("(lower(hex(randomblob(4))) || '-' || lower(hex(randomblob(2))) || '-4' || substr(lower(hex(randomblob(2))),2) || '-' || substr('89ab',abs(random()) % 4 + 1, 1) || substr(lower(hex(randomblob(2))),2) || '-' || lower(hex(randomblob(6))))");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Name")
+                        .IsUnique();
+
+                    b.HasIndex("Uuid")
+                        .IsUnique();
+
+                    b.ToTable("Categories", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Description = "Medicamentos em geral",
+                            IsActive = true,
+                            IsDeleted = false,
+                            Name = "Medicamentos",
+                            Uuid = new Guid("33333333-0000-4000-8000-000000000001")
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Description = "Analgésicos e antitérmicos",
+                            IsActive = true,
+                            IsDeleted = false,
+                            Name = "Dor e Febre",
+                            Uuid = new Guid("33333333-0000-4000-8000-000000000002")
+                        },
+                        new
+                        {
+                            Id = 3,
+                            Description = "Saúde e bem-estar",
+                            IsActive = true,
+                            IsDeleted = false,
+                            Name = "Bem-estar",
+                            Uuid = new Guid("33333333-0000-4000-8000-000000000003")
+                        },
+                        new
+                        {
+                            Id = 4,
+                            Description = "Antialérgicos",
+                            IsActive = true,
+                            IsDeleted = false,
+                            Name = "Alergia",
+                            Uuid = new Guid("33333333-0000-4000-8000-000000000004")
+                        },
+                        new
+                        {
+                            Id = 5,
+                            Description = "Saúde digestiva",
+                            IsActive = true,
+                            IsDeleted = false,
+                            Name = "Digestivo",
+                            Uuid = new Guid("33333333-0000-4000-8000-000000000005")
+                        },
+                        new
+                        {
+                            Id = 6,
+                            Description = "Vitaminas e suplementos",
+                            IsActive = true,
+                            IsDeleted = false,
+                            Name = "Vitaminas",
+                            Uuid = new Guid("33333333-0000-4000-8000-000000000006")
+                        },
+                        new
+                        {
+                            Id = 7,
+                            Description = "Higiene pessoal",
+                            IsActive = true,
+                            IsDeleted = false,
+                            Name = "Higiene",
+                            Uuid = new Guid("33333333-0000-4000-8000-000000000007")
+                        },
+                        new
+                        {
+                            Id = 8,
+                            Description = "Cosméticos e cuidados com a pele",
+                            IsActive = true,
+                            IsDeleted = false,
+                            Name = "Dermocosméticos",
+                            Uuid = new Guid("33333333-0000-4000-8000-000000000008")
+                        },
+                        new
+                        {
+                            Id = 9,
+                            Description = "Antibióticos e antimicrobianos",
+                            IsActive = true,
+                            IsDeleted = false,
+                            Name = "Antibióticos",
+                            Uuid = new Guid("33333333-0000-4000-8000-000000000009")
+                        },
+                        new
+                        {
+                            Id = 10,
+                            Description = "Medicamentos sob prescrição médica",
+                            IsActive = true,
+                            IsDeleted = false,
+                            Name = "Tarja Vermelha",
+                            Uuid = new Guid("33333333-0000-4000-8000-000000000010")
+                        });
+                });
+
             modelBuilder.Entity("ProjetoLES.Server.Models.CreditCardModel", b =>
                 {
                     b.Property<int>("Id")
@@ -376,6 +508,1089 @@ namespace ProjetoLES.Server.Migrations
                     b.ToTable("CustomerPhones", (string)null);
                 });
 
+            modelBuilder.Entity("ProjetoLES.Server.Models.DrugInteractionModel", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("ProductAId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("ProductBId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("SeverityLevel")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<Guid>("Uuid")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT")
+                        .HasDefaultValueSql("(lower(hex(randomblob(4))) || '-' || lower(hex(randomblob(2))) || '-4' || substr(lower(hex(randomblob(2))),2) || '-' || substr('89ab',abs(random()) % 4 + 1, 1) || substr(lower(hex(randomblob(2))),2) || '-' || lower(hex(randomblob(6))))");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProductBId");
+
+                    b.HasIndex("Uuid")
+                        .IsUnique();
+
+                    b.HasIndex("ProductAId", "ProductBId")
+                        .IsUnique();
+
+                    b.ToTable("DrugInteractions", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Description = "Associação de dois anti-inflamatórios pode elevar risco gastrointestinal e renal.",
+                            IsDeleted = false,
+                            ProductAId = 3,
+                            ProductBId = 15,
+                            SeverityLevel = 3,
+                            Uuid = new Guid("99999999-0000-4000-8000-000000000001")
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Description = "Uso concomitante de AINEs aumenta chance de eventos adversos gastrointestinais.",
+                            IsDeleted = false,
+                            ProductAId = 4,
+                            ProductBId = 16,
+                            SeverityLevel = 3,
+                            Uuid = new Guid("99999999-0000-4000-8000-000000000002")
+                        },
+                        new
+                        {
+                            Id = 3,
+                            Description = "Combinação pode elevar risco de reações adversas hematológicas e gastrintestinais.",
+                            IsDeleted = false,
+                            ProductAId = 5,
+                            ProductBId = 19,
+                            SeverityLevel = 2,
+                            Uuid = new Guid("99999999-0000-4000-8000-000000000003")
+                        },
+                        new
+                        {
+                            Id = 4,
+                            Description = "Atenção ao uso conjunto por potencial aumento de eventos adversos.",
+                            IsDeleted = false,
+                            ProductAId = 6,
+                            ProductBId = 20,
+                            SeverityLevel = 2,
+                            Uuid = new Guid("99999999-0000-4000-8000-000000000004")
+                        },
+                        new
+                        {
+                            Id = 5,
+                            Description = "Pode reduzir absorção ideal dependendo de horários de administração.",
+                            IsDeleted = false,
+                            ProductAId = 13,
+                            ProductBId = 11,
+                            SeverityLevel = 2,
+                            Uuid = new Guid("99999999-0000-4000-8000-000000000005")
+                        },
+                        new
+                        {
+                            Id = 6,
+                            Description = "Recomenda-se orientação farmacêutica para ajuste de horários e monitoramento.",
+                            IsDeleted = false,
+                            ProductAId = 14,
+                            ProductBId = 12,
+                            SeverityLevel = 2,
+                            Uuid = new Guid("99999999-0000-4000-8000-000000000006")
+                        });
+                });
+
+            modelBuilder.Entity("ProjetoLES.Server.Models.PricingGroupModel", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(500)
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("TEXT");
+
+                    b.Property<decimal>("ProfitMarginPercent")
+                        .HasColumnType("decimal(6,2)");
+
+                    b.Property<Guid>("Uuid")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT")
+                        .HasDefaultValueSql("(lower(hex(randomblob(4))) || '-' || lower(hex(randomblob(2))) || '-4' || substr(lower(hex(randomblob(2))),2) || '-' || substr('89ab',abs(random()) % 4 + 1, 1) || substr(lower(hex(randomblob(2))),2) || '-' || lower(hex(randomblob(6))))");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Name")
+                        .IsUnique();
+
+                    b.HasIndex("Uuid")
+                        .IsUnique();
+
+                    b.ToTable("PricingGroups", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Description = "Margem padrão de 30%",
+                            IsActive = true,
+                            IsDeleted = false,
+                            Name = "Padrão",
+                            ProfitMarginPercent = 30m,
+                            Uuid = new Guid("44444444-0000-4000-8000-000000000001")
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Description = "Margem de 50% para produtos premium",
+                            IsActive = true,
+                            IsDeleted = false,
+                            Name = "Premium",
+                            ProfitMarginPercent = 50m,
+                            Uuid = new Guid("44444444-0000-4000-8000-000000000002")
+                        },
+                        new
+                        {
+                            Id = 3,
+                            Description = "Margem reduzida de 20% para genéricos",
+                            IsActive = true,
+                            IsDeleted = false,
+                            Name = "Genérico",
+                            ProfitMarginPercent = 20m,
+                            Uuid = new Guid("44444444-0000-4000-8000-000000000003")
+                        },
+                        new
+                        {
+                            Id = 4,
+                            Description = "Margem de 40% para suplementos e vitaminas",
+                            IsActive = true,
+                            IsDeleted = false,
+                            Name = "Suplemento",
+                            ProfitMarginPercent = 40m,
+                            Uuid = new Guid("44444444-0000-4000-8000-000000000004")
+                        });
+                });
+
+            modelBuilder.Entity("ProjetoLES.Server.Models.ProductCategoryModel", b =>
+                {
+                    b.Property<int>("ProductId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("CategoryId")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("ProductId", "CategoryId");
+
+                    b.HasIndex("CategoryId");
+
+                    b.ToTable("ProductCategories", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            ProductId = 1,
+                            CategoryId = 1
+                        },
+                        new
+                        {
+                            ProductId = 1,
+                            CategoryId = 2
+                        },
+                        new
+                        {
+                            ProductId = 2,
+                            CategoryId = 1
+                        },
+                        new
+                        {
+                            ProductId = 2,
+                            CategoryId = 2
+                        },
+                        new
+                        {
+                            ProductId = 3,
+                            CategoryId = 1
+                        },
+                        new
+                        {
+                            ProductId = 3,
+                            CategoryId = 2
+                        },
+                        new
+                        {
+                            ProductId = 4,
+                            CategoryId = 1
+                        },
+                        new
+                        {
+                            ProductId = 4,
+                            CategoryId = 2
+                        },
+                        new
+                        {
+                            ProductId = 5,
+                            CategoryId = 1
+                        },
+                        new
+                        {
+                            ProductId = 5,
+                            CategoryId = 2
+                        },
+                        new
+                        {
+                            ProductId = 6,
+                            CategoryId = 1
+                        },
+                        new
+                        {
+                            ProductId = 6,
+                            CategoryId = 2
+                        },
+                        new
+                        {
+                            ProductId = 7,
+                            CategoryId = 4
+                        },
+                        new
+                        {
+                            ProductId = 8,
+                            CategoryId = 4
+                        },
+                        new
+                        {
+                            ProductId = 9,
+                            CategoryId = 4
+                        },
+                        new
+                        {
+                            ProductId = 10,
+                            CategoryId = 4
+                        },
+                        new
+                        {
+                            ProductId = 11,
+                            CategoryId = 5
+                        },
+                        new
+                        {
+                            ProductId = 12,
+                            CategoryId = 5
+                        },
+                        new
+                        {
+                            ProductId = 13,
+                            CategoryId = 9
+                        },
+                        new
+                        {
+                            ProductId = 13,
+                            CategoryId = 10
+                        },
+                        new
+                        {
+                            ProductId = 14,
+                            CategoryId = 9
+                        },
+                        new
+                        {
+                            ProductId = 14,
+                            CategoryId = 10
+                        },
+                        new
+                        {
+                            ProductId = 15,
+                            CategoryId = 2
+                        },
+                        new
+                        {
+                            ProductId = 15,
+                            CategoryId = 10
+                        },
+                        new
+                        {
+                            ProductId = 16,
+                            CategoryId = 2
+                        },
+                        new
+                        {
+                            ProductId = 16,
+                            CategoryId = 10
+                        },
+                        new
+                        {
+                            ProductId = 17,
+                            CategoryId = 6
+                        },
+                        new
+                        {
+                            ProductId = 17,
+                            CategoryId = 3
+                        },
+                        new
+                        {
+                            ProductId = 18,
+                            CategoryId = 6
+                        },
+                        new
+                        {
+                            ProductId = 18,
+                            CategoryId = 3
+                        },
+                        new
+                        {
+                            ProductId = 19,
+                            CategoryId = 2
+                        },
+                        new
+                        {
+                            ProductId = 19,
+                            CategoryId = 10
+                        },
+                        new
+                        {
+                            ProductId = 20,
+                            CategoryId = 2
+                        },
+                        new
+                        {
+                            ProductId = 20,
+                            CategoryId = 10
+                        });
+                });
+
+            modelBuilder.Entity("ProjetoLES.Server.Models.ProductModel", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("ActivationReason")
+                        .HasMaxLength(500)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("ActivePrinciple")
+                        .HasMaxLength(300)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Barcode")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<decimal?>("DepthCm")
+                        .HasColumnType("decimal(8,2)");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(1000)
+                        .HasColumnType("TEXT");
+
+                    b.Property<decimal?>("HeightCm")
+                        .HasColumnType("decimal(8,2)");
+
+                    b.Property<string>("ImageUrl")
+                        .HasMaxLength(1000)
+                        .HasColumnType("TEXT");
+
+                    b.Property<int?>("InactivationCategory")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("InactivationReason")
+                        .HasMaxLength(500)
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("PrescriptionType")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("PricingGroupId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("ProductCode")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("TEXT");
+
+                    b.Property<decimal>("SalePrice")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("Uuid")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT")
+                        .HasDefaultValueSql("(lower(hex(randomblob(4))) || '-' || lower(hex(randomblob(2))) || '-4' || substr(lower(hex(randomblob(2))),2) || '-' || substr('89ab',abs(random()) % 4 + 1, 1) || substr(lower(hex(randomblob(2))),2) || '-' || lower(hex(randomblob(6))))");
+
+                    b.Property<decimal?>("WeightGrams")
+                        .HasColumnType("decimal(10,2)");
+
+                    b.Property<decimal?>("WidthCm")
+                        .HasColumnType("decimal(8,2)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Barcode")
+                        .IsUnique();
+
+                    b.HasIndex("PricingGroupId");
+
+                    b.HasIndex("ProductCode")
+                        .IsUnique();
+
+                    b.HasIndex("Uuid")
+                        .IsUnique();
+
+                    b.ToTable("Products", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            ActivePrinciple = "Paracetamol 750mg",
+                            Barcode = "7891234500001",
+                            CreatedAt = new DateTime(2026, 3, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Description = "Medicamento de referência para dor e febre.",
+                            ImageUrl = "https://images.unsplash.com/photo-1471864190281-a93a3070b6de?w=420&h=420&fit=crop&q=80",
+                            IsActive = true,
+                            IsDeleted = false,
+                            Name = "Tylenol 750mg",
+                            PrescriptionType = 0,
+                            PricingGroupId = 2,
+                            ProductCode = "PROD0001",
+                            SalePrice = 24.90m,
+                            UpdatedAt = new DateTime(2026, 3, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Uuid = new Guid("66666666-0000-4000-8000-000000000001")
+                        },
+                        new
+                        {
+                            Id = 2,
+                            ActivePrinciple = "Paracetamol 750mg",
+                            Barcode = "7891234500002",
+                            CreatedAt = new DateTime(2026, 3, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Description = "Opção genérica para alívio de dor e febre.",
+                            ImageUrl = "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=420&h=420&fit=crop&q=80",
+                            IsActive = true,
+                            IsDeleted = false,
+                            Name = "Paracetamol Genérico 750mg",
+                            PrescriptionType = 0,
+                            PricingGroupId = 3,
+                            ProductCode = "PROD0002",
+                            SalePrice = 13.90m,
+                            UpdatedAt = new DateTime(2026, 3, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Uuid = new Guid("66666666-0000-4000-8000-000000000002")
+                        },
+                        new
+                        {
+                            Id = 3,
+                            ActivePrinciple = "Ibuprofeno 400mg",
+                            Barcode = "7891234500003",
+                            CreatedAt = new DateTime(2026, 3, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Description = "Analgésico e anti-inflamatório de referência.",
+                            ImageUrl = "https://images.unsplash.com/photo-1587854692152-cbe660dbde88?w=420&h=420&fit=crop&q=80",
+                            IsActive = true,
+                            IsDeleted = false,
+                            Name = "Advil 400mg",
+                            PrescriptionType = 0,
+                            PricingGroupId = 2,
+                            ProductCode = "PROD0003",
+                            SalePrice = 28.90m,
+                            UpdatedAt = new DateTime(2026, 3, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Uuid = new Guid("66666666-0000-4000-8000-000000000003")
+                        },
+                        new
+                        {
+                            Id = 4,
+                            ActivePrinciple = "Ibuprofeno 400mg",
+                            Barcode = "7891234500004",
+                            CreatedAt = new DateTime(2026, 3, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Description = "Alternativa genérica para dores e inflamações.",
+                            ImageUrl = "https://images.unsplash.com/photo-1607619056574-7b8d3ee536b2?w=420&h=420&fit=crop&q=80",
+                            IsActive = true,
+                            IsDeleted = false,
+                            Name = "Ibuprofeno Genérico 400mg",
+                            PrescriptionType = 0,
+                            PricingGroupId = 3,
+                            ProductCode = "PROD0004",
+                            SalePrice = 16.90m,
+                            UpdatedAt = new DateTime(2026, 3, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Uuid = new Guid("66666666-0000-4000-8000-000000000004")
+                        },
+                        new
+                        {
+                            Id = 5,
+                            ActivePrinciple = "Dipirona Sódica 1g",
+                            Barcode = "7891234500005",
+                            CreatedAt = new DateTime(2026, 3, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Description = "Referência em analgesia e antitérmico.",
+                            ImageUrl = "https://images.unsplash.com/photo-1585435557343-3b092031a831?w=420&h=420&fit=crop&q=80",
+                            IsActive = true,
+                            IsDeleted = false,
+                            Name = "Novalgina 1g",
+                            PrescriptionType = 0,
+                            PricingGroupId = 2,
+                            ProductCode = "PROD0005",
+                            SalePrice = 21.90m,
+                            UpdatedAt = new DateTime(2026, 3, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Uuid = new Guid("66666666-0000-4000-8000-000000000005")
+                        },
+                        new
+                        {
+                            Id = 6,
+                            ActivePrinciple = "Dipirona Sódica 1g",
+                            Barcode = "7891234500006",
+                            CreatedAt = new DateTime(2026, 3, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Description = "Genérico para dores e febre.",
+                            ImageUrl = "https://images.unsplash.com/photo-1550572017-4fade5817617?w=420&h=420&fit=crop&q=80",
+                            IsActive = true,
+                            IsDeleted = false,
+                            Name = "Dipirona Genérica 1g",
+                            PrescriptionType = 0,
+                            PricingGroupId = 3,
+                            ProductCode = "PROD0006",
+                            SalePrice = 12.90m,
+                            UpdatedAt = new DateTime(2026, 3, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Uuid = new Guid("66666666-0000-4000-8000-000000000006")
+                        },
+                        new
+                        {
+                            Id = 7,
+                            ActivePrinciple = "Fexofenadina 120mg",
+                            Barcode = "7891234500007",
+                            CreatedAt = new DateTime(2026, 3, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Description = "Antialérgico de referência para rinite.",
+                            ImageUrl = "https://images.unsplash.com/photo-1471864190281-a93a3070b6de?w=420&h=420&fit=crop&q=80",
+                            IsActive = true,
+                            IsDeleted = false,
+                            Name = "Allegra 120mg",
+                            PrescriptionType = 0,
+                            PricingGroupId = 2,
+                            ProductCode = "PROD0007",
+                            SalePrice = 42.90m,
+                            UpdatedAt = new DateTime(2026, 3, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Uuid = new Guid("66666666-0000-4000-8000-000000000007")
+                        },
+                        new
+                        {
+                            Id = 8,
+                            ActivePrinciple = "Fexofenadina 120mg",
+                            Barcode = "7891234500008",
+                            CreatedAt = new DateTime(2026, 3, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Description = "Genérico antialérgico para uso diário.",
+                            ImageUrl = "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=420&h=420&fit=crop&q=80",
+                            IsActive = true,
+                            IsDeleted = false,
+                            Name = "Fexofenadina Genérica 120mg",
+                            PrescriptionType = 0,
+                            PricingGroupId = 3,
+                            ProductCode = "PROD0008",
+                            SalePrice = 24.90m,
+                            UpdatedAt = new DateTime(2026, 3, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Uuid = new Guid("66666666-0000-4000-8000-000000000008")
+                        },
+                        new
+                        {
+                            Id = 9,
+                            ActivePrinciple = "Loratadina 10mg",
+                            Barcode = "7891234500009",
+                            CreatedAt = new DateTime(2026, 3, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Description = "Referência para alívio de sintomas alérgicos.",
+                            ImageUrl = "https://images.unsplash.com/photo-1607619056574-7b8d3ee536b2?w=420&h=420&fit=crop&q=80",
+                            IsActive = true,
+                            IsDeleted = false,
+                            Name = "Claritin 10mg",
+                            PrescriptionType = 0,
+                            PricingGroupId = 2,
+                            ProductCode = "PROD0009",
+                            SalePrice = 32.90m,
+                            UpdatedAt = new DateTime(2026, 3, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Uuid = new Guid("66666666-0000-4000-8000-000000000009")
+                        },
+                        new
+                        {
+                            Id = 10,
+                            ActivePrinciple = "Loratadina 10mg",
+                            Barcode = "7891234500010",
+                            CreatedAt = new DateTime(2026, 3, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Description = "Genérico para rinite e urticária.",
+                            ImageUrl = "https://images.unsplash.com/photo-1587854692152-cbe660dbde88?w=420&h=420&fit=crop&q=80",
+                            IsActive = true,
+                            IsDeleted = false,
+                            Name = "Loratadina Genérica 10mg",
+                            PrescriptionType = 0,
+                            PricingGroupId = 3,
+                            ProductCode = "PROD0010",
+                            SalePrice = 17.90m,
+                            UpdatedAt = new DateTime(2026, 3, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Uuid = new Guid("66666666-0000-4000-8000-000000000010")
+                        },
+                        new
+                        {
+                            Id = 11,
+                            ActivePrinciple = "Omeprazol 20mg",
+                            Barcode = "7891234500011",
+                            CreatedAt = new DateTime(2026, 3, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Description = "Referência para redução da acidez gástrica.",
+                            ImageUrl = "https://images.unsplash.com/photo-1550572017-4fade5817617?w=420&h=420&fit=crop&q=80",
+                            IsActive = true,
+                            IsDeleted = false,
+                            Name = "Losec Mups 20mg",
+                            PrescriptionType = 0,
+                            PricingGroupId = 2,
+                            ProductCode = "PROD0011",
+                            SalePrice = 29.90m,
+                            UpdatedAt = new DateTime(2026, 3, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Uuid = new Guid("66666666-0000-4000-8000-000000000011")
+                        },
+                        new
+                        {
+                            Id = 12,
+                            ActivePrinciple = "Omeprazol 20mg",
+                            Barcode = "7891234500012",
+                            CreatedAt = new DateTime(2026, 3, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Description = "Genérico para gastrite e refluxo.",
+                            ImageUrl = "https://images.unsplash.com/photo-1585435557343-3b092031a831?w=420&h=420&fit=crop&q=80",
+                            IsActive = true,
+                            IsDeleted = false,
+                            Name = "Omeprazol Genérico 20mg",
+                            PrescriptionType = 0,
+                            PricingGroupId = 3,
+                            ProductCode = "PROD0012",
+                            SalePrice = 15.90m,
+                            UpdatedAt = new DateTime(2026, 3, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Uuid = new Guid("66666666-0000-4000-8000-000000000012")
+                        },
+                        new
+                        {
+                            Id = 13,
+                            ActivePrinciple = "Amoxicilina 500mg",
+                            Barcode = "7891234500013",
+                            CreatedAt = new DateTime(2026, 3, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Description = "Antibiótico de referência sob prescrição.",
+                            ImageUrl = "https://images.unsplash.com/photo-1471864190281-a93a3070b6de?w=420&h=420&fit=crop&q=80",
+                            IsActive = true,
+                            IsDeleted = false,
+                            Name = "Amoxil 500mg",
+                            PrescriptionType = 2,
+                            PricingGroupId = 1,
+                            ProductCode = "PROD0013",
+                            SalePrice = 44.90m,
+                            UpdatedAt = new DateTime(2026, 3, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Uuid = new Guid("66666666-0000-4000-8000-000000000013")
+                        },
+                        new
+                        {
+                            Id = 14,
+                            ActivePrinciple = "Amoxicilina 500mg",
+                            Barcode = "7891234500014",
+                            CreatedAt = new DateTime(2026, 3, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Description = "Antibiótico genérico sob prescrição médica.",
+                            ImageUrl = "https://images.unsplash.com/photo-1607619056574-7b8d3ee536b2?w=420&h=420&fit=crop&q=80",
+                            IsActive = true,
+                            IsDeleted = false,
+                            Name = "Amoxicilina Genérica 500mg",
+                            PrescriptionType = 2,
+                            PricingGroupId = 3,
+                            ProductCode = "PROD0014",
+                            SalePrice = 29.90m,
+                            UpdatedAt = new DateTime(2026, 3, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Uuid = new Guid("66666666-0000-4000-8000-000000000014")
+                        },
+                        new
+                        {
+                            Id = 15,
+                            ActivePrinciple = "Diclofenaco Potássico 50mg",
+                            Barcode = "7891234500015",
+                            CreatedAt = new DateTime(2026, 3, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Description = "Anti-inflamatório de referência para dor aguda.",
+                            ImageUrl = "https://images.unsplash.com/photo-1587854692152-cbe660dbde88?w=420&h=420&fit=crop&q=80",
+                            IsActive = true,
+                            IsDeleted = false,
+                            Name = "Cataflam 50mg",
+                            PrescriptionType = 2,
+                            PricingGroupId = 1,
+                            ProductCode = "PROD0015",
+                            SalePrice = 31.90m,
+                            UpdatedAt = new DateTime(2026, 3, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Uuid = new Guid("66666666-0000-4000-8000-000000000015")
+                        },
+                        new
+                        {
+                            Id = 16,
+                            ActivePrinciple = "Diclofenaco Potássico 50mg",
+                            Barcode = "7891234500016",
+                            CreatedAt = new DateTime(2026, 3, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Description = "Genérico anti-inflamatório sob prescrição.",
+                            ImageUrl = "https://images.unsplash.com/photo-1550572017-4fade5817617?w=420&h=420&fit=crop&q=80",
+                            IsActive = true,
+                            IsDeleted = false,
+                            Name = "Diclofenaco Potássico Genérico 50mg",
+                            PrescriptionType = 2,
+                            PricingGroupId = 3,
+                            ProductCode = "PROD0016",
+                            SalePrice = 19.90m,
+                            UpdatedAt = new DateTime(2026, 3, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Uuid = new Guid("66666666-0000-4000-8000-000000000016")
+                        },
+                        new
+                        {
+                            Id = 17,
+                            ActivePrinciple = "Multivitamínico A-Z",
+                            Barcode = "7891234500017",
+                            CreatedAt = new DateTime(2026, 3, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Description = "Suplemento vitamínico completo.",
+                            ImageUrl = "https://images.unsplash.com/photo-1488459716781-31db52582fe9?w=420&h=420&fit=crop&q=80",
+                            IsActive = true,
+                            IsDeleted = false,
+                            Name = "Centrum A-Z",
+                            PrescriptionType = 0,
+                            PricingGroupId = 4,
+                            ProductCode = "PROD0017",
+                            SalePrice = 64.90m,
+                            UpdatedAt = new DateTime(2026, 3, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Uuid = new Guid("66666666-0000-4000-8000-000000000017")
+                        },
+                        new
+                        {
+                            Id = 18,
+                            ActivePrinciple = "Multivitamínico A-Z",
+                            Barcode = "7891234500018",
+                            CreatedAt = new DateTime(2026, 3, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Description = "Suplemento diário de vitaminas e minerais.",
+                            ImageUrl = "https://images.unsplash.com/photo-1515377905703-c4788e51af15?w=420&h=420&fit=crop&q=80",
+                            IsActive = true,
+                            IsDeleted = false,
+                            Name = "Multivitamínico Genérico A-Z",
+                            PrescriptionType = 0,
+                            PricingGroupId = 4,
+                            ProductCode = "PROD0018",
+                            SalePrice = 38.90m,
+                            UpdatedAt = new DateTime(2026, 3, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Uuid = new Guid("66666666-0000-4000-8000-000000000018")
+                        },
+                        new
+                        {
+                            Id = 19,
+                            ActivePrinciple = "Nimesulida 100mg",
+                            Barcode = "7891234500019",
+                            CreatedAt = new DateTime(2026, 3, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Description = "Anti-inflamatório sob prescrição médica.",
+                            ImageUrl = "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=420&h=420&fit=crop&q=80",
+                            IsActive = true,
+                            IsDeleted = false,
+                            Name = "Nimesulida 100mg",
+                            PrescriptionType = 2,
+                            PricingGroupId = 1,
+                            ProductCode = "PROD0019",
+                            SalePrice = 27.90m,
+                            UpdatedAt = new DateTime(2026, 3, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Uuid = new Guid("66666666-0000-4000-8000-000000000019")
+                        },
+                        new
+                        {
+                            Id = 20,
+                            ActivePrinciple = "Nimesulida 100mg",
+                            Barcode = "7891234500020",
+                            CreatedAt = new DateTime(2026, 3, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Description = "Genérico anti-inflamatório de uso controlado.",
+                            ImageUrl = "https://images.unsplash.com/photo-1585435557343-3b092031a831?w=420&h=420&fit=crop&q=80",
+                            IsActive = true,
+                            IsDeleted = false,
+                            Name = "Nimesulida Genérica 100mg",
+                            PrescriptionType = 2,
+                            PricingGroupId = 3,
+                            ProductCode = "PROD0020",
+                            SalePrice = 17.90m,
+                            UpdatedAt = new DateTime(2026, 3, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Uuid = new Guid("66666666-0000-4000-8000-000000000020")
+                        });
+                });
+
+            modelBuilder.Entity("ProjetoLES.Server.Models.ProductStockModel", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("AvailableQuantity")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("BlockedQuantity")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime>("LastUpdated")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("ProductId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<Guid>("Uuid")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT")
+                        .HasDefaultValueSql("(lower(hex(randomblob(4))) || '-' || lower(hex(randomblob(2))) || '-4' || substr(lower(hex(randomblob(2))),2) || '-' || substr('89ab',abs(random()) % 4 + 1, 1) || substr(lower(hex(randomblob(2))),2) || '-' || lower(hex(randomblob(6))))");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProductId")
+                        .IsUnique();
+
+                    b.HasIndex("Uuid")
+                        .IsUnique();
+
+                    b.ToTable("ProductStocks", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            AvailableQuantity = 90,
+                            BlockedQuantity = 3,
+                            IsDeleted = false,
+                            LastUpdated = new DateTime(2026, 3, 15, 0, 0, 0, 0, DateTimeKind.Utc),
+                            ProductId = 1,
+                            Uuid = new Guid("77777777-0000-4000-8000-000000000001")
+                        },
+                        new
+                        {
+                            Id = 2,
+                            AvailableQuantity = 120,
+                            BlockedQuantity = 4,
+                            IsDeleted = false,
+                            LastUpdated = new DateTime(2026, 3, 15, 0, 0, 0, 0, DateTimeKind.Utc),
+                            ProductId = 2,
+                            Uuid = new Guid("77777777-0000-4000-8000-000000000002")
+                        },
+                        new
+                        {
+                            Id = 3,
+                            AvailableQuantity = 70,
+                            BlockedQuantity = 2,
+                            IsDeleted = false,
+                            LastUpdated = new DateTime(2026, 3, 15, 0, 0, 0, 0, DateTimeKind.Utc),
+                            ProductId = 3,
+                            Uuid = new Guid("77777777-0000-4000-8000-000000000003")
+                        },
+                        new
+                        {
+                            Id = 4,
+                            AvailableQuantity = 110,
+                            BlockedQuantity = 5,
+                            IsDeleted = false,
+                            LastUpdated = new DateTime(2026, 3, 15, 0, 0, 0, 0, DateTimeKind.Utc),
+                            ProductId = 4,
+                            Uuid = new Guid("77777777-0000-4000-8000-000000000004")
+                        },
+                        new
+                        {
+                            Id = 5,
+                            AvailableQuantity = 85,
+                            BlockedQuantity = 2,
+                            IsDeleted = false,
+                            LastUpdated = new DateTime(2026, 3, 15, 0, 0, 0, 0, DateTimeKind.Utc),
+                            ProductId = 5,
+                            Uuid = new Guid("77777777-0000-4000-8000-000000000005")
+                        },
+                        new
+                        {
+                            Id = 6,
+                            AvailableQuantity = 130,
+                            BlockedQuantity = 6,
+                            IsDeleted = false,
+                            LastUpdated = new DateTime(2026, 3, 15, 0, 0, 0, 0, DateTimeKind.Utc),
+                            ProductId = 6,
+                            Uuid = new Guid("77777777-0000-4000-8000-000000000006")
+                        },
+                        new
+                        {
+                            Id = 7,
+                            AvailableQuantity = 60,
+                            BlockedQuantity = 2,
+                            IsDeleted = false,
+                            LastUpdated = new DateTime(2026, 3, 15, 0, 0, 0, 0, DateTimeKind.Utc),
+                            ProductId = 7,
+                            Uuid = new Guid("77777777-0000-4000-8000-000000000007")
+                        },
+                        new
+                        {
+                            Id = 8,
+                            AvailableQuantity = 95,
+                            BlockedQuantity = 3,
+                            IsDeleted = false,
+                            LastUpdated = new DateTime(2026, 3, 15, 0, 0, 0, 0, DateTimeKind.Utc),
+                            ProductId = 8,
+                            Uuid = new Guid("77777777-0000-4000-8000-000000000008")
+                        },
+                        new
+                        {
+                            Id = 9,
+                            AvailableQuantity = 72,
+                            BlockedQuantity = 1,
+                            IsDeleted = false,
+                            LastUpdated = new DateTime(2026, 3, 15, 0, 0, 0, 0, DateTimeKind.Utc),
+                            ProductId = 9,
+                            Uuid = new Guid("77777777-0000-4000-8000-000000000009")
+                        },
+                        new
+                        {
+                            Id = 10,
+                            AvailableQuantity = 116,
+                            BlockedQuantity = 4,
+                            IsDeleted = false,
+                            LastUpdated = new DateTime(2026, 3, 15, 0, 0, 0, 0, DateTimeKind.Utc),
+                            ProductId = 10,
+                            Uuid = new Guid("77777777-0000-4000-8000-000000000010")
+                        },
+                        new
+                        {
+                            Id = 11,
+                            AvailableQuantity = 80,
+                            BlockedQuantity = 2,
+                            IsDeleted = false,
+                            LastUpdated = new DateTime(2026, 3, 15, 0, 0, 0, 0, DateTimeKind.Utc),
+                            ProductId = 11,
+                            Uuid = new Guid("77777777-0000-4000-8000-000000000011")
+                        },
+                        new
+                        {
+                            Id = 12,
+                            AvailableQuantity = 140,
+                            BlockedQuantity = 5,
+                            IsDeleted = false,
+                            LastUpdated = new DateTime(2026, 3, 15, 0, 0, 0, 0, DateTimeKind.Utc),
+                            ProductId = 12,
+                            Uuid = new Guid("77777777-0000-4000-8000-000000000012")
+                        },
+                        new
+                        {
+                            Id = 13,
+                            AvailableQuantity = 56,
+                            BlockedQuantity = 3,
+                            IsDeleted = false,
+                            LastUpdated = new DateTime(2026, 3, 15, 0, 0, 0, 0, DateTimeKind.Utc),
+                            ProductId = 13,
+                            Uuid = new Guid("77777777-0000-4000-8000-000000000013")
+                        },
+                        new
+                        {
+                            Id = 14,
+                            AvailableQuantity = 104,
+                            BlockedQuantity = 4,
+                            IsDeleted = false,
+                            LastUpdated = new DateTime(2026, 3, 15, 0, 0, 0, 0, DateTimeKind.Utc),
+                            ProductId = 14,
+                            Uuid = new Guid("77777777-0000-4000-8000-000000000014")
+                        },
+                        new
+                        {
+                            Id = 15,
+                            AvailableQuantity = 62,
+                            BlockedQuantity = 2,
+                            IsDeleted = false,
+                            LastUpdated = new DateTime(2026, 3, 15, 0, 0, 0, 0, DateTimeKind.Utc),
+                            ProductId = 15,
+                            Uuid = new Guid("77777777-0000-4000-8000-000000000015")
+                        },
+                        new
+                        {
+                            Id = 16,
+                            AvailableQuantity = 98,
+                            BlockedQuantity = 3,
+                            IsDeleted = false,
+                            LastUpdated = new DateTime(2026, 3, 15, 0, 0, 0, 0, DateTimeKind.Utc),
+                            ProductId = 16,
+                            Uuid = new Guid("77777777-0000-4000-8000-000000000016")
+                        },
+                        new
+                        {
+                            Id = 17,
+                            AvailableQuantity = 75,
+                            BlockedQuantity = 2,
+                            IsDeleted = false,
+                            LastUpdated = new DateTime(2026, 3, 15, 0, 0, 0, 0, DateTimeKind.Utc),
+                            ProductId = 17,
+                            Uuid = new Guid("77777777-0000-4000-8000-000000000017")
+                        },
+                        new
+                        {
+                            Id = 18,
+                            AvailableQuantity = 128,
+                            BlockedQuantity = 3,
+                            IsDeleted = false,
+                            LastUpdated = new DateTime(2026, 3, 15, 0, 0, 0, 0, DateTimeKind.Utc),
+                            ProductId = 18,
+                            Uuid = new Guid("77777777-0000-4000-8000-000000000018")
+                        },
+                        new
+                        {
+                            Id = 19,
+                            AvailableQuantity = 68,
+                            BlockedQuantity = 2,
+                            IsDeleted = false,
+                            LastUpdated = new DateTime(2026, 3, 15, 0, 0, 0, 0, DateTimeKind.Utc),
+                            ProductId = 19,
+                            Uuid = new Guid("77777777-0000-4000-8000-000000000019")
+                        },
+                        new
+                        {
+                            Id = 20,
+                            AvailableQuantity = 101,
+                            BlockedQuantity = 4,
+                            IsDeleted = false,
+                            LastUpdated = new DateTime(2026, 3, 15, 0, 0, 0, 0, DateTimeKind.Utc),
+                            ProductId = 20,
+                            Uuid = new Guid("77777777-0000-4000-8000-000000000020")
+                        });
+                });
+
             modelBuilder.Entity("ProjetoLES.Server.Models.RoleModel", b =>
                 {
                     b.Property<int>("Id")
@@ -443,6 +1658,412 @@ namespace ProjetoLES.Server.Migrations
                             IsDeleted = false,
                             Name = "Customer",
                             Uuid = new Guid("11111111-0000-4000-8000-000000000003")
+                        });
+                });
+
+            modelBuilder.Entity("ProjetoLES.Server.Models.StockEntryModel", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<decimal>("CostValue")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateOnly>("EntryDate")
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("ProductId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("Quantity")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("SupplierId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<Guid>("Uuid")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT")
+                        .HasDefaultValueSql("(lower(hex(randomblob(4))) || '-' || lower(hex(randomblob(2))) || '-4' || substr(lower(hex(randomblob(2))),2) || '-' || substr('89ab',abs(random()) % 4 + 1, 1) || substr(lower(hex(randomblob(2))),2) || '-' || lower(hex(randomblob(6))))");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProductId");
+
+                    b.HasIndex("SupplierId");
+
+                    b.HasIndex("Uuid")
+                        .IsUnique();
+
+                    b.ToTable("StockEntries", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            CostValue = 17.20m,
+                            CreatedAt = new DateTime(2026, 3, 5, 0, 0, 0, 0, DateTimeKind.Utc),
+                            EntryDate = new DateOnly(2026, 3, 5),
+                            IsDeleted = false,
+                            ProductId = 1,
+                            Quantity = 90,
+                            SupplierId = 4,
+                            Uuid = new Guid("88888888-0000-4000-8000-000000000001")
+                        },
+                        new
+                        {
+                            Id = 2,
+                            CostValue = 9.60m,
+                            CreatedAt = new DateTime(2026, 3, 5, 0, 0, 0, 0, DateTimeKind.Utc),
+                            EntryDate = new DateOnly(2026, 3, 5),
+                            IsDeleted = false,
+                            ProductId = 2,
+                            Quantity = 120,
+                            SupplierId = 5,
+                            Uuid = new Guid("88888888-0000-4000-8000-000000000002")
+                        },
+                        new
+                        {
+                            Id = 3,
+                            CostValue = 19.30m,
+                            CreatedAt = new DateTime(2026, 3, 6, 0, 0, 0, 0, DateTimeKind.Utc),
+                            EntryDate = new DateOnly(2026, 3, 6),
+                            IsDeleted = false,
+                            ProductId = 3,
+                            Quantity = 70,
+                            SupplierId = 3,
+                            Uuid = new Guid("88888888-0000-4000-8000-000000000003")
+                        },
+                        new
+                        {
+                            Id = 4,
+                            CostValue = 11.50m,
+                            CreatedAt = new DateTime(2026, 3, 6, 0, 0, 0, 0, DateTimeKind.Utc),
+                            EntryDate = new DateOnly(2026, 3, 6),
+                            IsDeleted = false,
+                            ProductId = 4,
+                            Quantity = 110,
+                            SupplierId = 6,
+                            Uuid = new Guid("88888888-0000-4000-8000-000000000004")
+                        },
+                        new
+                        {
+                            Id = 5,
+                            CostValue = 14.90m,
+                            CreatedAt = new DateTime(2026, 3, 7, 0, 0, 0, 0, DateTimeKind.Utc),
+                            EntryDate = new DateOnly(2026, 3, 7),
+                            IsDeleted = false,
+                            ProductId = 5,
+                            Quantity = 85,
+                            SupplierId = 3,
+                            Uuid = new Guid("88888888-0000-4000-8000-000000000005")
+                        },
+                        new
+                        {
+                            Id = 6,
+                            CostValue = 8.20m,
+                            CreatedAt = new DateTime(2026, 3, 7, 0, 0, 0, 0, DateTimeKind.Utc),
+                            EntryDate = new DateOnly(2026, 3, 7),
+                            IsDeleted = false,
+                            ProductId = 6,
+                            Quantity = 130,
+                            SupplierId = 5,
+                            Uuid = new Guid("88888888-0000-4000-8000-000000000006")
+                        },
+                        new
+                        {
+                            Id = 7,
+                            CostValue = 31.50m,
+                            CreatedAt = new DateTime(2026, 3, 8, 0, 0, 0, 0, DateTimeKind.Utc),
+                            EntryDate = new DateOnly(2026, 3, 8),
+                            IsDeleted = false,
+                            ProductId = 7,
+                            Quantity = 60,
+                            SupplierId = 2,
+                            Uuid = new Guid("88888888-0000-4000-8000-000000000007")
+                        },
+                        new
+                        {
+                            Id = 8,
+                            CostValue = 18.20m,
+                            CreatedAt = new DateTime(2026, 3, 8, 0, 0, 0, 0, DateTimeKind.Utc),
+                            EntryDate = new DateOnly(2026, 3, 8),
+                            IsDeleted = false,
+                            ProductId = 8,
+                            Quantity = 95,
+                            SupplierId = 6,
+                            Uuid = new Guid("88888888-0000-4000-8000-000000000008")
+                        },
+                        new
+                        {
+                            Id = 9,
+                            CostValue = 24.80m,
+                            CreatedAt = new DateTime(2026, 3, 9, 0, 0, 0, 0, DateTimeKind.Utc),
+                            EntryDate = new DateOnly(2026, 3, 9),
+                            IsDeleted = false,
+                            ProductId = 9,
+                            Quantity = 72,
+                            SupplierId = 2,
+                            Uuid = new Guid("88888888-0000-4000-8000-000000000009")
+                        },
+                        new
+                        {
+                            Id = 10,
+                            CostValue = 10.70m,
+                            CreatedAt = new DateTime(2026, 3, 9, 0, 0, 0, 0, DateTimeKind.Utc),
+                            EntryDate = new DateOnly(2026, 3, 9),
+                            IsDeleted = false,
+                            ProductId = 10,
+                            Quantity = 116,
+                            SupplierId = 5,
+                            Uuid = new Guid("88888888-0000-4000-8000-000000000010")
+                        },
+                        new
+                        {
+                            Id = 11,
+                            CostValue = 20.40m,
+                            CreatedAt = new DateTime(2026, 3, 10, 0, 0, 0, 0, DateTimeKind.Utc),
+                            EntryDate = new DateOnly(2026, 3, 10),
+                            IsDeleted = false,
+                            ProductId = 11,
+                            Quantity = 80,
+                            SupplierId = 1,
+                            Uuid = new Guid("88888888-0000-4000-8000-000000000011")
+                        },
+                        new
+                        {
+                            Id = 12,
+                            CostValue = 9.90m,
+                            CreatedAt = new DateTime(2026, 3, 10, 0, 0, 0, 0, DateTimeKind.Utc),
+                            EntryDate = new DateOnly(2026, 3, 10),
+                            IsDeleted = false,
+                            ProductId = 12,
+                            Quantity = 140,
+                            SupplierId = 6,
+                            Uuid = new Guid("88888888-0000-4000-8000-000000000012")
+                        },
+                        new
+                        {
+                            Id = 13,
+                            CostValue = 31.00m,
+                            CreatedAt = new DateTime(2026, 3, 11, 0, 0, 0, 0, DateTimeKind.Utc),
+                            EntryDate = new DateOnly(2026, 3, 11),
+                            IsDeleted = false,
+                            ProductId = 13,
+                            Quantity = 56,
+                            SupplierId = 1,
+                            Uuid = new Guid("88888888-0000-4000-8000-000000000013")
+                        },
+                        new
+                        {
+                            Id = 14,
+                            CostValue = 19.40m,
+                            CreatedAt = new DateTime(2026, 3, 11, 0, 0, 0, 0, DateTimeKind.Utc),
+                            EntryDate = new DateOnly(2026, 3, 11),
+                            IsDeleted = false,
+                            ProductId = 14,
+                            Quantity = 104,
+                            SupplierId = 5,
+                            Uuid = new Guid("88888888-0000-4000-8000-000000000014")
+                        },
+                        new
+                        {
+                            Id = 15,
+                            CostValue = 22.10m,
+                            CreatedAt = new DateTime(2026, 3, 12, 0, 0, 0, 0, DateTimeKind.Utc),
+                            EntryDate = new DateOnly(2026, 3, 12),
+                            IsDeleted = false,
+                            ProductId = 15,
+                            Quantity = 62,
+                            SupplierId = 4,
+                            Uuid = new Guid("88888888-0000-4000-8000-000000000015")
+                        },
+                        new
+                        {
+                            Id = 16,
+                            CostValue = 12.40m,
+                            CreatedAt = new DateTime(2026, 3, 12, 0, 0, 0, 0, DateTimeKind.Utc),
+                            EntryDate = new DateOnly(2026, 3, 12),
+                            IsDeleted = false,
+                            ProductId = 16,
+                            Quantity = 98,
+                            SupplierId = 6,
+                            Uuid = new Guid("88888888-0000-4000-8000-000000000016")
+                        },
+                        new
+                        {
+                            Id = 17,
+                            CostValue = 44.60m,
+                            CreatedAt = new DateTime(2026, 3, 13, 0, 0, 0, 0, DateTimeKind.Utc),
+                            EntryDate = new DateOnly(2026, 3, 13),
+                            IsDeleted = false,
+                            ProductId = 17,
+                            Quantity = 75,
+                            SupplierId = 2,
+                            Uuid = new Guid("88888888-0000-4000-8000-000000000017")
+                        },
+                        new
+                        {
+                            Id = 18,
+                            CostValue = 26.10m,
+                            CreatedAt = new DateTime(2026, 3, 13, 0, 0, 0, 0, DateTimeKind.Utc),
+                            EntryDate = new DateOnly(2026, 3, 13),
+                            IsDeleted = false,
+                            ProductId = 18,
+                            Quantity = 128,
+                            SupplierId = 6,
+                            Uuid = new Guid("88888888-0000-4000-8000-000000000018")
+                        },
+                        new
+                        {
+                            Id = 19,
+                            CostValue = 18.90m,
+                            CreatedAt = new DateTime(2026, 3, 14, 0, 0, 0, 0, DateTimeKind.Utc),
+                            EntryDate = new DateOnly(2026, 3, 14),
+                            IsDeleted = false,
+                            ProductId = 19,
+                            Quantity = 68,
+                            SupplierId = 4,
+                            Uuid = new Guid("88888888-0000-4000-8000-000000000019")
+                        },
+                        new
+                        {
+                            Id = 20,
+                            CostValue = 11.20m,
+                            CreatedAt = new DateTime(2026, 3, 14, 0, 0, 0, 0, DateTimeKind.Utc),
+                            EntryDate = new DateOnly(2026, 3, 14),
+                            IsDeleted = false,
+                            ProductId = 20,
+                            Quantity = 101,
+                            SupplierId = 6,
+                            Uuid = new Guid("88888888-0000-4000-8000-000000000020")
+                        });
+                });
+
+            modelBuilder.Entity("ProjetoLES.Server.Models.SupplierModel", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Cnpj")
+                        .IsRequired()
+                        .HasMaxLength(18)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("ContactEmail")
+                        .HasMaxLength(255)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("ContactPhone")
+                        .HasMaxLength(20)
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("Uuid")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT")
+                        .HasDefaultValueSql("(lower(hex(randomblob(4))) || '-' || lower(hex(randomblob(2))) || '-4' || substr(lower(hex(randomblob(2))),2) || '-' || substr('89ab',abs(random()) % 4 + 1, 1) || substr(lower(hex(randomblob(2))),2) || '-' || lower(hex(randomblob(6))))");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Cnpj")
+                        .IsUnique();
+
+                    b.HasIndex("Uuid")
+                        .IsUnique();
+
+                    b.ToTable("Suppliers", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Cnpj = "57.507.378/0001-41",
+                            ContactEmail = "comercial@ems.com.br",
+                            ContactPhone = "11999990001",
+                            IsActive = true,
+                            IsDeleted = false,
+                            Name = "EMS Sigma Pharma",
+                            Uuid = new Guid("55555555-0000-4000-8000-000000000001")
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Cnpj = "61.190.096/0001-92",
+                            ContactEmail = "vendas@eurofarma.com.br",
+                            ContactPhone = "11999990002",
+                            IsActive = true,
+                            IsDeleted = false,
+                            Name = "Eurofarma",
+                            Uuid = new Guid("55555555-0000-4000-8000-000000000002")
+                        },
+                        new
+                        {
+                            Id = 3,
+                            Cnpj = "02.932.074/0001-91",
+                            ContactEmail = "pedidos@hypera.com.br",
+                            ContactPhone = "11999990003",
+                            IsActive = true,
+                            IsDeleted = false,
+                            Name = "Hypera Pharma",
+                            Uuid = new Guid("55555555-0000-4000-8000-000000000003")
+                        },
+                        new
+                        {
+                            Id = 4,
+                            Cnpj = "60.659.463/0001-91",
+                            ContactEmail = "vendas@ache.com.br",
+                            ContactPhone = "11999990004",
+                            IsActive = true,
+                            IsDeleted = false,
+                            Name = "Aché Laboratórios",
+                            Uuid = new Guid("55555555-0000-4000-8000-000000000004")
+                        },
+                        new
+                        {
+                            Id = 5,
+                            Cnpj = "10.588.595/0001-03",
+                            ContactEmail = "comercial@medley.com.br",
+                            ContactPhone = "11999990005",
+                            IsActive = true,
+                            IsDeleted = false,
+                            Name = "Medley",
+                            Uuid = new Guid("55555555-0000-4000-8000-000000000005")
+                        },
+                        new
+                        {
+                            Id = 6,
+                            Cnpj = "62.641.224/0001-01",
+                            ContactEmail = "atendimento@neoquimica.com.br",
+                            ContactPhone = "11999990006",
+                            IsActive = true,
+                            IsDeleted = false,
+                            Name = "Neo Química",
+                            Uuid = new Guid("55555555-0000-4000-8000-000000000006")
                         });
                 });
 
@@ -605,6 +2226,85 @@ namespace ProjetoLES.Server.Migrations
                     b.Navigation("Customer");
                 });
 
+            modelBuilder.Entity("ProjetoLES.Server.Models.DrugInteractionModel", b =>
+                {
+                    b.HasOne("ProjetoLES.Server.Models.ProductModel", "ProductA")
+                        .WithMany("InteractionsAsSource")
+                        .HasForeignKey("ProductAId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("ProjetoLES.Server.Models.ProductModel", "ProductB")
+                        .WithMany("InteractionsAsTarget")
+                        .HasForeignKey("ProductBId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("ProductA");
+
+                    b.Navigation("ProductB");
+                });
+
+            modelBuilder.Entity("ProjetoLES.Server.Models.ProductCategoryModel", b =>
+                {
+                    b.HasOne("ProjetoLES.Server.Models.CategoryModel", "Category")
+                        .WithMany("ProductCategories")
+                        .HasForeignKey("CategoryId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("ProjetoLES.Server.Models.ProductModel", "Product")
+                        .WithMany("ProductCategories")
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Category");
+
+                    b.Navigation("Product");
+                });
+
+            modelBuilder.Entity("ProjetoLES.Server.Models.ProductModel", b =>
+                {
+                    b.HasOne("ProjetoLES.Server.Models.PricingGroupModel", "PricingGroup")
+                        .WithMany("Products")
+                        .HasForeignKey("PricingGroupId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("PricingGroup");
+                });
+
+            modelBuilder.Entity("ProjetoLES.Server.Models.ProductStockModel", b =>
+                {
+                    b.HasOne("ProjetoLES.Server.Models.ProductModel", "Product")
+                        .WithOne("Stock")
+                        .HasForeignKey("ProjetoLES.Server.Models.ProductStockModel", "ProductId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Product");
+                });
+
+            modelBuilder.Entity("ProjetoLES.Server.Models.StockEntryModel", b =>
+                {
+                    b.HasOne("ProjetoLES.Server.Models.ProductModel", "Product")
+                        .WithMany("StockEntries")
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("ProjetoLES.Server.Models.SupplierModel", "Supplier")
+                        .WithMany("StockEntries")
+                        .HasForeignKey("SupplierId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Product");
+
+                    b.Navigation("Supplier");
+                });
+
             modelBuilder.Entity("ProjetoLES.Server.Models.TransactionModel", b =>
                 {
                     b.HasOne("ProjetoLES.Server.Models.CreditCardModel", "CreditCard")
@@ -657,6 +2357,11 @@ namespace ProjetoLES.Server.Migrations
                     b.Navigation("CreditCards");
                 });
 
+            modelBuilder.Entity("ProjetoLES.Server.Models.CategoryModel", b =>
+                {
+                    b.Navigation("ProductCategories");
+                });
+
             modelBuilder.Entity("ProjetoLES.Server.Models.CustomerModel", b =>
                 {
                     b.Navigation("Addresses");
@@ -670,9 +2375,32 @@ namespace ProjetoLES.Server.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("ProjetoLES.Server.Models.PricingGroupModel", b =>
+                {
+                    b.Navigation("Products");
+                });
+
+            modelBuilder.Entity("ProjetoLES.Server.Models.ProductModel", b =>
+                {
+                    b.Navigation("InteractionsAsSource");
+
+                    b.Navigation("InteractionsAsTarget");
+
+                    b.Navigation("ProductCategories");
+
+                    b.Navigation("Stock");
+
+                    b.Navigation("StockEntries");
+                });
+
             modelBuilder.Entity("ProjetoLES.Server.Models.RoleModel", b =>
                 {
                     b.Navigation("UserRoles");
+                });
+
+            modelBuilder.Entity("ProjetoLES.Server.Models.SupplierModel", b =>
+                {
+                    b.Navigation("StockEntries");
                 });
 
             modelBuilder.Entity("ProjetoLES.Server.Models.UserModel", b =>

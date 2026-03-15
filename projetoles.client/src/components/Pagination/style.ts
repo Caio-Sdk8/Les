@@ -10,13 +10,13 @@ export const DivPagination = styled.div`
 `;
 
 export const PaginationContainer = styled.div`
-  padding: 5px 0;
-  border-radius: 8px;
+  padding: 8px 0;
+  border-radius: var(--radius-md);
   display: flex;
   align-items: center;
-  justify-content: end;
+  justify-content: space-between;
   flex-wrap: wrap;
-  gap: 0.5rem;
+  gap: 12px;
   margin: 5px 0;
 
   @media (width <= 567px) {
@@ -26,27 +26,31 @@ export const PaginationContainer = styled.div`
 
 export const ButtonsContainer = styled.div`
   align-items: center;
-  padding-right: 12px;
   display: flex;
-  gap: 1rem;
+  flex-wrap: wrap;
+  gap: 8px;
 `;
 
 export const PageButton = styled.button`
-  padding-bottom: 2px;
-  width: 10px;
-  height: 16px;
-  border-radius: 0.3125rem;
-  border: none;
-  background: transparent;
-  padding: 0;
-  margin: 0;
+  width: 34px;
+  height: 34px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-border);
+  background-color: var(--color-surface);
 
   display: flex;
   align-items: center;
   justify-content: center;
+  cursor: pointer;
+
+  &:hover:not(:disabled) {
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px var(--color-primary-soft);
+  }
 
   &:disabled {
     cursor: not-allowed;
+    opacity: 0.45;
   }
 `;
 
@@ -54,10 +58,9 @@ export const Pages = styled.button<{ $isActive: boolean }>`
   display: flex;
   align-items: center;
   justify-content: center;
-  background: ${({ $isActive }) => ($isActive ? "transparent" : "transparent")};
 
-  width: 24px;
-  height: 24px;
+  width: 34px;
+  height: 34px;
   border-radius: var(--radius-sm);
   background-color: ${({ $isActive }) =>
     $isActive ? "var(--color-primary)" : "transparent"};
@@ -67,22 +70,27 @@ export const Pages = styled.button<{ $isActive: boolean }>`
       $isActive ? "var(--color-primary)" : "var(--color-border)"};
   margin: 0;
 
-  font-size: 16px;
+  font-size: 14px;
   font-family: var(--font-openSans), sans-serif;
-  font-weight: ${({ $isActive }) => ($isActive ? "700" : "400")};
+  font-weight: ${({ $isActive }) => ($isActive ? "700" : "600")};
   color: ${({ $isActive }) => ($isActive ? "white" : "var(--color-text)")};
+
+  &:hover:not(:disabled) {
+    border-color: var(--color-primary);
+    background-color: var(--color-primary-soft);
+  }
 `;
 
 export const Text = styled.p`
-  padding-left: 12px;
   font-family: var(--font-openSans), sans-serif;
-  font-weight: 700;
-  font-size: 16px;
+  font-weight: 600;
+  font-size: 14px;
   color: var(--color-text);
+  margin: 0;
 `;
 
 export const Icon = styled.img`
-  width: 10px;
-  height: 16px;
-  cursor: pointer;
+  width: 12px;
+  height: 12px;
+  display: block;
 `;

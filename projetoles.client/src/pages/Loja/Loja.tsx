@@ -1,5 +1,5 @@
-import { useMemo, useState } from "react";
-import produtos from "../../mock/produtos";
+import { useEffect, useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { StoreCarouselSection } from "../../components/StoreCarouselSection/StoreCarouselSection";
 import {
   StoreCategories,
@@ -8,6 +8,13 @@ import {
 import { StoreHighlights } from "../../components/StoreHighlights/StoreHighlights";
 import { StoreImageTiles } from "../../components/StoreImageTiles/StoreImageTiles";
 import { StoreProduct } from "../../components/StoreProductCard/StoreProductCard";
+import {
+  categoryService,
+  productService,
+  ProductSummary,
+  PrescriptionType,
+} from "../../services/catalog/productService";
+import { cartService } from "../../services/cart/cartService";
 import {
   BannerButton,
   BannerDescription,
@@ -20,17 +27,40 @@ import {
 } from "./style";
 import { AppShell } from "../../components/AppShell/AppShell";
 
-const categories: StoreCategory[] = [
-  { id: "all", name: "Todos", icon: "🛍️" },
-  { id: "med", name: "Medicamentos", icon: "💊" },
-  { id: "bem", name: "Bem-estar", icon: "🌿" },
-  { id: "dor", name: "Dor e Febre", icon: "🌡️" },
-  { id: "al", name: "Alergia", icon: "🤧" },
-  { id: "dig", name: "Digestivo", icon: "🧪" },
-  { id: "vit", name: "Vitaminas", icon: "🍊" },
-  { id: "hig", name: "Higiene", icon: "🧼" },
-];
+const CATEGORY_ICONS: Record<string, string> = {
+  Medicamentos: "💊",
+  "Bem-estar": "🌿",
+  "Dor e Febre": "🌡️",
+  Alergia: "🤧",
+  Digestivo: "🧪",
+  Vitaminas: "🍊",
+  Higiene: "🧼",
+  Dermocosméticos: "🧴",
+  Antibióticos: "🔬",
+  "Tarja Vermelha": "🔴",
+};
 
+const PRESCRIPTION_LABELS: Record<PrescriptionType, string> = {
+  [PrescriptionType.None]: "Venda livre",
+  [PrescriptionType.TarjaAmarela]: "Tarja Amarela",
+  [PrescriptionType.TarjaVermelha]: "Tarja Vermelha",
+  [PrescriptionType.TarjaPreta]: "Tarja Preta",
+};
+
+function toStoreProduct(p: ProductSummary): StoreProduct {
+  return {
+    id: p.uuid,
+    uuid: p.uuid,
+    nome: p.name,
+    valor: p.salePrice,
+    imagem:
+      p.imageUrl ||
+      "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=400&h=400&fit=crop&q=80",
+    descricao: p.activePrinciple,
+    categoria: p.categories[0] ?? "",
+    aviso: PRESCRIPTION_LABELS[p.prescriptionType],
+  };
+}
 const careTiles = [
   {
     id: "tile-1",
@@ -65,64 +95,87 @@ const careTiles = [
 ];
 
 const Loja = () => {
+  const navigate = useNavigate();
   const [activeCategory, setActiveCategory] = useState("Todos");
   const [searchTerm, setSearchTerm] = useState("");
+  const [apiProducts, setApiProducts] = useState<ProductSummary[]>([]);
+  const [apiCategories, setApiCategories] = useState<StoreCategory[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const catalog = useMemo<StoreProduct[]>(() => {
-    const sequence = [
-      "Medicamentos",
-      "Dor e Febre",
-      "Bem-estar",
-      "Alergia",
-      "Digestivo",
-      "Vitaminas",
-    ];
-    const warnings = [
-      "Uso adulto",
-      "Genérico",
-      "Sem açúcar",
-      "Venda livre",
-      "Uso contínuo",
-      "Uso oral",
-    ];
+  const handleAddToCart = (product: StoreProduct) => {
+    if (!product.uuid) return;
+    cartService.addItem(product.uuid, 1);
+  };
 
-    return produtos.map((item, index) => ({
-      ...item,
-      categoria: sequence[index % sequence.length],
-      aviso: warnings[index % warnings.length],
-      desconto: 10 + ((item.id * 7) % 26),
-    }));
+  useEffect(() => {
+    let cancelled = false;
+    const load = async () => {
+      try {
+        const [productResult, cats] = await Promise.all([
+          productService.getProducts({ pageSize: 100, isActive: true }),
+          categoryService.getAll(),
+        ]);
+        if (!cancelled) {
+          setApiProducts(productResult.items);
+          const storeCategories: StoreCategory[] = [
+            { id: "all", name: "Todos", icon: "🛍️" },
+            ...cats.map((c) => ({
+              id: c.uuid,
+              name: c.name,
+              icon: CATEGORY_ICONS[c.name] ?? "📦",
+            })),
+          ];
+          setApiCategories(storeCategories);
+        }
+      } catch {
+        // mantém tela funcional mesmo sem API
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    };
+    load();
+    return () => { cancelled = true; };
   }, []);
+
+  const catalog = useMemo<StoreProduct[]>(
+    () => apiProducts.map(toStoreProduct),
+    [apiProducts]
+  );
 
   const filteredProducts = useMemo(() => {
     return catalog.filter((product) => {
       const matchCategory =
         activeCategory === "Todos" || product.categoria === activeCategory;
-
       const term = searchTerm.trim().toLowerCase();
       const matchSearch =
         term.length === 0 ||
         product.nome.toLowerCase().includes(term) ||
         (product.descricao ?? "").toLowerCase().includes(term) ||
         (product.categoria ?? "").toLowerCase().includes(term);
-
       return matchCategory && matchSearch;
     });
   }, [activeCategory, catalog, searchTerm]);
 
   const popularProducts = filteredProducts;
-  const offerProducts = [...filteredProducts]
-    .sort((a, b) => (b.desconto ?? 0) - (a.desconto ?? 0))
-    .slice(0, 8);
-  const weekProducts = [...filteredProducts]
-    .sort((a, b) => b.valor - a.valor)
-    .slice(0, 8);
+  const weekProducts = [...filteredProducts].slice(0, 8);
+
+  if (loading) {
+    return (
+      <AppShell title="Loja">
+        <Main>
+          <PageContent>
+            <p style={{ color: "var(--color-muted)", padding: "32px 0" }}>Carregando produtos...</p>
+          </PageContent>
+        </Main>
+      </AppShell>
+    );
+  }
 
   return (
     <AppShell title="Loja">
       <Main>
       <StoreCategories
-        categories={categories}
+        categories={apiCategories}
         activeCategory={activeCategory}
         onSelectCategory={setActiveCategory}
       />
@@ -172,21 +225,22 @@ const Loja = () => {
           <StoreCarouselSection
             title="Mais comprados"
             products={popularProducts}
-            onAddToCart={(product) => console.log("adicionar", product.id)}
+            onAddToCart={handleAddToCart}
+            onProductClick={(product) => {
+              if (product.uuid) navigate(`/produto/${product.uuid}`);
+            }}
           />
 
-          <StoreCarouselSection
-            title="Ofertas imperdíveis"
-            products={offerProducts}
-            onAddToCart={(product) => console.log("adicionar", product.id)}
-          />
 
           <StoreImageTiles title="Cuidados que você merece" items={careTiles} />
 
           <StoreCarouselSection
             title="Destaques da semana"
             products={weekProducts}
-            onAddToCart={(product) => console.log("adicionar", product.id)}
+            onAddToCart={handleAddToCart}
+            onProductClick={(product) => {
+              if (product.uuid) navigate(`/produto/${product.uuid}`);
+            }}
           />
         </SectionStack>
       </PageContent>

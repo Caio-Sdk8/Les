@@ -14,6 +14,7 @@ type StoreCarouselSectionProps = {
   products: StoreProduct[];
   compactCards?: boolean;
   onAddToCart?: (product: StoreProduct) => void;
+  onProductClick?: (product: StoreProduct) => void;
 };
 
 export const StoreCarouselSection = ({
@@ -21,6 +22,7 @@ export const StoreCarouselSection = ({
   products,
   compactCards = true,
   onAddToCart,
+  onProductClick,
 }: StoreCarouselSectionProps) => {
   const trackRef = useRef<HTMLDivElement>(null);
 
@@ -51,6 +53,7 @@ export const StoreCarouselSection = ({
             product={product}
             compact={compactCards}
             onAddToCart={onAddToCart}
+            onClick={onProductClick}
           />
         ))}
       </CarouselTrack>

@@ -3,39 +3,48 @@ import styled from "styled-components";
 export const Container = styled.div`
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 8px;
   justify-content: center;
 `;
 
 export const QuantityButton = styled.button`
-  width: 32px;
+  width: 34px;
   display: flex;
   align-items: center;
   justify-content: center;
-  height: 32px;
-  border: none;
+  height: 34px;
+  border: 1px solid var(--color-border);
   border-radius: var(--radius-sm);
-  background-color: var(--color-primary);
-  color: white;
-  font-size: 18px;
-  font-weight: bold;
+  background-color: var(--color-surface);
+  color: var(--color-text);
+  font-size: 16px;
+  font-weight: 700;
   cursor: pointer;
-  transition: 0.2s ease;
+  transition: border-color 0.2s ease, background-color 0.2s ease, box-shadow 0.2s ease;
 
   &:hover:not(:disabled) {
-    background-color: var(--color-primary-strong);
-    transform: scale(1.05);
+    border-color: var(--color-primary);
+    background-color: var(--color-primary-soft);
+    box-shadow: 0 0 0 3px var(--color-primary-soft);
   }
 
   &:disabled {
-    background-color: #ccc;
+    opacity: 0.45;
     cursor: not-allowed;
   }
 `;
 
 export const QuantityValue = styled.span`
-  font-size: 18px;
+  height: 34px;
+  min-width: 40px;
+  padding: 0 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background-color: var(--color-surface);
+  font-size: 14px;
   font-weight: 600;
-  min-width: 20px;
-  text-align: center;
+  color: var(--color-text);
 `;

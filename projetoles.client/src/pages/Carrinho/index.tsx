@@ -1,6 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import {
   AlertText,
+  CartEmptyState,
   CartItem,
   CartItemInfo,
   CartItemMeta,
@@ -21,35 +22,46 @@ import {
   PrimaryButton,
   ProductImage,
   ProductThumb,
+  RemoveItemButton,
   SectionCard,
   SummaryCard,
   SummaryDivider,
   SummaryHeader,
+  InteractionAlert,
+  InteractionAlertTitle,
+  InteractionList,
+  InteractionMeta,
   SummaryRow,
   SecondaryButton,
   TotalValue,
   TwoCardsGrid,
 } from "./style";
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import ModalCartao from "../../components/Modals/Cartão";
-import produtos from "../../mock/produtos";
 import QuantitySelector from "../../components/Quantidade/Quantidade";
 import { AppShell } from "../../components/AppShell/AppShell";
 import { cartoesMock } from "../../mock/cartao";
 import { enderecosMock } from "../../mock/endereco";
+import {
+  productService,
+  type DrugInteractionAlert,
+  type ProductSummary,
+} from "../../services/catalog/productService";
+import { cartService } from "../../services/cart/cartService";
+
+type CartLine = ProductSummary & { quantity: number };
 
 export default function Carrinho() {
   const [modalCartao, setModalCartao] = useState(false);
   const navigate = useNavigate();
-  const cartProducts = produtos.slice(0, 2);
   const availableCards = cartoesMock.slice(0, 4);
-  const [quantities, setQuantities] = useState<Record<number, number>>(
-    () =>
-      cartProducts.reduce(
-        (acc, product) => ({ ...acc, [product.id]: 1 }),
-        {} as Record<number, number>
-      )
-  );
+  const [catalog, setCatalog] = useState<ProductSummary[]>([]);
+  const [cartUuids, setCartUuids] = useState(() => cartService.getItems());
+  const [quantities, setQuantities] = useState<Record<string, number>>({});
+  const [interactionAlerts, setInteractionAlerts] = useState<DrugInteractionAlert[]>([]);
+  const [interactionLoading, setInteractionLoading] = useState(false);
+  const [interactionError, setInteractionError] = useState("");
+
   const [paymentType, setPaymentType] = useState("");
   const [addressId, setAddressId] = useState("");
   const [coupon, setCoupon] = useState("");
@@ -59,16 +71,120 @@ export default function Carrinho() {
   const [firstCardAmount, setFirstCardAmount] = useState(0);
   const [secondCardAmount, setSecondCardAmount] = useState(0);
 
+  useEffect(() => {
+    let cancelled = false;
+
+    const loadCatalog = async () => {
+      try {
+        let page = 1;
+        const pageSize = 100;
+        const all: ProductSummary[] = [];
+
+        while (true) {
+          const result = await productService.getProducts({ page, pageSize, isActive: true });
+          all.push(...result.items);
+          if (!result.hasNextPage) break;
+          page += 1;
+        }
+
+        if (!cancelled) setCatalog(all);
+      } catch {
+        if (!cancelled) setCatalog([]);
+      }
+    };
+
+    loadCatalog();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  useEffect(() => {
+    const fromStorage = cartService.getItems();
+    setCartUuids(fromStorage);
+    setQuantities(
+      fromStorage.reduce(
+        (acc, item) => ({ ...acc, [item.productUuid]: item.quantity }),
+        {} as Record<string, number>
+      )
+    );
+  }, []);
+
+  const cartProducts = useMemo<CartLine[]>(() => {
+    if (catalog.length === 0 || cartUuids.length === 0) return [];
+
+    const byUuid = new Map(catalog.map((product) => [product.uuid, product]));
+
+    return cartUuids
+      .map((item) => {
+        const found = byUuid.get(item.productUuid);
+        if (!found) return null;
+
+        return {
+          ...found,
+          quantity: quantities[item.productUuid] ?? item.quantity,
+        };
+      })
+      .filter((item): item is CartLine => item !== null);
+  }, [catalog, cartUuids, quantities]);
+
+  useEffect(() => {
+    const uniqueUuids = Array.from(new Set(cartProducts.map((item) => item.uuid)));
+
+    if (uniqueUuids.length < 2) {
+      setInteractionAlerts([]);
+      setInteractionError("");
+      return;
+    }
+
+    let cancelled = false;
+    const run = async () => {
+      setInteractionLoading(true);
+      setInteractionError("");
+      try {
+        const result = await productService.checkDrugInteractions(uniqueUuids);
+        if (!cancelled) setInteractionAlerts(result);
+      } catch {
+        if (!cancelled) {
+          setInteractionAlerts([]);
+          setInteractionError("Não foi possível validar interações medicamentosas no momento.");
+        }
+      } finally {
+        if (!cancelled) setInteractionLoading(false);
+      }
+    };
+
+    run();
+    return () => {
+      cancelled = true;
+    };
+  }, [cartProducts]);
+
   const handleSalvar = () => {
+    if (cartProducts.length === 0) return;
+    cartService.clear();
+    setCartUuids([]);
     navigate("/loja");
   };
 
-  const updateQuantity = (productId: number, value: number) => {
-    setQuantities((prev) => ({ ...prev, [productId]: value }));
+  const updateQuantity = (productUuid: string, value: number) => {
+    setQuantities((prev) => ({ ...prev, [productUuid]: value }));
+    cartService.updateQuantity(productUuid, value);
+    setCartUuids(cartService.getItems());
+  };
+
+  const removeFromCart = (productUuid: string) => {
+    cartService.removeItem(productUuid);
+    setCartUuids(cartService.getItems());
+    setQuantities((prev) => {
+      const next = { ...prev };
+      delete next[productUuid];
+      return next;
+    });
   };
 
   const subtotal = cartProducts.reduce(
-    (total, product) => total + product.valor * (quantities[product.id] ?? 1),
+    (total, product) => total + product.salePrice * (quantities[product.uuid] ?? product.quantity),
     0
   );
   const shipping = subtotal >= 80 ? 0 : 8.9;
@@ -89,6 +205,7 @@ export default function Carrinho() {
     Math.abs(splitSum - total) < 0.01;
 
   const checkoutIsValid =
+    cartProducts.length > 0 &&
     addressId.length > 0 &&
     paymentType.length > 0 &&
     (isPixOrDebit ||
@@ -292,27 +409,71 @@ export default function Carrinho() {
           <SectionCard>
             <CartTitle>Produtos no carrinho</CartTitle>
             <CartItemsSection>
+              {cartProducts.length === 0 && (
+                <CartEmptyState>
+                  Seu carrinho está vazio no momento. Volte para a loja e adicione alguns produtos.
+                </CartEmptyState>
+              )}
+
               {cartProducts.map((product) => (
-                <CartItem key={product.id}>
+                <CartItem key={product.uuid}>
                   <ProductThumb>
-                    <ProductImage src={product.imagem} alt={product.nome} />
+                    <ProductImage
+                      src={
+                        product.imageUrl ||
+                        "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=320&h=320&fit=crop&q=80"
+                      }
+                      alt={product.name}
+                    />
                   </ProductThumb>
 
                   <CartItemInfo>
-                    <strong>{product.nome}</strong>
-                    <CartItemMeta>{product.composicao}</CartItemMeta>
-                    <CartItemMeta>{formatCurrency(product.valor)}</CartItemMeta>
+                    <strong>{product.name}</strong>
+                    <CartItemMeta>{product.activePrinciple || "Princípio ativo não informado"}</CartItemMeta>
+                    <CartItemMeta>{formatCurrency(product.salePrice)}</CartItemMeta>
                   </CartItemInfo>
 
                   <QuantitySelector
-                    value={quantities[product.id] ?? 1}
+                    key={`${product.uuid}-${quantities[product.uuid] ?? 1}`}
+                    value={quantities[product.uuid] ?? 1}
                     min={1}
                     max={10}
-                    onChange={(value) => updateQuantity(product.id, value)}
+                    onChange={(value) => updateQuantity(product.uuid, value)}
                   />
+
+                  <RemoveItemButton type="button" onClick={() => removeFromCart(product.uuid)}>
+                    Remover
+                  </RemoveItemButton>
                 </CartItem>
               ))}
             </CartItemsSection>
+          </SectionCard>
+
+          <SectionCard>
+            <CartTitle>Interações medicamentosas (automático)</CartTitle>
+
+            {interactionLoading && <AlertText>Validando interações entre os itens do carrinho...</AlertText>}
+            {interactionError && <AlertText>{interactionError}</AlertText>}
+
+            {!interactionLoading && !interactionError && interactionAlerts.length === 0 && cartProducts.length >= 2 && (
+              <CartEmptyState>Nenhuma interação medicamentosa relevante encontrada entre os itens atuais.</CartEmptyState>
+            )}
+
+            {!interactionLoading && interactionAlerts.length > 0 && (
+              <InteractionList>
+                {interactionAlerts.map((alert, index) => (
+                  <InteractionAlert key={`${alert.productAUuid}-${alert.productBUuid}-${index}`} $severity={alert.severityLevel}>
+                    <InteractionAlertTitle>
+                      {alert.severityLevel >= 3 ? "ALTA" : alert.severityLevel === 2 ? "MÉDIA" : "BAIXA"}
+                    </InteractionAlertTitle>
+                    <InteractionMeta>
+                      {alert.productAName} + {alert.productBName}
+                    </InteractionMeta>
+                    <InteractionMeta>{alert.description}</InteractionMeta>
+                  </InteractionAlert>
+                ))}
+              </InteractionList>
+            )}
           </SectionCard>
         </CheckoutCard>
 

@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { Container, QuantityButton, QuantityValue } from "./style";
 
 import SetaDireita from "../../assets/SetaDireita.svg";
@@ -17,12 +16,11 @@ const QuantitySelector = ({
   max = 99,
   onChange,
 }: Props) => {
-  const [quantity, setQuantity] = useState(value);
+  const quantity = value;
 
   const increase = () => {
     if (quantity < max) {
       const newValue = quantity + 1;
-      setQuantity(newValue);
       onChange?.(newValue);
     }
   };
@@ -30,7 +28,6 @@ const QuantitySelector = ({
   const decrease = () => {
     if (quantity > min) {
       const newValue = quantity - 1;
-      setQuantity(newValue);
       onChange?.(newValue);
     }
   };
@@ -38,13 +35,13 @@ const QuantitySelector = ({
   return (
     <Container>
       <QuantityButton onClick={decrease} disabled={quantity === min}>
-        <img src={SetaEsquerda} alt="Diminuir" width="12" />
+        <img src={SetaEsquerda} alt="Diminuir" width="12" height="12" />
       </QuantityButton>
 
       <QuantityValue>{quantity}</QuantityValue>
 
       <QuantityButton onClick={increase} disabled={quantity === max}>
-        <img src={SetaDireita} alt="Aumentar" width="12" />
+        <img src={SetaDireita} alt="Aumentar" width="12" height="12" />
       </QuantityButton>
     </Container>
   );

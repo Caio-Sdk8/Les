@@ -27,7 +27,8 @@ export const ItemsContainer = styled.div`
 
   @media (max-width: 860px) {
     width: 100%;
-    overflow-x: auto;
-    padding-bottom: 4px;
+    flex-wrap: wrap;
+    justify-content: center;
+    padding-bottom: 0;
   }
 `;

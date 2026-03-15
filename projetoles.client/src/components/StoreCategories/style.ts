@@ -5,9 +5,10 @@ export const CategoriesBar = styled.div`
   border-bottom: 1px solid var(--color-border);
   background-color: var(--color-surface);
   display: flex;
+  flex-wrap: wrap;
   gap: 8px;
   padding: 10px 12px;
-  overflow-x: auto;
+  overflow: visible;
 `;
 
 export const CategoryButton = styled.button<{ $active: boolean }>`

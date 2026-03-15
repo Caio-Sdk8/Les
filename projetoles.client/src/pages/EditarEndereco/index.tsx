@@ -1,4 +1,4 @@
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import {
   BodyData,
   ButtonDiv,
@@ -16,13 +16,28 @@ import EnderecoTable from "../../components/Tables/EnderecoTable";
 
 export default function EdicaoEndereco() {
   const navigate = useNavigate();
+  const location = useLocation();
+
+  const state = (location.state as {
+    addressNickname?: string;
+    addressCity?: string;
+  } | null) ?? { addressNickname: "", addressCity: "" };
+
+  const nickname = state.addressNickname?.trim();
+  const city = state.addressCity?.trim();
+
+  const pageTitle = nickname
+    ? `Edição de Endereço - ${nickname}`
+    : city
+      ? `Edição de Endereço - ${city}`
+      : "Edição de Endereço";
 
   const handleSalvar = () => {
     navigate("/editarUsuario");
   };
 
   return (
-    <AppShell title="Edição de Endereço">
+    <AppShell title={pageTitle}>
       <DataContainer>
         <BodyData>
           <DivSeparator>

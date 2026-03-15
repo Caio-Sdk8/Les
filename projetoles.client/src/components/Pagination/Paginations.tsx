@@ -77,15 +77,7 @@ const Pagination = ({
           onClick={() => onPageChange(currentPage - 1)}
           disabled={currentPage === 1}
         >
-          <img
-            src={SetaEsquerda}
-            alt="Editar"
-            style={{
-              width: "15px",
-              height: "15px",
-              cursor: "pointer",
-            }}
-          />
+          <Icon src={SetaEsquerda} alt="Página anterior" />
         </PageButton>
 
         {pages.map((page, index) =>
@@ -109,15 +101,7 @@ const Pagination = ({
           onClick={() => onPageChange(currentPage + 1)}
           disabled={currentPage === totalPages}
         >
-          <img
-            src={SetaDireita}
-            alt="Editar"
-            style={{
-              width: "15px",
-              height: "15px",
-              cursor: "pointer",
-            }}
-          />
+          <Icon src={SetaDireita} alt="Próxima página" />
         </PageButton>
       </ButtonsContainer>
     </PaginationContainer>
