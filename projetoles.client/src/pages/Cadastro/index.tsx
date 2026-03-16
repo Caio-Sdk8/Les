@@ -34,7 +34,7 @@ import {
 import { SingClient } from "../../services/requests/singClient";
 
 // opções
-const GENDER_OPTIONS = [
+export const GENDER_OPTIONS = [
   { label: "Masculino", value: 1 },
   { label: "Feminino", value: 2 },
   { label: "Não-binário", value: 3 },

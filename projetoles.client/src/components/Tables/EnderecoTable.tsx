@@ -14,7 +14,20 @@ import {
 } from "../../pages/ListagemCliente/style";
 import { enderecosMock } from "../../mock/endereco";
 import { Title } from "./style";
-const EnderecoTable = () => {
+import { GetAllCLientAddressRequest } from "../../services/requests/getAddressClient";
+import { IGetAddressResponse } from "../../services/interfaces/GetAddressClient";
+
+interface Props {
+  uuid: string;
+}
+
+const EnderecoTable: React.FC<Props> = ({ uuid }) => {
+  const {
+    data: addresses,
+    isLoading,
+    error,
+  } = GetAllCLientAddressRequest(uuid);
+
   const navigate = useNavigate();
   const [currentPage, setCurrentPage] = useState(1);
 
@@ -22,14 +35,14 @@ const EnderecoTable = () => {
     setCurrentPage(pageNumber);
   };
 
-  const handleEdit = (apelido?: string, cidade?: string) => {
-    navigate("/editarEndereco", {
-      state: {
-        addressNickname: apelido,
-        addressCity: cidade,
-      },
-    });
-  };
+const handleEdit = (endereco: IGetAddressResponse) => {
+  navigate("/editarEndereco", {
+    state: {
+      endereco,
+      clientUuid: uuid, 
+    },
+  });
+};
 
   return (
     <>
@@ -41,7 +54,7 @@ const EnderecoTable = () => {
             <TableContainer>
               <thead>
                 <tr>
-                  <Th style={{ width: "16.8%", paddingLeft: "5px" }}>NOME</Th>
+                  <Th style={{ width: "16.8%", paddingLeft: "5px" }}>PAÍS</Th>
                   <Th style={{ width: "16.8%", height: "48px" }}>CEP</Th>
                   <Th style={{ width: "16.8%", height: "48px" }}>ESTADO</Th>
                   <Th style={{ width: "16.8%", height: "48px" }}>CIDADE</Th>
@@ -51,69 +64,70 @@ const EnderecoTable = () => {
                 </tr>
               </thead>
 
-              {enderecosMock.map((endereco, index) => (
-                <tbody key={endereco.id}>
-                  <Tr $background={index % 2 === 0}>
-                    <Td style={{ textAlign: "left", paddingLeft: "5px" }}>
-                      <p>{endereco.apelido || "----------"}</p>
-                    </Td>
-                    <Td>
-                      <p>{endereco.cep}</p>
-                    </Td>
-                    <Td>
-                      <p>{endereco.estado}</p>
-                    </Td>
-                    <Td>
-                      <p>{endereco.cidade}</p>
-                    </Td>
-                    <Td>
-                      <p>{endereco.tipo}</p>
-                    </Td>
+              {addresses &&
+                addresses.map((endereco, index) => (
+                  <tbody key={endereco.uuid}>
+                    <Tr $background={index % 2 === 0}>
+                      <Td style={{ textAlign: "left", paddingLeft: "5px" }}>
+                        <p>{endereco.country || "----------"}</p>
+                      </Td>
+                      <Td>
+                        <p>{endereco.zipCode}</p>
+                      </Td>
+                      <Td>
+                        <p>{endereco.state}</p>
+                      </Td>
+                      <Td>
+                        <p>{endereco.city}</p>
+                      </Td>
+                      <Td>
+                        <p>{endereco.label}</p>
+                      </Td>
 
-                    <Td
-                      style={{
-                        textAlign: "center",
-                        verticalAlign: "middle",
-                        display: "flex",
-                        justifyContent: "center",
-                        alignItems: "center",
-                        height: "inherit",
-                        gap: "20px",
-                      }}
-                    >
-                      <button
-                        type="button"
-                        onClick={() => handleEdit(endereco.apelido, endereco.cidade)}
+                      <Td
                         style={{
-                          width: "36px",
-                          height: "36px",
-                          borderRadius: "999px",
-                          border: "1px solid var(--color-border)",
-                          backgroundColor: "var(--color-surface)",
-                          cursor: "pointer",
+                          textAlign: "center",
+                          verticalAlign: "middle",
                           display: "flex",
-                          alignItems: "center",
                           justifyContent: "center",
+                          alignItems: "center",
+                          height: "inherit",
+                          gap: "20px",
                         }}
                       >
-                        <img
-                          src={PencilIcon}
-                          alt="Editar"
-                          style={{ width: "18px", height: "18px" }}
-                        />
-                      </button>
-                    </Td>
-                  </Tr>
-                </tbody>
-              ))}
+                        <button
+                          type="button"
+                          onClick={() => handleEdit(endereco)}
+                          style={{
+                            width: "36px",
+                            height: "36px",
+                            borderRadius: "999px",
+                            border: "1px solid var(--color-border)",
+                            backgroundColor: "var(--color-surface)",
+                            cursor: "pointer",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                          }}
+                        >
+                          <img
+                            src={PencilIcon}
+                            alt="Editar"
+                            style={{ width: "18px", height: "18px" }}
+                          />
+                        </button>
+                      </Td>
+                    </Tr>
+                  </tbody>
+                ))}
             </TableContainer>
 
-            {(enderecosMock.length ?? 0) > 0 && (
+            {addresses && (enderecosMock.length ?? 0) > 0 && (
               <DivPagination>
                 <Pagination
                   currentPage={currentPage}
-                  currentCount={enderecosMock.length}
-                  totalCount={enderecosMock.length}
+                  currentCount={addresses.length}
+                  totalCount={addresses.length}
                   totalPages={1}
                   onPageChange={handlePageChange}
                   type="níveis"

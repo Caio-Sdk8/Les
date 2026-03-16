@@ -9,7 +9,7 @@ export const Title = styled.h1`
 `;
 
 interface Props {
-  preferido: boolean;
+  $preferido: boolean; // <-- aqui
 }
 
 export const ButtonPrefer = styled.button<Props>`
@@ -24,11 +24,11 @@ export const ButtonPrefer = styled.button<Props>`
   font-size: 12px;
   transition: 0.5s all ease;
 
-  background-color: ${({ preferido }) =>
-    preferido ? "var(--color-primary-soft)" : "#E5E7EB"};
+  background-color: ${({ $preferido }) =>
+    $preferido ? "var(--color-primary-soft)" : "#E5E7EB"};
 
-  color: ${({ preferido }) =>
-    preferido ? "var(--color-primary)" : "var(--color-muted)"};
+  color: ${({ $preferido }) =>
+    $preferido ? "var(--color-primary)" : "var(--color-muted)"};
 
   &:hover {
     scale: 0.95;

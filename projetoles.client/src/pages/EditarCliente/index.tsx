@@ -5,6 +5,7 @@ import {
   DataContainer,
   DivLabel,
   DivSeparator,
+  InputSelect,
   InputSing,
   InputWrapper,
   Label,
@@ -12,13 +13,22 @@ import {
   SubTitle,
 } from "../Cadastro/style";
 import { EditButton } from "./style";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import ModalCartao from "../../components/Modals/Cartão";
 import ModalEndereco from "../../components/Modals/Endereco";
 import ModalSenha from "../../components/Modals/Senha";
 import { AppShell } from "../../components/AppShell/AppShell";
 import EnderecoTable from "../../components/Tables/EnderecoTable";
 import CartaoTable from "../../components/Tables/CartaoTable";
+import { GetClientDataRequest } from "../../services/requests/getClientData";
+import { useForm } from "react-hook-form";
+import {
+  EditClienteForm,
+  EditClienteSchema,
+} from "../../validations/schemas/EditClientSchema";
+import { yupResolver } from "@hookform/resolvers/yup";
+import { GENDER_OPTIONS } from "../Cadastro";
+import { UpdateClient } from "../../services/requests/editClient";
 
 export default function Edicao() {
   const [modalCartao, setModalCartao] = useState(false);
@@ -38,8 +48,56 @@ export default function Edicao() {
 
   const customerUuid = location.state?.uuid;
 
-  const handleSalvar = () => {
-    navigate("/clientes");
+  const { data } = GetClientDataRequest(customerUuid);
+
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    reset,
+    watch,
+    formState: { errors },
+  } = useForm<EditClienteForm>({
+    resolver: yupResolver(EditClienteSchema),
+    defaultValues: {
+      name: "",
+      gender: 0,
+      birthDate: "",
+      cpf: "",
+      email: "",
+    },
+  });
+
+  useEffect(() => {
+    if (data) {
+      reset({
+        name: data.name ?? "",
+        gender: data.gender ?? 0,
+        birthDate: data.birthDate
+          ? new Date(data.birthDate).toISOString().split("T")[0]
+          : "",
+        cpf: data.cpf ?? "",
+        email: data.email ?? "",
+      });
+    }
+  }, [data, reset]);
+
+  const handleSalvar = async (formData: EditClienteForm) => {
+    if (!customerUuid) return;
+
+    const payload = {
+      name: formData.name,
+      gender: Number(formData.gender),
+      birthDate: formData.birthDate,
+    };
+
+    try {
+      const updatedClient = await UpdateClient(customerUuid, payload);
+      console.log("Cliente atualizado:", updatedClient);
+      navigate("/clientes");
+    } catch (err) {
+      console.error("Erro ao atualizar cliente", err);
+    }
   };
 
   return (
@@ -51,15 +109,29 @@ export default function Edicao() {
               <DivLabel>
                 <Label>Gênero</Label>
               </DivLabel>
-
-              <InputSing placeholder="Digite o gênero" />
+              <InputSelect
+                {...register("gender", { setValueAs: (v) => Number(v) })}
+              >
+                <option value="">Selecione</option>
+                {GENDER_OPTIONS.map((o) => (
+                  <option key={o.value} value={o.value}>
+                    {o.label}
+                  </option>
+                ))}
+              </InputSelect>
+              {errors.gender && (
+                <span style={{ color: "red" }}>{errors.gender.message}</span>
+              )}
             </InputWrapper>
+
             <InputWrapper>
               <DivLabel>
                 <Label>Nome</Label>
               </DivLabel>
-
-              <InputSing placeholder="Digite o nome" />
+              <InputSing {...register("name")} placeholder="Digite o nome" />
+              {errors.name && (
+                <span style={{ color: "red" }}>{errors.name.message}</span>
+              )}
             </InputWrapper>
           </DivSeparator>
 
@@ -68,27 +140,42 @@ export default function Edicao() {
               <DivLabel>
                 <Label>Data de nascimento</Label>
               </DivLabel>
-
-              <InputSing placeholder="00/00/0000" />
+              <InputSing
+                type="date"
+                {...register("birthDate")}
+                placeholder="00/00/0000"
+              />
+              {errors.birthDate && (
+                <span style={{ color: "red" }}>{errors.birthDate.message}</span>
+              )}
             </InputWrapper>
+
             <InputWrapper>
               <DivLabel>
                 <Label>CPF</Label>
               </DivLabel>
-
-              <InputSing placeholder="Digite o cpf" />
+              <InputSing
+                {...register("cpf")}
+                placeholder="000.000.000-00"
+                readOnly
+              />
+              {errors.cpf && (
+                <span style={{ color: "red" }}>{errors.cpf.message}</span>
+              )}
             </InputWrapper>
           </DivSeparator>
 
-          <DivSeparator>
-            <InputWrapper>
-              <DivLabel>
-                <Label>Email</Label>
-              </DivLabel>
-
-              <InputSing placeholder="Digite o e-mail" />
-            </InputWrapper>
-            <InputWrapper>
+          {/* <DivSeparator> */}
+          <InputWrapper>
+            <DivLabel>
+              <Label>Email</Label>
+            </DivLabel>
+            <InputSing {...register("email")} placeholder="Digite o e-mail" />
+            {errors.email && (
+              <span style={{ color: "red" }}>{errors.email.message}</span>
+            )}
+          </InputWrapper>
+          {/* <InputWrapper>
               <DivLabel>
                 <Label>Telefone</Label>
               </DivLabel>
@@ -112,11 +199,11 @@ export default function Edicao() {
 
               <InputSing placeholder="Digite o tipo de telefone" />
             </InputWrapper>
-          </DivSeparator>
+          </DivSeparator> */}
 
-          <EnderecoTable />
+          <EnderecoTable uuid={customerUuid} />
 
-          <CartaoTable />
+          <CartaoTable uuid={customerUuid} clientUuid={customerUuid} />
 
           <ButtonDiv>
             <EditButton onClick={() => setModalSenha(true)}>
@@ -128,7 +215,7 @@ export default function Edicao() {
             <EditButton onClick={() => setModalCartao(true)}>
               Cadastrar Cartão
             </EditButton>
-            <NextButton onClick={handleSalvar}>Salvar</NextButton>
+            <NextButton onClick={handleSubmit(handleSalvar)}>Salvar</NextButton>
           </ButtonDiv>
         </BodyData>
       </DataContainer>
@@ -151,6 +238,7 @@ export default function Edicao() {
           button="Alterar"
           button2="Cancelar"
           back={() => setModalSenha(false)}
+          uuid={customerUuid}
         />
       )}
 
