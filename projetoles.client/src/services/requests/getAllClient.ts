@@ -4,7 +4,7 @@ import { IGetAllClientResponse } from "../interfaces/GetAllClient";
 
 export const GetAllCLientRequest = () => {
   return useQuery({
-    queryKey: ["GetAllCLient"],
+    queryKey: ["GetAllClient"],
     queryFn: async () => {
       const { data } = await api.get<IGetAllClientResponse>("/api/customers");
       return data;

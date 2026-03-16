@@ -29,6 +29,7 @@ import {
 import { yupResolver } from "@hookform/resolvers/yup";
 import { GENDER_OPTIONS } from "../Cadastro";
 import { UpdateClient } from "../../services/requests/editClient";
+import { PhoneTypeEnum } from "../../validations/interfaces/interfaces";
 
 export default function Edicao() {
   const [modalCartao, setModalCartao] = useState(false);
@@ -78,6 +79,9 @@ export default function Edicao() {
           : "",
         cpf: data.cpf ?? "",
         email: data.email ?? "",
+        phoneType: data?.phones[0].phoneType ?? "",
+        areaCode: data?.phones[0].areaCode ?? "",
+        phoneNumber: data?.phones[0].number ?? "",
       });
     }
   }, [data, reset]);
@@ -86,9 +90,18 @@ export default function Edicao() {
     if (!customerUuid) return;
 
     const payload = {
-      name: formData.name,
-      gender: Number(formData.gender),
-      birthDate: formData.birthDate,
+      Name: formData.name,
+      Gender: Number(formData.gender),
+      BirthDate: formData.birthDate,
+      Email: formData.email,
+      Phones: [
+        {
+          PhoneType: Number(formData.phoneType),
+          AreaCode: formData.areaCode,
+          Number: formData.phoneNumber,
+          IsMain: true,
+        },
+      ],
     };
 
     try {
@@ -175,31 +188,53 @@ export default function Edicao() {
               <span style={{ color: "red" }}>{errors.email.message}</span>
             )}
           </InputWrapper>
-          {/* <InputWrapper>
-              <DivLabel>
-                <Label>Telefone</Label>
-              </DivLabel>
-
-              <InputSing placeholder="Digite o telefone" />
-            </InputWrapper>
-          </DivSeparator>
 
           <DivSeparator>
             <InputWrapper>
               <DivLabel>
                 <Label>DDD</Label>
               </DivLabel>
-
-              <InputSing placeholder="Digite o DDD do telefone" />
+              <InputSing
+                {...register("areaCode")}
+                placeholder="Digite o DDD do telefone"
+              />
+              {errors.areaCode && (
+                <span style={{ color: "red" }}>{errors.areaCode.message}</span>
+              )}
             </InputWrapper>
+
             <InputWrapper>
               <DivLabel>
                 <Label>Tipo de Telefone</Label>
               </DivLabel>
-
-              <InputSing placeholder="Digite o tipo de telefone" />
+              <InputSelect
+                {...register("phoneType", { setValueAs: (v) => Number(v) })}
+              >
+                <option value="">Selecione</option>
+                {Object.entries(PhoneTypeEnum).map(([key, value]) => (
+                  <option key={key} value={value}>
+                    {key}
+                  </option>
+                ))}
+              </InputSelect>
+              {errors.phoneType && (
+                <span style={{ color: "red" }}>{errors.phoneType.message}</span>
+              )}
             </InputWrapper>
-          </DivSeparator> */}
+          </DivSeparator>
+
+          <InputWrapper>
+            <DivLabel>
+              <Label>Telefone</Label>
+            </DivLabel>
+            <InputSing
+              {...register("phoneNumber")}
+              placeholder="Digite o telefone"
+            />
+            {errors.phoneNumber && (
+              <span style={{ color: "red" }}>{errors.phoneNumber.message}</span>
+            )}
+          </InputWrapper>
 
           <EnderecoTable uuid={customerUuid} />
 

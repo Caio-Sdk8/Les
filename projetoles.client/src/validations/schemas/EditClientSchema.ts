@@ -14,6 +14,13 @@ export const EditClienteSchema = yup.object({
   cpf: yup.string().required("CPF é obrigatório"),
 
   email: yup.string().email("E-mail inválido").required("E-mail é obrigatório"),
+  phoneType: yup
+    .number()
+    .oneOf(Object.values(PhoneTypeEnum), "Tipo de telefone inválido")
+    .required("Tipo de telefone é obrigatório"),
+
+  areaCode: yup.string().required("DDD é obrigatório"),
+  phoneNumber: yup.string().required("Telefone é obrigatório"),
 });
 
 export type EditClienteForm = yup.InferType<typeof EditClienteSchema>;
