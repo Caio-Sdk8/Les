@@ -116,13 +116,13 @@ namespace ProjetoLES.Server.Controllers
         }
 
 
-        [HttpPatch("{uuid:guid}/deactivate")]
+        [HttpPatch("{uuid:guid}/toggle-active")]
         [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> Deactivate(Guid uuid, CancellationToken cancellationToken)
+        public async Task<IActionResult> ToggleActive(Guid uuid, CancellationToken cancellationToken)
         {
             try
             {
-                await _customerService.DeactivateAsync(uuid, cancellationToken);
+                await _customerService.ToggleActiveAsync(uuid, cancellationToken);
                 return NoContent();
             }
             catch (KeyNotFoundException ex)

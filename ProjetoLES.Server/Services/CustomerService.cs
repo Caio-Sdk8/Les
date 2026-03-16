@@ -231,10 +231,10 @@ namespace ProjetoLES.Server.Services
             await _context.SaveChangesAsync(cancellationToken);
         }
 
-        public async Task DeactivateAsync(Guid uuid, CancellationToken cancellationToken = default)
+        public async Task ToggleActiveAsync(Guid uuid, CancellationToken cancellationToken = default)
         {
             var customer = await GetTrackedAsync(uuid, cancellationToken);
-            customer.IsActive = false;
+            customer.IsActive = !customer.IsActive;
             customer.UpdatedAt = DateTime.UtcNow;
             _customerRepository.Update(customer);
             await _customerRepository.SaveChangesAsync(cancellationToken);
@@ -413,7 +413,8 @@ namespace ProjetoLES.Server.Services
 
         private static CustomerResponseDTO MapToResponseDTO(CustomerModel c) => new(
             c.Uuid, c.CustomerCode, c.Name, c.Gender, c.BirthDate,
-            c.Cpf, c.User?.Email, c.IsActive, c.Ranking, c.CreatedAt, c.UpdatedAt);
+            c.Cpf, c.User?.Email, c.IsActive, c.Ranking, c.CreatedAt, c.UpdatedAt,
+            c.Phones.Select(p => new PhoneResponseDTO(p.Uuid, p.PhoneType, p.AreaCode, p.Number, p.IsMain)));
 
         private static AddressResponseDTO MapToAddressDTO(CustomerAddressModel a) => new(
             a.Uuid, a.AddressType, a.Label, a.ResidenceType, a.StreetType,

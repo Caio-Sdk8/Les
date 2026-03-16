@@ -6,7 +6,7 @@ export const useToggleClient = () => {
 
   return useMutation({
     mutationFn: async (uuid: string) => {
-      return api.patch(`/api/customers/${uuid}/deactivate`);
+      return api.patch(`/api/customers/${uuid}/toggle-active`);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({

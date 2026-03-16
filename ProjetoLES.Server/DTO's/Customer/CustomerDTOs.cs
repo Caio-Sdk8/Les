@@ -1,8 +1,8 @@
+using ProjetoLES.Server.DTO_s.Phone;
 using ProjetoLES.Server.Enums;
 
 namespace ProjetoLES.Server.DTO_s.Customer
 {
-    // Criação pelo admin — apenas dados de perfil; credenciais ficam em UserModel
     public record CustomerCreateDTO(
         string Name,
         GenderEnum Gender,
@@ -11,7 +11,6 @@ namespace ProjetoLES.Server.DTO_s.Customer
         int Ranking = 0
     );
 
-    // Atualização de perfil — email e senha gerenciados via UserModel
     public record CustomerUpdateDTO(
         string Name,
         GenderEnum Gender,
@@ -24,7 +23,6 @@ namespace ProjetoLES.Server.DTO_s.Customer
         string NewPasswordConfirmation
     );
 
-    // Email é opcional: null quando o cliente ainda não tem conta de usuário vinculada
     public record CustomerResponseDTO(
         Guid Uuid,
         string CustomerCode,
@@ -36,7 +34,8 @@ namespace ProjetoLES.Server.DTO_s.Customer
         bool IsActive,
         int Ranking,
         DateTime CreatedAt,
-        DateTime UpdatedAt
+        DateTime UpdatedAt,
+        IEnumerable<PhoneResponseDTO> Phones
     );
 
     public record CustomerSummaryDTO(

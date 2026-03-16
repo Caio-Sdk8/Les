@@ -30,7 +30,7 @@ namespace ProjetoLES.Server.Interfaces.Services
             CustomerFilterDTO filter,
             CancellationToken cancellationToken = default);
 
-        Task DeactivateAsync(Guid uuid, CancellationToken cancellationToken = default);
+        Task ToggleActiveAsync(Guid uuid, CancellationToken cancellationToken = default);
 
         Task ChangePasswordAsync(
             Guid uuid,

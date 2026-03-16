@@ -27,14 +27,9 @@ namespace ProjetoLES.Server.Repositories
         public async Task ClearPreferredAsync(
             int customerId, CancellationToken cancellationToken = default)
         {
-            var cards = await _dbSet
+            await _dbSet
                 .Where(c => c.CustomerId == customerId && c.IsPreferred)
-                .ToListAsync(cancellationToken);
-
-            foreach (var card in cards)
-                card.IsPreferred = false;
-
-            await _context.SaveChangesAsync(cancellationToken);
+                .ExecuteUpdateAsync(s => s.SetProperty(c => c.IsPreferred, false), cancellationToken);
         }
     }
 }
