@@ -12,6 +12,7 @@ import PrivateRoute from "../components/PrivateRoute";
 import EdicaoEndereco from "../pages/EditarEndereco";
 import Estoque from "../pages/Estoque";
 import Produto from "../pages/Produto";
+import AvaliacaoReceitas from "../pages/AvaliacaoReceitas";
 
 export default function AppRoutes() {
   return (
@@ -105,6 +106,14 @@ export default function AppRoutes() {
           element={
             <PrivateRoute roles={["Admin"]}>
               <Transacao />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/avaliacao-receitas"
+          element={
+            <PrivateRoute roles={["Admin"]}>
+              <AvaliacaoReceitas />
             </PrivateRoute>
           }
         />

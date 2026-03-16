@@ -32,9 +32,10 @@ namespace ProjetoLES.Server.Repositories
             if (!string.IsNullOrWhiteSpace(filter.Search))
             {
                 var term = filter.Search.Trim();
+                var pattern = $"%{term}%";
                 query = query.Where(s =>
-                    s.Product.Name.Contains(term) ||
-                    s.Product.ProductCode.Contains(term));
+                    EF.Functions.Like(EF.Functions.Collate(s.Product.Name, "NOCASE"), pattern) ||
+                    EF.Functions.Like(EF.Functions.Collate(s.Product.ProductCode, "NOCASE"), pattern));
             }
 
             if (!string.IsNullOrWhiteSpace(filter.ProductCode))

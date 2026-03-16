@@ -296,3 +296,40 @@ export const InteractionMeta = styled.p`
   color: var(--color-text);
   font-size: 13px;
 `;
+
+export const RulePanel = styled.div`
+  border: 1px dashed var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-bg);
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+`;
+
+export const RuleBadge = styled.span<{ $tone?: "ok" | "warn" | "error" }>`
+  align-self: flex-start;
+  border-radius: 999px;
+  padding: 4px 10px;
+  font-size: 11px;
+  font-weight: 700;
+  color: ${({ $tone }) => ($tone === "error" ? "#991b1b" : $tone === "warn" ? "#92400e" : "#065f46")};
+  background: ${({ $tone }) => ($tone === "error" ? "#fee2e2" : $tone === "warn" ? "#fef3c7" : "#d1fae5")};
+`;
+
+export const RuleText = styled.p`
+  margin: 0;
+  color: var(--color-muted);
+  font-size: 12px;
+  line-height: 1.5;
+`;
+
+export const UploadInput = styled.input`
+  width: 100%;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface);
+  color: var(--color-text);
+  padding: 8px 10px;
+  font-size: 13px;
+`;

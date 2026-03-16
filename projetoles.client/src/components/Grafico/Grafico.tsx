@@ -9,68 +9,60 @@ import {
   ChartOptions,
 } from "chart.js";
 import { Line } from "react-chartjs-2";
-import ChartDataLabels from "chartjs-plugin-datalabels";
-import { vendasPorProduto } from "../../mock/grafico";
+import { ChartWrap } from "./style";
 
-ChartJS.register(
-  LineElement,
-  PointElement,
-  CategoryScale,
-  LinearScale,
-  Tooltip,
-  Legend,
-  ChartDataLabels,
-);
+ChartJS.register(LineElement, PointElement, CategoryScale, LinearScale, Tooltip, Legend);
 
-interface Props {
-  produtoSelecionado: string;
+interface ChartSeries {
+  label: string;
+  data: number[];
+  color: string;
 }
 
-export default function ProdutosGrafico({ produtoSelecionado }: Props) {
-  const produto = vendasPorProduto.find(
-    (item) => item.produto === produtoSelecionado,
-  );
+interface Props {
+  labels: string[];
+  series: ChartSeries[];
+}
 
-  if (!produto) return null;
-
+export default function ProdutosGrafico({ labels, series }: Props) {
   const chartData = {
-    labels: produto.vendas.map((item) => item.periodo),
-    datasets: [
-      {
-        label: `Vendas de ${produtoSelecionado}`,
-        data: produto.vendas.map((item) => item.quantidade),
-        borderColor: "#2563EB",
-        backgroundColor: "#2563EB33",
-        borderWidth: 3,
-        pointBackgroundColor: "#2563EB",
-        pointRadius: 5,
-        tension: 0.3,
-        fill: false,
-      },
-    ],
+    labels,
+    datasets: series.map((item) => ({
+      label: item.label,
+      data: item.data,
+      borderColor: item.color,
+      backgroundColor: `${item.color}22`,
+      borderWidth: 3,
+      pointBackgroundColor: item.color,
+      pointRadius: 4,
+      pointHoverRadius: 6,
+      tension: 0.28,
+      fill: false,
+    })),
   };
 
   const options: ChartOptions<"line"> = {
     responsive: true,
     maintainAspectRatio: false,
+    interaction: {
+      mode: "index",
+      intersect: false,
+    },
     plugins: {
-      legend: { display: true },
-      tooltip: { enabled: true },
-      datalabels: {
-        color: "#000",
-        anchor: "end",
-        align: "top",
-        font: {
-          weight: 600,
-          size: 14,
+      legend: {
+        position: "top",
+        labels: {
+          usePointStyle: true,
+          boxWidth: 8,
         },
       },
+      tooltip: { enabled: true },
     },
     scales: {
       x: {
         title: {
           display: true,
-          text: "Mês", // 👈 aqui você pode mudar para "Ano"
+          text: "Período",
         },
         grid: { display: false },
       },
@@ -78,15 +70,15 @@ export default function ProdutosGrafico({ produtoSelecionado }: Props) {
         beginAtZero: true,
         title: {
           display: true,
-          text: "Quantidade Vendida",
+          text: "Quantidade vendida",
         },
       },
     },
   };
 
   return (
-    <div style={{ height: 400, width: "100%" }}>
+    <ChartWrap>
       <Line data={chartData} options={options} />
-    </div>
+    </ChartWrap>
   );
 }

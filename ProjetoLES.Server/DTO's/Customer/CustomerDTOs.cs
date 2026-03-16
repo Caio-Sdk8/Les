@@ -14,7 +14,9 @@ namespace ProjetoLES.Server.DTO_s.Customer
     public record CustomerUpdateDTO(
         string Name,
         GenderEnum Gender,
-        DateOnly BirthDate
+        DateOnly BirthDate,
+        string Email,
+        IEnumerable<PhoneCreateDTO> Phones
     );
 
     public record CustomerChangePasswordDTO(

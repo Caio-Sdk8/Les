@@ -31,10 +31,13 @@ import {
   InteractionAlertTitle,
   InteractionList,
   InteractionMeta,
+  RulePanel,
+  RuleText,
   SummaryRow,
   SecondaryButton,
   TotalValue,
   TwoCardsGrid,
+  UploadInput,
 } from "./style";
 import { useEffect, useMemo, useState } from "react";
 import ModalCartao from "../../components/Modals/Cartão";
@@ -43,6 +46,7 @@ import { AppShell } from "../../components/AppShell/AppShell";
 import { cartoesMock } from "../../mock/cartao";
 import { enderecosMock } from "../../mock/endereco";
 import {
+  PrescriptionType,
   productService,
   type DrugInteractionAlert,
   type ProductSummary,
@@ -70,6 +74,7 @@ export default function Carrinho() {
   const [secondCardId, setSecondCardId] = useState("");
   const [firstCardAmount, setFirstCardAmount] = useState(0);
   const [secondCardAmount, setSecondCardAmount] = useState(0);
+  const [prescriptionFileName, setPrescriptionFileName] = useState("");
 
   useEffect(() => {
     let cancelled = false;
@@ -188,37 +193,59 @@ export default function Carrinho() {
     0
   );
   const shipping = subtotal >= 80 ? 0 : 8.9;
-  const couponDiscount = coupon === "semana10" ? subtotal * 0.1 : 0;
+  const couponDiscount =
+    coupon === "semana10"
+      ? subtotal * 0.1
+      : coupon === "fretegratis"
+        ? shipping
+        : coupon === "troca30"
+          ? Math.min(30, subtotal + shipping)
+          : 0;
   const total = subtotal + shipping - couponDiscount;
+  const hasCoupon = coupon !== "" && coupon !== "sem";
 
   const splitSum = firstCardAmount + secondCardAmount;
   const isTwoCards = paymentType === "credito2";
   const isOneCard = paymentType === "credito1";
   const isPixOrDebit = paymentType === "pix" || paymentType === "debito";
+  const requiresPrescriptionValidation = cartProducts.some(
+    (product) =>
+      product.prescriptionType === PrescriptionType.TarjaVermelha ||
+      product.prescriptionType === PrescriptionType.TarjaPreta
+  );
+  const prescriptionIsValid = !requiresPrescriptionValidation || prescriptionFileName.length > 0;
+  const minCardAmount = hasCoupon ? 0.01 : 10;
 
   const twoCardsAreValid =
     firstCardId.length > 0 &&
     secondCardId.length > 0 &&
     firstCardId !== secondCardId &&
-    firstCardAmount > 0 &&
-    secondCardAmount > 0 &&
+    firstCardAmount >= minCardAmount &&
+    secondCardAmount >= minCardAmount &&
     Math.abs(splitSum - total) < 0.01;
+
+  const oneCardIsValid =
+    !isOneCard ||
+    (singleCardId.length > 0 && (hasCoupon || total >= 10));
 
   const checkoutIsValid =
     cartProducts.length > 0 &&
     addressId.length > 0 &&
     paymentType.length > 0 &&
+    prescriptionIsValid &&
     (isPixOrDebit ||
-      (isOneCard && singleCardId.length > 0) ||
+      oneCardIsValid ||
       (isTwoCards && twoCardsAreValid));
+
+  const formatCurrency = (value: number) =>
+    value.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 
   const splitHelperText =
     paymentType === "credito2" && Math.abs(splitSum - total) >= 0.01
       ? `A soma dos cartões deve ser ${formatCurrency(total)}.`
-      : "";
-
-  const formatCurrency = (value: number) =>
-    value.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+      : paymentType === "credito2" && !hasCoupon && (firstCardAmount < 10 || secondCardAmount < 10)
+        ? "Sem cupom aplicado, cada cartão deve ter no mínimo R$ 10,00."
+        : "";
 
   const formatCardLabel = (cardId: string) => {
     const selected = availableCards.find((card) => String(card.id) === cardId);
@@ -237,6 +264,11 @@ export default function Carrinho() {
     const normalized = Number.isNaN(value) ? 0 : Math.max(0, value);
     setSecondCardAmount(normalized);
     setFirstCardAmount(Math.max(0, Number((total - normalized).toFixed(2))));
+  };
+
+  const handlePrescriptionUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    setPrescriptionFileName(file?.name ?? "");
   };
 
   return (
@@ -309,7 +341,14 @@ export default function Carrinho() {
                   <option value="sem">Sem cupom</option>
                   <option value="semana10">SEMANA10</option>
                   <option value="fretegratis">FRETEGRATIS</option>
+                  <option value="troca30">TROCA30</option>
                 </FieldSelect>
+                {coupon === "semana10" && (
+                  <InlineHint>RN0033: apenas um cupom promocional por compra.</InlineHint>
+                )}
+                {coupon === "troca30" && (
+                  <InlineHint>Cupom de troca (protótipo): abate até R$ 30,00 do total.</InlineHint>
+                )}
               </FieldGroup>
 
               {isOneCard && (
@@ -405,6 +444,28 @@ export default function Carrinho() {
               </PaymentSplitCard>
             )}
           </SectionCard>
+
+          {requiresPrescriptionValidation && (
+            <SectionCard>
+              <CartTitle>Envio de receita</CartTitle>
+
+              <RulePanel>
+                <RuleText>
+                  Este pedido possui medicamento sob prescrição. Envie a receita para análise farmacêutica após a finalização do pedido.
+                </RuleText>
+
+                <FieldGroup>
+                  <FieldLabel>Upload da receita (imagem ou PDF)</FieldLabel>
+                  <UploadInput
+                    type="file"
+                    accept="image/*,.pdf"
+                    onChange={handlePrescriptionUpload}
+                  />
+                  {prescriptionFileName && <InlineHint>Arquivo selecionado: {prescriptionFileName}</InlineHint>}
+                </FieldGroup>
+              </RulePanel>
+            </SectionCard>
+          )}
 
           <SectionCard>
             <CartTitle>Produtos no carrinho</CartTitle>
@@ -524,6 +585,18 @@ export default function Carrinho() {
           {!checkoutIsValid && (
             <AlertText>
               Preencha pagamento e endereço para finalizar o pedido.
+            </AlertText>
+          )}
+
+          {isOneCard && !hasCoupon && total > 0 && total < 10 && (
+            <AlertText>
+              Sem cupom aplicado, compras no cartão único exigem valor mínimo de R$ 10,00.
+            </AlertText>
+          )}
+
+          {requiresPrescriptionValidation && !prescriptionIsValid && (
+            <AlertText>
+              Anexe a receita para finalizar o pedido com medicamento sob prescrição.
             </AlertText>
           )}
 

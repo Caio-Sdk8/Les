@@ -91,6 +91,10 @@ namespace ProjetoLES.Server.Controllers
                 var result = await _customerService.UpdateAsync(uuid, dto, cancellationToken);
                 return Ok(result);
             }
+            catch (InvalidOperationException ex)
+            {
+                return Conflict(new { message = ex.Message });
+            }
             catch (KeyNotFoundException ex)
             {
                 return NotFound(new { message = ex.Message });

@@ -204,13 +204,65 @@ namespace ProjetoLES.Server.Services
         public async Task<CustomerResponseDTO> UpdateAsync(
             Guid uuid, CustomerUpdateDTO DTO, CancellationToken cancellationToken = default)
         {
+            if (DTO.Phones is null || !DTO.Phones.Any())
+                throw new InvalidOperationException("Informe ao menos um telefone.");
+
+            if (DTO.Phones.Count(p => p.IsMain) > 1)
+                throw new InvalidOperationException("Apenas um telefone pode ser principal.");
+
             var customer = await GetTrackedAsync(uuid, cancellationToken);
+            var userAccount = await _context.Set<UserModel>()
+                .FirstOrDefaultAsync(u => u.CustomerId == customer.Id, cancellationToken)
+                ?? throw new KeyNotFoundException("Conta de usuário não encontrada para este cliente.");
+
+            var emailInUse = await _context.Set<UserModel>()
+                .AnyAsync(u => u.Email == DTO.Email && u.Id != userAccount.Id, cancellationToken);
+
+            if (emailInUse)
+                throw new InvalidOperationException("E-mail já cadastrado.");
+
+            await using var transaction = await _context.Database.BeginTransactionAsync(cancellationToken);
+
+            try
+            {
             customer.Name = DTO.Name;
             customer.Gender = DTO.Gender;
             customer.BirthDate = DTO.BirthDate;
             customer.UpdatedAt = DateTime.UtcNow;
+
+            userAccount.Email = DTO.Email;
+            userAccount.UpdatedAt = DateTime.UtcNow;
+
+            var existingPhones = await _context.Set<CustomerPhoneModel>()
+                .Where(p => p.CustomerId == customer.Id)
+                .ToListAsync(cancellationToken);
+
+            _context.Set<CustomerPhoneModel>().RemoveRange(existingPhones);
+
+            var phones = DTO.Phones
+                .Select((p, index) => new CustomerPhoneModel
+                {
+                    CustomerId = customer.Id,
+                    PhoneType = p.PhoneType,
+                    AreaCode = p.AreaCode,
+                    Number = p.Number,
+                    IsMain = DTO.Phones.Any(x => x.IsMain) ? p.IsMain : index == 0
+                })
+                .ToList();
+
+            await _context.Set<CustomerPhoneModel>().AddRangeAsync(phones, cancellationToken);
+
             _customerRepository.Update(customer);
             await _customerRepository.SaveChangesAsync(cancellationToken);
+
+            await transaction.CommitAsync(cancellationToken);
+            }
+            catch
+            {
+                await transaction.RollbackAsync(cancellationToken);
+                throw;
+            }
+
             var full = await _customerRepository.GetFullProfileAsync(uuid, cancellationToken);
             return MapToResponseDTO(full!);
         }
