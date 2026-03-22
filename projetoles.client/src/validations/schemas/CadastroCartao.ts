@@ -16,11 +16,7 @@ export const cardSchema = yup.object({
       "O número do cartão deve ter entre 13 e 19 dígitos",
     ),
 
-  cardBrand: yup
-    .string()
-    .required("A bandeira é obrigatória")
-    .min(2, "A bandeira deve ter pelo menos 2 caracteres")
-    .max(30, "A bandeira deve ter no máximo 30 caracteres"),
+  cardBrandUuid: yup.string().required("A bandeira é obrigatória"),
 
   securityCode: yup
     .string()

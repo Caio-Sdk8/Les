@@ -2,6 +2,7 @@ import { useForm } from "react-hook-form";
 import {
   DivLabel,
   DivSeparator,
+  InputSelect,
   InputSing,
   InputWrapper,
   Label,
@@ -24,6 +25,8 @@ import {
 } from "../../validations/schemas/CadastroCartao";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { createCreditCard } from "../../services/requests/sinCredit";
+import { GetCardBrandRequest } from "../../services/requests/getCardBrand";
+import { GetAllCLientCardsRequest } from "../../services/requests/getCardClient";
 
 type Props = {
   back?: () => void;
@@ -35,7 +38,7 @@ type Props = {
   button2?: string;
   height?: string;
   width?: string;
-  uuid?: string;
+  uuid: string;
 };
 
 const ModalCartao = ({
@@ -58,12 +61,21 @@ const ModalCartao = ({
     resolver: yupResolver(cardSchema),
   });
 
+  const { data, refetch } = GetAllCLientCardsRequest(uuid);
+  const { data: cardBrands, isLoading } = GetCardBrandRequest();
+
+  const cardOptions =
+    cardBrands?.map((item) => ({
+      label: item.name,
+      value: item.uuid,
+    })) ?? [];
+
   const onSubmit = async (formData: CardFormData) => {
     try {
       if (!uuid) return;
 
       const payload = {
-        CardBrandUuid: "11111111-1111-1111-1111-111111111111",
+        CardBrandUuid: formData.cardBrandUuid,
         CardNumber: formData.cardNumber.replace(/\s/g, ""),
         PrintedName: formData.printedName,
         SecurityCode: formData.securityCode,
@@ -72,6 +84,7 @@ const ModalCartao = ({
       };
 
       const response = await createCreditCard(uuid, payload);
+      await refetch();
 
       console.log("Cartão cadastrado com sucesso:", response);
       next();
@@ -121,11 +134,21 @@ const ModalCartao = ({
                 <Label>Bandeira</Label>
               </DivLabel>
 
-              <InputSing
-                placeholder="Digite a bandeira"
-                {...register("cardBrand")}
-              />
-              {errors.cardBrand && <span>{errors.cardBrand.message}</span>}
+              <InputSelect {...register("cardBrandUuid")}>
+                <option value="">
+                  {isLoading ? "Carregando..." : "Selecione"}
+                </option>
+
+                {cardOptions.map((o) => (
+                  <option key={o.value} value={o.value}>
+                    {o.label}
+                  </option>
+                ))}
+              </InputSelect>
+
+              {errors.cardBrandUuid && (
+                <span>{errors.cardBrandUuid.message}</span>
+              )}
             </InputWrapper>
 
             <InputWrapper>
