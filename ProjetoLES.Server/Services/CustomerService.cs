@@ -46,6 +46,15 @@ namespace ProjetoLES.Server.Services
             if (await _context.Set<UserModel>().AnyAsync(u => u.Email == DTO.Email, cancellationToken))
                 throw new InvalidOperationException("E-mail já cadastrado.");
 
+            var billingAddressDTOs = NormalizeAddresses(DTO.BillingAddresses, DTO.BillingAddress);
+            var deliveryAddressDTOs = NormalizeAddresses(DTO.DeliveryAddresses, DTO.DeliveryAddress);
+
+            if (!billingAddressDTOs.Any())
+                throw new InvalidOperationException("Informe ao menos um endereço de cobrança.");
+
+            if (!deliveryAddressDTOs.Any())
+                throw new InvalidOperationException("Informe ao menos um endereço de entrega.");
+
             var cards = DTO.CreditCards ?? new List<CreditCardRegisterDTO>();
 
             if (cards.Any())
@@ -88,16 +97,24 @@ namespace ProjetoLES.Server.Services
                 };
                 await _context.Set<CustomerPhoneModel>().AddAsync(phone, cancellationToken);
 
-                var billingAddress = BuildAddress(
-                    customer.Id, AddressTypeEnum.Billing, DTO.BillingAddress,
-                    DTO.BillingAddress.Label ?? "Endereço de cobrança");
+                var billingAddresses = billingAddressDTOs
+                    .Select((addressDTO, index) => BuildAddress(
+                        customer.Id,
+                        AddressTypeEnum.Billing,
+                        addressDTO,
+                        addressDTO.Label ?? $"Endereço de cobrança {index + 1}"))
+                    .ToList();
 
-                var deliveryAddress = BuildAddress(
-                    customer.Id, AddressTypeEnum.Delivery, DTO.DeliveryAddress,
-                    DTO.DeliveryAddress.Label ?? "Endereço de entrega");
+                var deliveryAddresses = deliveryAddressDTOs
+                    .Select((addressDTO, index) => BuildAddress(
+                        customer.Id,
+                        AddressTypeEnum.Delivery,
+                        addressDTO,
+                        addressDTO.Label ?? $"Endereço de entrega {index + 1}"))
+                    .ToList();
 
                 await _context.Set<CustomerAddressModel>()
-                    .AddRangeAsync(new[] { billingAddress, deliveryAddress }, cancellationToken);
+                    .AddRangeAsync(billingAddresses.Concat(deliveryAddresses), cancellationToken);
 
                 var createdCards = new List<CreditCardModel>();
 
@@ -167,8 +184,8 @@ namespace ProjetoLES.Server.Services
                     customer.CustomerCode,
                     customer.Name,
                     DTO.Email,
-                    MapToAddressDTO(billingAddress),
-                    MapToAddressDTO(deliveryAddress),
+                    billingAddresses.Select(MapToAddressDTO),
+                    deliveryAddresses.Select(MapToAddressDTO),
                     cardResponses);
             }
             catch
@@ -462,6 +479,18 @@ namespace ProjetoLES.Server.Services
                 Observations = DTO.Observations,
                 IsActive = true
             };
+
+        private static List<AddressRegisterDTO> NormalizeAddresses(
+            IList<AddressRegisterDTO>? addresses,
+            AddressRegisterDTO? singleAddress)
+        {
+            var normalized = addresses?.ToList() ?? new List<AddressRegisterDTO>();
+
+            if (singleAddress is not null)
+                normalized.Add(singleAddress);
+
+            return normalized;
+        }
 
         private static CustomerResponseDTO MapToResponseDTO(CustomerModel c) => new(
             c.Uuid, c.CustomerCode, c.Name, c.Gender, c.BirthDate,

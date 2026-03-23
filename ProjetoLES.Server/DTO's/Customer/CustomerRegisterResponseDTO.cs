@@ -8,8 +8,8 @@ namespace ProjetoLES.Server.DTO_s.Customer
         string CustomerCode,
         string Name,
         string Email,
-        AddressResponseDTO BillingAddress,
-        AddressResponseDTO DeliveryAddress,
+        IEnumerable<AddressResponseDTO> BillingAddresses,
+        IEnumerable<AddressResponseDTO> DeliveryAddresses,
         IEnumerable<CreditCardResponseDTO> CreditCards
     );
 }

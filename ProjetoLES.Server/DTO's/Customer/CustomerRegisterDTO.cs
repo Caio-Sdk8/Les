@@ -18,9 +18,13 @@ namespace ProjetoLES.Server.DTO_s.Customer
         string Password,
         string PasswordConfirmation,
 
-        AddressRegisterDTO BillingAddress,
+        AddressRegisterDTO? BillingAddress,
 
-        AddressRegisterDTO DeliveryAddress,
+        AddressRegisterDTO? DeliveryAddress,
+
+        IList<AddressRegisterDTO>? BillingAddresses = null,
+
+        IList<AddressRegisterDTO>? DeliveryAddresses = null,
 
         IList<CreditCardRegisterDTO>? CreditCards = null
     );

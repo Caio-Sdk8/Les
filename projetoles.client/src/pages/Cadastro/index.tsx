@@ -88,6 +88,19 @@ const EMPTY_CARD = {
   expirationDate: "",
 };
 
+const EMPTY_ADDRESS = {
+  zipCode: "",
+  street: "",
+  number: "",
+  neighborhood: "",
+  state: "",
+  city: "",
+  country: "Brasil",
+  residenceType: 1,
+  streetType: "Rua",
+  observations: "",
+};
+
 export default function Cadastro() {
   const navigate = useNavigate();
   const [sameAddress, setSameAddress] = useState(false);
@@ -112,46 +125,49 @@ export default function Cadastro() {
       phoneType: 1,
       password: "",
       passwordConfirmation: "",
-      billingAddress: {
-        zipCode: "",
-        street: "",
-        number: "",
-        neighborhood: "",
-        state: "",
-        city: "",
-        country: "Brasil",
-        residenceType: 1,
-        streetType: "Rua",
-        observations: "",
-      },
-      deliveryAddress: {
-        zipCode: "",
-        street: "",
-        number: "",
-        neighborhood: "",
-        state: "",
-        city: "",
-        country: "Brasil",
-        residenceType: 1,
-        streetType: "Rua",
-        observations: "",
-      },
+      billingAddresses: [{ ...EMPTY_ADDRESS }],
+      deliveryAddresses: [{ ...EMPTY_ADDRESS }],
       cards: [{ ...EMPTY_CARD }],
     },
   });
 
-  const watchBilling = watch("billingAddress");
-  const watchDelivery = watch("deliveryAddress");
+  const watchBilling = watch("billingAddresses");
+  const watchDelivery = watch("deliveryAddresses");
   const watchCards = watch("cards");
 
   function handleSameAddress(e: React.ChangeEvent<HTMLInputElement>) {
     const checked = e.target.checked;
     setSameAddress(checked);
     if (checked) {
-      Object.entries(watchBilling).forEach(([k, v]) =>
-        setValue(`deliveryAddress.${k}` as Path<CadastroClienteForm>, v),
+      setValue(
+        "deliveryAddresses",
+        watchBilling.map((address) => ({ ...address })),
       );
     }
+  }
+
+  function addBillingAddress() {
+    setValue("billingAddresses", [...watchBilling, { ...EMPTY_ADDRESS }]);
+  }
+
+  function removeBillingAddress(index: number) {
+    if (watchBilling.length <= 1) return;
+    setValue(
+      "billingAddresses",
+      watchBilling.filter((_, i) => i !== index),
+    );
+  }
+
+  function addDeliveryAddress() {
+    setValue("deliveryAddresses", [...watchDelivery, { ...EMPTY_ADDRESS }]);
+  }
+
+  function removeDeliveryAddress(index: number) {
+    if (watchDelivery.length <= 1) return;
+    setValue(
+      "deliveryAddresses",
+      watchDelivery.filter((_, i) => i !== index),
+    );
   }
 
   type CardField = keyof CadastroClienteForm["cards"][number];
@@ -172,8 +188,11 @@ export default function Cadastro() {
       PhoneNumber: data.phoneNumber,
       Password: data.password,
       PasswordConfirmation: data.passwordConfirmation,
-      BillingAddress: { ...data.billingAddress },
-      DeliveryAddress: { ...data.deliveryAddress },
+      BillingAddresses: data.billingAddresses.map((address) => ({ ...address })),
+      DeliveryAddresses: (sameAddress
+        ? data.billingAddresses
+        : data.deliveryAddresses
+      ).map((address) => ({ ...address })),
       CreditCards: data.cards.map((card, idx) => ({
         CardBrandName: card.cardBrandName,
         CardNumber: card.cardNumber,
@@ -366,11 +385,37 @@ export default function Cadastro() {
 
           {/* Endereço de Cobrança */}
           <SubTitle>Endereço de cobrança</SubTitle>
-          <AddressInputs
-            prefix="billingAddress"
-            register={register}
-            errors={errors.billingAddress}
-          />
+          {watchBilling.map((_, idx) => (
+            <div key={`billing-${idx}`}>
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                }}
+              >
+                <SubTitle style={{ marginBottom: 8 }}>{`Cobrança ${idx + 1}`}</SubTitle>
+                {watchBilling.length > 1 && (
+                  <RemoveButton onClick={() => removeBillingAddress(idx)}>
+                    Remover endereço
+                  </RemoveButton>
+                )}
+              </div>
+              <AddressInputs
+                prefix={`billingAddresses.${idx}`}
+                register={register}
+                errors={(errors.billingAddresses as any)?.[idx]}
+              />
+            </div>
+          ))}
+          {(errors.billingAddresses as any)?.message && (
+            <span style={{ color: "red" }}>
+              {(errors.billingAddresses as any).message}
+            </span>
+          )}
+          <AddCardButton onClick={addBillingAddress}>
+            + Adicionar endereço de cobrança
+          </AddCardButton>
 
           {/* Checkbox mesmo endereço */}
           <label
@@ -394,12 +439,38 @@ export default function Cadastro() {
           </label>
 
           <SubTitle>Endereço de entrega</SubTitle>
-          <AddressInputs
-            prefix="deliveryAddress"
-            register={register}
-            errors={errors.deliveryAddress}
-            disabled={sameAddress}
-          />
+          {watchDelivery.map((_, idx) => (
+            <div key={`delivery-${idx}`}>
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                }}
+              >
+                <SubTitle style={{ marginBottom: 8 }}>{`Entrega ${idx + 1}`}</SubTitle>
+                {watchDelivery.length > 1 && (
+                  <RemoveButton onClick={() => removeDeliveryAddress(idx)}>
+                    Remover endereço
+                  </RemoveButton>
+                )}
+              </div>
+              <AddressInputs
+                prefix={`deliveryAddresses.${idx}`}
+                register={register}
+                errors={(errors.deliveryAddresses as any)?.[idx]}
+                disabled={sameAddress}
+              />
+            </div>
+          ))}
+          {(errors.deliveryAddresses as any)?.message && (
+            <span style={{ color: "red" }}>
+              {(errors.deliveryAddresses as any).message}
+            </span>
+          )}
+          <AddCardButton onClick={addDeliveryAddress} disabled={sameAddress}>
+            + Adicionar endereço de entrega
+          </AddCardButton>
 
           {/* Cartões de Crédito */}
           <SubTitle>Cartões de Crédito</SubTitle>

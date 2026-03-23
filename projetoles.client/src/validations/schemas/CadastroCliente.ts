@@ -66,8 +66,16 @@ export const CadastroClienteSchema = yup.object({
     .oneOf([yup.ref("password")], "As senhas não conferem")
     .required("Confirmação de senha é obrigatória"),
 
-  billingAddress: AddressSchema.required(),
-  deliveryAddress: AddressSchema.required(),
+  billingAddresses: yup
+    .array()
+    .of(AddressSchema)
+    .min(1, "É necessário ter ao menos um endereço de cobrança")
+    .required("É necessário ter ao menos um endereço de cobrança"),
+  deliveryAddresses: yup
+    .array()
+    .of(AddressSchema)
+    .min(1, "É necessário ter ao menos um endereço de entrega")
+    .required("É necessário ter ao menos um endereço de entrega"),
 
   cards: yup
     .array()
