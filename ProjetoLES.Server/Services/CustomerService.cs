@@ -228,6 +228,7 @@ namespace ProjetoLES.Server.Services
                 throw new InvalidOperationException("Apenas um telefone pode ser principal.");
 
             var customer = await GetTrackedAsync(uuid, cancellationToken);
+            EnsureCustomerIsActiveForMutation(customer);
             var userAccount = await _context.Set<UserModel>()
                 .FirstOrDefaultAsync(u => u.CustomerId == customer.Id, cancellationToken)
                 ?? throw new KeyNotFoundException("Conta de usuário não encontrada para este cliente.");
@@ -288,6 +289,7 @@ namespace ProjetoLES.Server.Services
             Guid uuid, CustomerChangePasswordDTO DTO, CancellationToken cancellationToken = default)
         {
             var customer = await GetTrackedAsync(uuid, cancellationToken);
+            EnsureCustomerIsActiveForMutation(customer);
             var userAccount = await _context.Set<UserModel>()
                 .FirstOrDefaultAsync(u => u.CustomerId == customer.Id, cancellationToken)
                 ?? throw new KeyNotFoundException("Conta de usuário não encontrada para este cliente.");
@@ -302,10 +304,44 @@ namespace ProjetoLES.Server.Services
 
         public async Task ToggleActiveAsync(Guid uuid, CancellationToken cancellationToken = default)
         {
-            var customer = await GetTrackedAsync(uuid, cancellationToken);
+            var customer = await _context.Set<CustomerModel>()
+                .Include(c => c.User)
+                .FirstOrDefaultAsync(c => c.Uuid == uuid, cancellationToken)
+                ?? throw new KeyNotFoundException($"Cliente {uuid} não encontrado.");
+
             customer.IsActive = !customer.IsActive;
+
+            if (customer.User is not null)
+            {
+                customer.User.IsActive = customer.IsActive;
+                customer.User.UpdatedAt = DateTime.UtcNow;
+            }
+
             customer.UpdatedAt = DateTime.UtcNow;
             _customerRepository.Update(customer);
+            await _customerRepository.SaveChangesAsync(cancellationToken);
+        }
+
+        public async Task DeleteAsync(Guid uuid, CancellationToken cancellationToken = default)
+        {
+            var customer = await _context.Set<CustomerModel>()
+                .Include(c => c.User)
+                .FirstOrDefaultAsync(c => c.Uuid == uuid, cancellationToken)
+                ?? throw new KeyNotFoundException($"Cliente {uuid} não encontrado.");
+
+            customer.IsActive = false;
+            customer.UpdatedAt = DateTime.UtcNow;
+
+            _customerRepository.Remove(customer);
+
+            if (customer.User is not null)
+            {
+                customer.User.IsActive = false;
+                customer.User.UpdatedAt = DateTime.UtcNow;
+                customer.User.IsDeleted = true;
+                customer.User.DeletedAt = DateTime.UtcNow;
+            }
+
             await _customerRepository.SaveChangesAsync(cancellationToken);
         }
 
@@ -329,6 +365,7 @@ namespace ProjetoLES.Server.Services
             Guid customerUuid, AddressCreateDTO DTO, CancellationToken cancellationToken = default)
         {
             var customer = await GetTrackedAsync(customerUuid, cancellationToken);
+            EnsureCustomerIsActiveForMutation(customer);
             var address = new CustomerAddressModel
             {
                 CustomerId = customer.Id,
@@ -354,6 +391,9 @@ namespace ProjetoLES.Server.Services
         public async Task<AddressResponseDTO> UpdateAddressAsync(
             Guid customerUuid, Guid addressUuid, AddressUpdateDTO DTO, CancellationToken cancellationToken = default)
         {
+            var customer = await GetTrackedAsync(customerUuid, cancellationToken);
+            EnsureCustomerIsActiveForMutation(customer);
+
             var addresses = await _addressRepository.GetByCustomerAsync(customerUuid, cancellationToken);
             var match = addresses.FirstOrDefault(a => a.Uuid == addressUuid)
                 ?? throw new KeyNotFoundException("Endereço não encontrado para este cliente.");
@@ -387,6 +427,7 @@ namespace ProjetoLES.Server.Services
             Guid customerUuid, PhoneCreateDTO DTO, CancellationToken cancellationToken = default)
         {
             var customer = await GetTrackedAsync(customerUuid, cancellationToken);
+            EnsureCustomerIsActiveForMutation(customer);
             var phone = new CustomerPhoneModel
             {
                 CustomerId = customer.Id,
@@ -404,6 +445,7 @@ namespace ProjetoLES.Server.Services
             Guid customerUuid, CreditCardCreateDTO DTO, CancellationToken cancellationToken = default)
         {
             var customer = await GetTrackedAsync(customerUuid, cancellationToken);
+            EnsureCustomerIsActiveForMutation(customer);
 
             var brand = await _context.Set<CardBrandModel>()
                 .FirstOrDefaultAsync(b => b.Uuid == DTO.CardBrandUuid && b.IsActive, cancellationToken)
@@ -433,6 +475,7 @@ namespace ProjetoLES.Server.Services
             Guid customerUuid, Guid creditCardUuid, CancellationToken cancellationToken = default)
         {
             var customer = await GetTrackedAsync(customerUuid, cancellationToken);
+            EnsureCustomerIsActiveForMutation(customer);
             await _creditCardRepository.ClearPreferredAsync(customer.Id, cancellationToken);
             var card = await _creditCardRepository.GetByUuidAsync(creditCardUuid, cancellationToken)
                 ?? throw new KeyNotFoundException("Cartão não encontrado.");
@@ -460,6 +503,14 @@ namespace ProjetoLES.Server.Services
         private async Task<CustomerModel> GetTrackedAsync(Guid uuid, CancellationToken ct)
             => await _customerRepository.GetByUuidAsync(uuid, ct)
                ?? throw new KeyNotFoundException($"Cliente {uuid} não encontrado.");
+
+        private static void EnsureCustomerIsActiveForMutation(CustomerModel customer)
+        {
+            if (!customer.IsActive)
+            {
+                throw new InvalidOperationException("Não é permitido editar cliente desativado.");
+            }
+        }
 
         private static CustomerAddressModel BuildAddress(
             int customerId, AddressTypeEnum type, AddressRegisterDTO DTO, string label) => new()

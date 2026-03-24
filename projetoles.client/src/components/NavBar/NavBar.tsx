@@ -9,15 +9,26 @@ export const NavBar = () => {
 
   return (
     <ItemsContainer>
-      <NavItems onClick={() => navigate("/clientes")}>Clientes</NavItems>
       <NavItems onClick={() => navigate("/loja")}>Loja</NavItems>
       <NavItems onClick={() => navigate("/carrinho")}>Carrinho</NavItems>
       <NavItems onClick={() => navigate("/IA")}>Recomendação</NavItems>
-      <NavItems onClick={() => navigate("/grafico")}>Gráfico</NavItems>
+
+      {isStaff && (
+        <NavItems onClick={() => navigate("/clientes")}>Clientes</NavItems>
+      )}
+
+      {isStaff && (
+        <NavItems onClick={() => navigate("/grafico")}>Gráfico</NavItems>
+      )}
+
       {isStaff && (
         <NavItems onClick={() => navigate("/estoque")}>Estoque</NavItems>
       )}
-      <NavItems onClick={() => navigate("/transacao")}>Transações</NavItems>
+
+      {isAdmin && (
+        <NavItems onClick={() => navigate("/transacao")}>Transações</NavItems>
+      )}
+
       {isAdmin && (
         <NavItems onClick={() => navigate("/avaliacao-receitas")}>Receitas</NavItems>
       )}

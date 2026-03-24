@@ -32,6 +32,8 @@ namespace ProjetoLES.Server.Interfaces.Services
 
         Task ToggleActiveAsync(Guid uuid, CancellationToken cancellationToken = default);
 
+        Task DeleteAsync(Guid uuid, CancellationToken cancellationToken = default);
+
         Task ChangePasswordAsync(
             Guid uuid,
             CustomerChangePasswordDTO dto,

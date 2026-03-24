@@ -30,6 +30,7 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import { GENDER_OPTIONS } from "../Cadastro";
 import { UpdateClient } from "../../services/requests/editClient";
 import { PhoneTypeEnum } from "../../validations/interfaces/interfaces";
+import { notifyApiError } from "../../services/errors/errorNotifier";
 
 export default function Edicao() {
   const [modalCartao, setModalCartao] = useState(false);
@@ -50,6 +51,7 @@ export default function Edicao() {
   const customerUuid = location.state?.uuid;
 
   const { data } = GetClientDataRequest(customerUuid);
+  const isInactiveCustomer = data?.isActive === false;
 
   const {
     register,
@@ -89,6 +91,11 @@ export default function Edicao() {
   const handleSalvar = async (formData: EditClienteForm) => {
     if (!customerUuid) return;
 
+    if (isInactiveCustomer) {
+      notifyApiError("Não é permitido editar cliente desativado.");
+      return;
+    }
+
     const payload = {
       Name: formData.name,
       Gender: Number(formData.gender),
@@ -117,6 +124,16 @@ export default function Edicao() {
     <AppShell title={pageTitle}>
       <DataContainer>
         <BodyData>
+          {isInactiveCustomer && (
+            <SubTitle style={{ height: "auto", fontSize: "18px", color: "#dc2626" }}>
+              Cliente desativado: edição e novos cadastros estão bloqueados.
+            </SubTitle>
+          )}
+
+          <fieldset
+            disabled={isInactiveCustomer}
+            style={{ border: "none", padding: 0, margin: 0 }}
+          >
           <DivSeparator>
             <InputWrapper>
               <DivLabel>
@@ -241,17 +258,20 @@ export default function Edicao() {
           <CartaoTable uuid={customerUuid} clientUuid={customerUuid} />
 
           <ButtonDiv>
-            <EditButton onClick={() => setModalSenha(true)}>
+            <EditButton onClick={() => setModalSenha(true)} disabled={isInactiveCustomer}>
               Alterar Senha
             </EditButton>
-            <EditButton onClick={() => setModalEndereco(true)}>
+            <EditButton onClick={() => setModalEndereco(true)} disabled={isInactiveCustomer}>
               Cadastrar Endereço
             </EditButton>
-            <EditButton onClick={() => setModalCartao(true)}>
+            <EditButton onClick={() => setModalCartao(true)} disabled={isInactiveCustomer}>
               Cadastrar Cartão
             </EditButton>
-            <NextButton onClick={handleSubmit(handleSalvar)}>Salvar</NextButton>
+            <NextButton onClick={handleSubmit(handleSalvar)} disabled={isInactiveCustomer}>
+              Salvar
+            </NextButton>
           </ButtonDiv>
+          </fieldset>
         </BodyData>
       </DataContainer>
 

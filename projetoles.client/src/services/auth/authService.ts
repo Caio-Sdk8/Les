@@ -18,6 +18,8 @@ export const authService = {
     const response = await api.post<LoginResponse>("/api/auth/login", {
       email,
       password,
+    }, {
+      skipGlobalErrorHandler: true,
     });
     authService.saveSession(response.data);
     return response.data;

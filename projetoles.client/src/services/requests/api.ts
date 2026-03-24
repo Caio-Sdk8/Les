@@ -1,5 +1,7 @@
 import axios from "axios";
 import { authService } from "../auth/authService";
+import { getApiErrorMessage } from "../errors/apiError";
+import { notifyApiError } from "../errors/errorNotifier";
 
 const api = axios.create({
   headers: {
@@ -20,13 +22,30 @@ api.interceptors.request.use((config) => {
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    const requestUrl = error.config?.url || "";
-    const isLoginRequest = requestUrl.includes("/api/auth/login");
+    const requestConfig = error.config as
+      | {
+          url?: string;
+          skipGlobalErrorHandler?: boolean;
+          errorFallbackMessage?: string;
+        }
+      | undefined;
 
-    if (error.response?.status === 401 && !isLoginRequest) {
+    const requestUrl = requestConfig?.url || "";
+    const isLoginRequest = requestUrl.includes("/api/auth/login");
+    const shouldSkipGlobalError = requestConfig?.skipGlobalErrorHandler === true;
+    const status = error.response?.status;
+
+    if (status === 401 && !isLoginRequest) {
       authService.logout();
       window.location.href = "/";
+      return Promise.reject(error);
     }
+
+    if (!shouldSkipGlobalError) {
+      const message = getApiErrorMessage(error, requestConfig?.errorFallbackMessage);
+      notifyApiError(message);
+    }
+
     return Promise.reject(error);
   },
 );

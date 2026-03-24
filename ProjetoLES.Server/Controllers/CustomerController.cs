@@ -103,6 +103,7 @@ namespace ProjetoLES.Server.Controllers
 
 
         [HttpPatch("{uuid:guid}/password")]
+        [Authorize(Roles = "Admin,Employee")]
         public async Task<IActionResult> ChangePassword(
             Guid uuid,
             [FromBody] CustomerChangePasswordDTO dto,
@@ -113,9 +114,17 @@ namespace ProjetoLES.Server.Controllers
                 await _customerService.ChangePasswordAsync(uuid, dto, cancellationToken);
                 return NoContent();
             }
+            catch (InvalidOperationException ex)
+            {
+                return Conflict(new { message = ex.Message });
+            }
             catch (UnauthorizedAccessException ex)
             {
                 return Unauthorized(new { message = ex.Message });
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new { message = ex.Message });
             }
         }
 
@@ -136,7 +145,24 @@ namespace ProjetoLES.Server.Controllers
         }
 
 
+        [HttpDelete("{uuid:guid}")]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> Delete(Guid uuid, CancellationToken cancellationToken)
+        {
+            try
+            {
+                await _customerService.DeleteAsync(uuid, cancellationToken);
+                return NoContent();
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new { message = ex.Message });
+            }
+        }
+
+
         [HttpGet("{uuid:guid}/addresses")]
+        [Authorize(Roles = "Admin,Employee")]
         public async Task<IActionResult> GetAddresses(Guid uuid, CancellationToken cancellationToken)
         {
             var result = await _customerService.GetAddressesAsync(uuid, cancellationToken);
@@ -144,16 +170,29 @@ namespace ProjetoLES.Server.Controllers
         }
 
         [HttpPost("{uuid:guid}/addresses")]
+        [Authorize(Roles = "Admin,Employee")]
         public async Task<IActionResult> AddAddress(
             Guid uuid,
             [FromBody] AddressCreateDTO dto,
             CancellationToken cancellationToken)
         {
-            var result = await _customerService.AddAddressAsync(uuid, dto, cancellationToken);
-            return CreatedAtAction(nameof(GetAddresses), new { uuid }, result);
+            try
+            {
+                var result = await _customerService.AddAddressAsync(uuid, dto, cancellationToken);
+                return CreatedAtAction(nameof(GetAddresses), new { uuid }, result);
+            }
+            catch (InvalidOperationException ex)
+            {
+                return Conflict(new { message = ex.Message });
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new { message = ex.Message });
+            }
         }
 
         [HttpPut("{uuid:guid}/addresses/{addressUuid:guid}")]
+        [Authorize(Roles = "Admin,Employee")]
         public async Task<IActionResult> UpdateAddress(
             Guid uuid,
             Guid addressUuid,
@@ -165,6 +204,10 @@ namespace ProjetoLES.Server.Controllers
                 var result = await _customerService.UpdateAddressAsync(uuid, addressUuid, dto, cancellationToken);
                 return Ok(result);
             }
+            catch (InvalidOperationException ex)
+            {
+                return Conflict(new { message = ex.Message });
+            }
             catch (KeyNotFoundException ex)
             {
                 return NotFound(new { message = ex.Message });
@@ -173,17 +216,30 @@ namespace ProjetoLES.Server.Controllers
 
 
         [HttpPost("{uuid:guid}/phones")]
+        [Authorize(Roles = "Admin,Employee")]
         public async Task<IActionResult> AddPhone(
             Guid uuid,
             [FromBody] PhoneCreateDTO dto,
             CancellationToken cancellationToken)
         {
-            var result = await _customerService.AddPhoneAsync(uuid, dto, cancellationToken);
-            return CreatedAtAction(nameof(GetById), new { uuid }, result);
+            try
+            {
+                var result = await _customerService.AddPhoneAsync(uuid, dto, cancellationToken);
+                return CreatedAtAction(nameof(GetById), new { uuid }, result);
+            }
+            catch (InvalidOperationException ex)
+            {
+                return Conflict(new { message = ex.Message });
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new { message = ex.Message });
+            }
         }
 
 
         [HttpGet("{uuid:guid}/credit-cards")]
+        [Authorize(Roles = "Admin,Employee")]
         public async Task<IActionResult> GetCreditCards(Guid uuid, CancellationToken cancellationToken)
         {
             var result = await _customerService.GetCreditCardsAsync(uuid, cancellationToken);
@@ -191,27 +247,52 @@ namespace ProjetoLES.Server.Controllers
         }
 
         [HttpPost("{uuid:guid}/credit-cards")]
+        [Authorize(Roles = "Admin,Employee")]
         public async Task<IActionResult> AddCreditCard(
             Guid uuid,
             [FromBody] CreditCardCreateDTO dto,
             CancellationToken cancellationToken)
         {
-            var result = await _customerService.AddCreditCardAsync(uuid, dto, cancellationToken);
-            return CreatedAtAction(nameof(GetCreditCards), new { uuid }, result);
+            try
+            {
+                var result = await _customerService.AddCreditCardAsync(uuid, dto, cancellationToken);
+                return CreatedAtAction(nameof(GetCreditCards), new { uuid }, result);
+            }
+            catch (InvalidOperationException ex)
+            {
+                return Conflict(new { message = ex.Message });
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new { message = ex.Message });
+            }
         }
 
         [HttpPatch("{uuid:guid}/credit-cards/{cardUuid:guid}/set-preferred")]
+        [Authorize(Roles = "Admin,Employee")]
         public async Task<IActionResult> SetPreferred(
             Guid uuid,
             Guid cardUuid,
             CancellationToken cancellationToken)
         {
-            await _customerService.SetPreferredCreditCardAsync(uuid, cardUuid, cancellationToken);
-            return NoContent();
+            try
+            {
+                await _customerService.SetPreferredCreditCardAsync(uuid, cardUuid, cancellationToken);
+                return NoContent();
+            }
+            catch (InvalidOperationException ex)
+            {
+                return Conflict(new { message = ex.Message });
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new { message = ex.Message });
+            }
         }
 
 
         [HttpGet("{uuid:guid}/transactions")]
+        [Authorize(Roles = "Admin,Employee")]
         public async Task<IActionResult> GetTransactions(
             Guid uuid,
             [FromQuery] int page = 1,

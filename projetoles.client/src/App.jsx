@@ -1,7 +1,13 @@
 import AppRoutes from "./routes/AppRoutes";
+import { GlobalApiErrorToast } from "./components/GlobalApiErrorToast/GlobalApiErrorToast";
 
 function App() {
-  return <AppRoutes />;
+  return (
+    <>
+      <GlobalApiErrorToast />
+      <AppRoutes />
+    </>
+  );
 }
 
 export default App;
