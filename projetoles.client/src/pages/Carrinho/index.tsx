@@ -43,8 +43,6 @@ import { useEffect, useMemo, useState } from "react";
 import ModalCartao from "../../components/Modals/Cartão";
 import QuantitySelector from "../../components/Quantidade/Quantidade";
 import { AppShell } from "../../components/AppShell/AppShell";
-import { cartoesMock } from "../../mock/cartao";
-import { enderecosMock } from "../../mock/endereco";
 import {
   PrescriptionType,
   productService,
@@ -52,14 +50,21 @@ import {
   type ProductSummary,
 } from "../../services/catalog/productService";
 import { cartService } from "../../services/cart/cartService";
+import {
+  transactionService,
+  type CheckoutAddressOption,
+  type CheckoutCardOption,
+} from "../../services/transactions/transactionService";
 
 type CartLine = ProductSummary & { quantity: number };
 
 export default function Carrinho() {
   const [modalCartao, setModalCartao] = useState(false);
   const navigate = useNavigate();
-  const availableCards = cartoesMock.slice(0, 4);
   const [catalog, setCatalog] = useState<ProductSummary[]>([]);
+  const [availableAddresses, setAvailableAddresses] = useState<CheckoutAddressOption[]>([]);
+  const [availableCards, setAvailableCards] = useState<CheckoutCardOption[]>([]);
+  const [checkoutDataError, setCheckoutDataError] = useState("");
   const [cartUuids, setCartUuids] = useState(() => cartService.getItems());
   const [quantities, setQuantities] = useState<Record<string, number>>({});
   const [interactionAlerts, setInteractionAlerts] = useState<DrugInteractionAlert[]>([]);
@@ -75,6 +80,9 @@ export default function Carrinho() {
   const [firstCardAmount, setFirstCardAmount] = useState(0);
   const [secondCardAmount, setSecondCardAmount] = useState(0);
   const [prescriptionFileName, setPrescriptionFileName] = useState("");
+  const [prescriptionFileContentType, setPrescriptionFileContentType] = useState("");
+  const [prescriptionFileBase64, setPrescriptionFileBase64] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -99,6 +107,62 @@ export default function Carrinho() {
     };
 
     loadCatalog();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const loadCheckoutData = async () => {
+      try {
+        setCheckoutDataError("");
+        const [addresses, cards] = await Promise.all([
+          transactionService.getMyCheckoutAddresses(),
+          transactionService.getMyCheckoutCards(),
+        ]);
+
+        if (cancelled) return;
+
+        const activeAddresses = addresses.filter((address) => address.isActive);
+        const activeCards = cards.filter((card) => card.isActive);
+
+        setAvailableAddresses(activeAddresses);
+        setAvailableCards(activeCards);
+
+        if (!addressId && activeAddresses.length > 0) {
+          setAddressId(activeAddresses[0].uuid);
+        }
+
+        const preferredCard = activeCards.find((card) => card.isPreferred);
+        const fallbackCard = activeCards[0];
+        const defaultCardId = (preferredCard ?? fallbackCard)?.uuid ?? "";
+
+        if (!singleCardId && defaultCardId) {
+          setSingleCardId(defaultCardId);
+        }
+
+        if (!firstCardId && defaultCardId) {
+          setFirstCardId(defaultCardId);
+        }
+
+        if (!secondCardId && activeCards.length > 1) {
+          const second = activeCards.find((card) => card.uuid !== defaultCardId);
+          if (second) {
+            setSecondCardId(second.uuid);
+          }
+        }
+      } catch {
+        if (cancelled) return;
+        setAvailableAddresses([]);
+        setAvailableCards([]);
+        setCheckoutDataError("Não foi possível carregar seus endereços e cartões cadastrados.");
+      }
+    };
+
+    void loadCheckoutData();
+
     return () => {
       cancelled = true;
     };
@@ -165,11 +229,55 @@ export default function Carrinho() {
     };
   }, [cartProducts]);
 
-  const handleSalvar = () => {
+  const handleSalvar = async () => {
     if (cartProducts.length === 0) return;
-    cartService.clear();
-    setCartUuids([]);
-    navigate("/loja");
+
+    const selectedAddress = availableAddresses.find((address) => address.uuid === addressId);
+    const addressLabel = selectedAddress
+      ? `${selectedAddress.label || `${selectedAddress.city}/${selectedAddress.state}`} - ${selectedAddress.zipCode}`
+      : "Endereço selecionado no checkout";
+
+    const singleCardLabel =
+      paymentType === "credito1" && singleCardId
+        ? formatCardLabel(singleCardId)
+        : undefined;
+
+    try {
+      setIsSubmitting(true);
+
+      await transactionService.checkout({
+        items: cartProducts.map((product) => ({
+          productUuid: product.uuid,
+          quantity: quantities[product.uuid] ?? product.quantity,
+        })),
+        paymentType,
+        addressLabel,
+        addressUuid: addressId || undefined,
+        couponCode: coupon || "sem",
+        singleCardLabel,
+        singleCardUuid: paymentType === "credito1" ? singleCardId || undefined : undefined,
+        splitPayment:
+          paymentType === "credito2"
+            ? {
+                firstCardLabel: formatCardLabel(firstCardId),
+                secondCardLabel: formatCardLabel(secondCardId),
+                firstAmount: firstCardAmount,
+                secondAmount: secondCardAmount,
+                firstCardUuid: firstCardId || undefined,
+                secondCardUuid: secondCardId || undefined,
+              }
+            : undefined,
+        prescriptionFileName: prescriptionFileName || undefined,
+        prescriptionFileContentType: prescriptionFileContentType || undefined,
+        prescriptionFileBase64: prescriptionFileBase64 || undefined,
+      });
+
+      cartService.clear();
+      setCartUuids([]);
+      navigate("/loja");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const updateQuantity = (productUuid: string, value: number) => {
@@ -248,10 +356,9 @@ export default function Carrinho() {
         : "";
 
   const formatCardLabel = (cardId: string) => {
-    const selected = availableCards.find((card) => String(card.id) === cardId);
+    const selected = availableCards.find((card) => card.uuid === cardId);
     if (!selected) return "-";
-    const cardFinal = String(1200 + selected.id).slice(-4);
-    return `${selected.bandeira.toUpperCase()} •••• ${cardFinal}`;
+    return `${selected.cardBrandName.toUpperCase()} ${selected.maskedCardNumber}`;
   };
 
   const setSplitByFirstCard = (value: number) => {
@@ -266,9 +373,35 @@ export default function Carrinho() {
     setFirstCardAmount(Math.max(0, Number((total - normalized).toFixed(2))));
   };
 
-  const handlePrescriptionUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handlePrescriptionUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
-    setPrescriptionFileName(file?.name ?? "");
+    if (!file) {
+      setPrescriptionFileName("");
+      setPrescriptionFileContentType("");
+      setPrescriptionFileBase64("");
+      return;
+    }
+
+    try {
+      const base64 = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => {
+          const result = String(reader.result ?? "");
+          const payload = result.includes(",") ? result.split(",")[1] : "";
+          resolve(payload);
+        };
+        reader.onerror = () => reject(new Error("Falha ao ler arquivo de receita."));
+        reader.readAsDataURL(file);
+      });
+
+      setPrescriptionFileName(file.name);
+      setPrescriptionFileContentType(file.type || "application/octet-stream");
+      setPrescriptionFileBase64(base64);
+    } catch {
+      setPrescriptionFileName("");
+      setPrescriptionFileContentType("");
+      setPrescriptionFileBase64("");
+    }
   };
 
   return (
@@ -320,10 +453,10 @@ export default function Carrinho() {
                   <option value="" disabled>
                     Selecione o endereço
                   </option>
-                  {enderecosMock.map((address) => (
-                    <option key={address.id} value={String(address.id)}>
-                      {address.apelido ?? `${address.cidade} - ${address.estado}`} • {" "}
-                      {address.cep}
+                  {availableAddresses.map((address) => (
+                    <option key={address.uuid} value={address.uuid}>
+                      {address.label || `${address.city} - ${address.state}`} • {" "}
+                      {address.zipCode}
                     </option>
                   ))}
                 </FieldSelect>
@@ -362,8 +495,8 @@ export default function Carrinho() {
                       Selecione um cartão
                     </option>
                     {availableCards.map((card) => (
-                      <option key={card.id} value={String(card.id)}>
-                        {card.bandeira.toUpperCase()} •••• {String(1200 + card.id).slice(-4)}
+                      <option key={card.uuid} value={card.uuid}>
+                        {card.cardBrandName.toUpperCase()} {card.maskedCardNumber}
                       </option>
                     ))}
                   </FieldSelect>
@@ -384,8 +517,8 @@ export default function Carrinho() {
                         Selecione o primeiro cartão
                       </option>
                       {availableCards.map((card) => (
-                        <option key={card.id} value={String(card.id)}>
-                          {card.bandeira.toUpperCase()} •••• {String(1200 + card.id).slice(-4)}
+                        <option key={card.uuid} value={card.uuid}>
+                          {card.cardBrandName.toUpperCase()} {card.maskedCardNumber}
                         </option>
                       ))}
                     </FieldSelect>
@@ -415,8 +548,8 @@ export default function Carrinho() {
                         Selecione o segundo cartão
                       </option>
                       {availableCards.map((card) => (
-                        <option key={card.id} value={String(card.id)}>
-                          {card.bandeira.toUpperCase()} •••• {String(1200 + card.id).slice(-4)}
+                        <option key={card.uuid} value={card.uuid}>
+                          {card.cardBrandName.toUpperCase()} {card.maskedCardNumber}
                         </option>
                       ))}
                     </FieldSelect>
@@ -588,6 +721,8 @@ export default function Carrinho() {
             </AlertText>
           )}
 
+          {checkoutDataError && <AlertText>{checkoutDataError}</AlertText>}
+
           {isOneCard && !hasCoupon && total > 0 && total < 10 && (
             <AlertText>
               Sem cupom aplicado, compras no cartão único exigem valor mínimo de R$ 10,00.
@@ -606,15 +741,16 @@ export default function Carrinho() {
           <PrimaryButton
             type="button"
             onClick={handleSalvar}
-            disabled={!checkoutIsValid}
+            disabled={!checkoutIsValid || isSubmitting}
           >
-            Finalizar pedido
+            {isSubmitting ? "Finalizando..." : "Finalizar pedido"}
           </PrimaryButton>
         </SummaryCard>
       </CartLayout>
 
       {modalCartao && (
         <ModalCartao
+          uuid=""
           next={() => setModalCartao(false)}
           title="Cadastro de cartão"
           button="Cadastrar"

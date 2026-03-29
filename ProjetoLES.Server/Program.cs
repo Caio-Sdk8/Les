@@ -48,12 +48,19 @@
     builder.Services.AddScoped<ICreditCardRepository, CreditCardRepository>();
     builder.Services.AddScoped<IUserRepository, UserRepository>();
     builder.Services.AddScoped<IRoleRepository, RoleRepository>();
+    builder.Services.AddScoped<IProductRepository, ProductRepository>();
+    builder.Services.AddScoped<IStockRepository, StockRepository>();
+    builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
+    builder.Services.AddScoped<ISupplierRepository, SupplierRepository>();
 
     // ── Services ──────────────────────────────────────────────────────────────────
     builder.Services.AddScoped<ICustomerService, CustomerService>();
     builder.Services.AddScoped<IAuthService, AuthService>();
     builder.Services.AddScoped<IUserService, UserService>();
     builder.Services.AddScoped<IRoleService, RoleService>();
+    builder.Services.AddScoped<IProductService, ProductService>();
+    builder.Services.AddScoped<IStockService, StockService>();
+    builder.Services.AddScoped<ITransactionService, TransactionService>();
 
     // ── Controllers + OpenAPI ─────────────────────────────────────────────────────
    builder.Services.AddControllers();

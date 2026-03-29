@@ -44,6 +44,7 @@ export const StoreHeader = ({
         <NavActions>
           <NavLink onClick={() => navigate("/loja")}>Início</NavLink>
           <NavLink onClick={() => navigate("/clientes")}>Clientes</NavLink>
+          <NavLink onClick={() => navigate("/pedidos")}>Pedidos</NavLink>
           <NavLink onClick={() => navigate("/IA")}>IA</NavLink>
           <CartButton onClick={() => navigate("/carrinho")}>
             <img src={CarrinhoIcon} alt="Carrinho" />

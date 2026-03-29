@@ -39,16 +39,28 @@ export const ReviewSubtitle = styled.p`
   font-size: 13px;
 `;
 
-export const StatusBadge = styled.span<{ $status: "PENDENTE" | "APROVADA" | "REPROVADA" }>`
+export const StatusBadge = styled.span<{ $status: "PENDENTE" | "APROVADA" | "REPROVADA" | "REENVIO_SOLICITADO" }>`
   border-radius: 999px;
   padding: 6px 12px;
   font-size: 11px;
   font-weight: 700;
   letter-spacing: 0.04em;
   color: ${({ $status }) =>
-    $status === "APROVADA" ? "#065f46" : $status === "REPROVADA" ? "#991b1b" : "#92400e"};
+    $status === "APROVADA"
+      ? "#065f46"
+      : $status === "REPROVADA"
+        ? "#991b1b"
+        : $status === "REENVIO_SOLICITADO"
+          ? "#1d4ed8"
+          : "#92400e"};
   background: ${({ $status }) =>
-    $status === "APROVADA" ? "#d1fae5" : $status === "REPROVADA" ? "#fee2e2" : "#fef3c7"};
+    $status === "APROVADA"
+      ? "#d1fae5"
+      : $status === "REPROVADA"
+        ? "#fee2e2"
+        : $status === "REENVIO_SOLICITADO"
+          ? "#dbeafe"
+          : "#fef3c7"};
 `;
 
 export const ReviewTable = styled.table`
@@ -192,4 +204,28 @@ export const FileLink = styled.button`
   font-weight: 700;
   cursor: pointer;
   text-align: left;
+`;
+
+export const PreviewPanel = styled.div`
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-bg);
+  padding: 10px;
+`;
+
+export const PreviewImage = styled.img`
+  width: 100%;
+  max-height: 360px;
+  object-fit: contain;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-border);
+  background: #fff;
+`;
+
+export const PreviewFrame = styled.iframe`
+  width: 100%;
+  height: 360px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: #fff;
 `;

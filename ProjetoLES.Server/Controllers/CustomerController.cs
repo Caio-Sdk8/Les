@@ -169,6 +169,17 @@ namespace ProjetoLES.Server.Controllers
             return Ok(result);
         }
 
+        [HttpGet("me/addresses")]
+        [Authorize(Roles = "Customer")]
+        public async Task<IActionResult> GetMyAddresses(CancellationToken cancellationToken)
+        {
+            if (!TryGetAuthenticatedUserUuid(out var userUuid))
+                return Unauthorized(new { message = "Token inválido para consulta de endereços." });
+
+            var result = await _customerService.GetMyAddressesAsync(userUuid, cancellationToken);
+            return Ok(result);
+        }
+
         [HttpPost("{uuid:guid}/addresses")]
         [Authorize(Roles = "Admin,Employee")]
         public async Task<IActionResult> AddAddress(
@@ -246,6 +257,17 @@ namespace ProjetoLES.Server.Controllers
             return Ok(result);
         }
 
+        [HttpGet("me/credit-cards")]
+        [Authorize(Roles = "Customer")]
+        public async Task<IActionResult> GetMyCreditCards(CancellationToken cancellationToken)
+        {
+            if (!TryGetAuthenticatedUserUuid(out var userUuid))
+                return Unauthorized(new { message = "Token inválido para consulta de cartões." });
+
+            var result = await _customerService.GetMyCreditCardsAsync(userUuid, cancellationToken);
+            return Ok(result);
+        }
+
         [HttpPost("{uuid:guid}/credit-cards")]
         [Authorize(Roles = "Admin,Employee")]
         public async Task<IActionResult> AddCreditCard(
@@ -301,6 +323,12 @@ namespace ProjetoLES.Server.Controllers
         {
             var result = await _customerService.GetTransactionsAsync(uuid, page, pageSize, cancellationToken);
             return Ok(result);
+        }
+
+        private bool TryGetAuthenticatedUserUuid(out Guid userUuid)
+        {
+            var userUuidClaim = User.FindFirst("uuid")?.Value;
+            return Guid.TryParse(userUuidClaim, out userUuid);
         }
     }
 }

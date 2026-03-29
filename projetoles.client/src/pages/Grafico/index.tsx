@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
 import { AppShell } from "../../components/AppShell/AppShell";
 import ProdutosGrafico from "../../components/Grafico/Grafico";
-import { salesCatalogMock, type SalesSeries } from "../../mock/grafico";
+import type { SalesCatalog, SalesSeries } from "../../services/transactions/transactionService";
+import { transactionService } from "../../services/transactions/transactionService";
 import {
   ColorDot,
   ContainerPage,
@@ -43,19 +44,58 @@ const percent = (value: number) => `${value >= 0 ? "+" : ""}${value.toFixed(1)}%
 const sum = (values: number[]) => values.reduce((acc, current) => acc + current, 0);
 
 export default function Grafico() {
+  const [salesCatalog, setSalesCatalog] = useState<SalesCatalog>({
+    periods: [],
+    products: [],
+    categories: [],
+  });
   const [mode, setMode] = useState<AnalysisMode>("produto");
-  const [startPeriod, setStartPeriod] = useState(salesCatalogMock.periods[0].value);
-  const [endPeriod, setEndPeriod] = useState(
-    salesCatalogMock.periods[salesCatalogMock.periods.length - 1].value
-  );
+  const [startPeriod, setStartPeriod] = useState("");
+  const [endPeriod, setEndPeriod] = useState("");
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const loadCatalog = async () => {
+      try {
+        const result = await transactionService.getSalesCatalog();
+        if (cancelled) return;
+
+        setSalesCatalog(result);
+        if (result.periods.length > 0) {
+          setStartPeriod(result.periods[0].value);
+          setEndPeriod(result.periods[result.periods.length - 1].value);
+        } else {
+          setStartPeriod("");
+          setEndPeriod("");
+        }
+      } catch {
+        if (cancelled) return;
+        setSalesCatalog({ periods: [], products: [], categories: [] });
+        setStartPeriod("");
+        setEndPeriod("");
+      }
+    };
+
+    void loadCatalog();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const availableSeries = useMemo(
-    () => (mode === "produto" ? salesCatalogMock.products : salesCatalogMock.categories),
-    [mode]
+    () => (mode === "produto" ? salesCatalog.products : salesCatalog.categories),
+    [mode, salesCatalog]
   );
 
   const [primarySeriesId, setPrimarySeriesId] = useState(availableSeries[0]?.id ?? "");
   const [secondarySeriesId, setSecondarySeriesId] = useState("");
+
+  const hasPeriods = salesCatalog.periods.length > 0;
+  const firstPeriodValue = hasPeriods ? salesCatalog.periods[0].value : "";
+  const lastPeriodValue = hasPeriods
+    ? salesCatalog.periods[salesCatalog.periods.length - 1].value
+    : "";
 
   useEffect(() => {
     const fallbackPrimary = availableSeries[0]?.id ?? "";
@@ -69,10 +109,10 @@ export default function Grafico() {
 
   const filteredPeriods = useMemo(
     () =>
-      salesCatalogMock.periods.filter(
+      salesCatalog.periods.filter(
         (period) => period.value >= startPeriod && period.value <= endPeriod
       ),
-    [startPeriod, endPeriod]
+    [startPeriod, endPeriod, salesCatalog]
   );
 
   const clipSeries = (series: SalesSeries | undefined | null) => {
@@ -213,10 +253,11 @@ export default function Grafico() {
               <FieldControl
                 id="start-period"
                 type="month"
-                min={salesCatalogMock.periods[0].value}
+                min={firstPeriodValue}
                 max={endPeriod}
                 value={startPeriod}
                 onChange={(event) => setStartPeriod(event.target.value)}
+                disabled={!hasPeriods}
               />
             </FieldGroup>
 
@@ -226,9 +267,10 @@ export default function Grafico() {
                 id="end-period"
                 type="month"
                 min={startPeriod}
-                max={salesCatalogMock.periods[salesCatalogMock.periods.length - 1].value}
+                max={lastPeriodValue}
                 value={endPeriod}
                 onChange={(event) => setEndPeriod(event.target.value)}
+                disabled={!hasPeriods}
               />
             </FieldGroup>
           </FilterGrid>
@@ -331,6 +373,10 @@ export default function Grafico() {
             </SummaryTable>
           )}
         </Panel>
+
+        <FilterHint>
+          Dados carregados exclusivamente da API de transações.
+        </FilterHint>
       </ContainerPage>
     </AppShell>
   );

@@ -13,6 +13,8 @@ import EdicaoEndereco from "../pages/EditarEndereco";
 import Estoque from "../pages/Estoque";
 import Produto from "../pages/Produto";
 import AvaliacaoReceitas from "../pages/AvaliacaoReceitas";
+import PedidoDetalhe from "../pages/PedidoDetalhe";
+import AvaliacaoTrocasDevolucoes from "../pages/AvaliacaoTrocasDevolucoes";
 
 export default function AppRoutes() {
   return (
@@ -100,20 +102,48 @@ export default function AppRoutes() {
           }
         />
 
-        {/* Somente Admin */}
+        {/* Pedidos */}
         <Route
-          path="/transacao"
+          path="/pedidos"
           element={
-            <PrivateRoute roles={["Admin"]}>
+            <PrivateRoute>
               <Transacao />
             </PrivateRoute>
           }
         />
         <Route
+          path="/pedidos/:uuid"
+          element={
+            <PrivateRoute>
+              <PedidoDetalhe />
+            </PrivateRoute>
+          }
+        />
+
+        {/* Compatibilidade de rota antiga */}
+        <Route
+          path="/transacao"
+          element={
+            <PrivateRoute>
+              <Transacao />
+            </PrivateRoute>
+          }
+        />
+
+        {/* Somente Admin */}
+        <Route
           path="/avaliacao-receitas"
           element={
             <PrivateRoute roles={["Admin"]}>
               <AvaliacaoReceitas />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/avaliacao-trocas-devolucoes"
+          element={
+            <PrivateRoute roles={["Admin", "Employee"]}>
+              <AvaliacaoTrocasDevolucoes />
             </PrivateRoute>
           }
         />

@@ -423,6 +423,14 @@ namespace ProjetoLES.Server.Services
             return addresses.Select(MapToAddressDTO);
         }
 
+        public async Task<IEnumerable<AddressResponseDTO>> GetMyAddressesAsync(
+            Guid userUuid,
+            CancellationToken cancellationToken = default)
+        {
+            var customerUuid = await GetCustomerUuidByUserUuidAsync(userUuid, cancellationToken);
+            return await GetAddressesAsync(customerUuid, cancellationToken);
+        }
+
         public async Task<PhoneResponseDTO> AddPhoneAsync(
             Guid customerUuid, PhoneCreateDTO DTO, CancellationToken cancellationToken = default)
         {
@@ -492,6 +500,14 @@ namespace ProjetoLES.Server.Services
                 MaskCardNumber(c.CardNumber), c.PrintedName, c.ExpirationDate, c.IsPreferred, c.IsActive));
         }
 
+        public async Task<IEnumerable<CreditCardResponseDTO>> GetMyCreditCardsAsync(
+            Guid userUuid,
+            CancellationToken cancellationToken = default)
+        {
+            var customerUuid = await GetCustomerUuidByUserUuidAsync(userUuid, cancellationToken);
+            return await GetCreditCardsAsync(customerUuid, cancellationToken);
+        }
+
         public async Task<PagedResultDTO<TransactionModel>> GetTransactionsAsync(
             Guid customerUuid, int page, int pageSize, CancellationToken cancellationToken = default)
         {
@@ -503,6 +519,14 @@ namespace ProjetoLES.Server.Services
         private async Task<CustomerModel> GetTrackedAsync(Guid uuid, CancellationToken ct)
             => await _customerRepository.GetByUuidAsync(uuid, ct)
                ?? throw new KeyNotFoundException($"Cliente {uuid} não encontrado.");
+
+        private async Task<Guid> GetCustomerUuidByUserUuidAsync(Guid userUuid, CancellationToken ct)
+            => await _context.Set<UserModel>()
+                .AsNoTracking()
+                .Where(u => u.Uuid == userUuid && u.IsActive && u.Customer != null)
+                .Select(u => (Guid?)u.Customer!.Uuid)
+                .FirstOrDefaultAsync(ct)
+               ?? throw new KeyNotFoundException("Cliente vinculado ao usuário não encontrado.");
 
         private static void EnsureCustomerIsActiveForMutation(CustomerModel customer)
         {

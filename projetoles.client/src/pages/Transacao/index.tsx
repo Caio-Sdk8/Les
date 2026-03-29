@@ -1,8 +1,7 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import { DivPagination } from "../../components/Pagination/style";
 import Pagination from "../../components/Pagination/Paginations";
-import Refound from "../../assets/Refound.png";
 import {
   Container,
   ContainerDad,
@@ -12,105 +11,186 @@ import {
   Th,
   Tr,
 } from "../ListagemCliente/style";
-import { transacoesMock } from "../../mock/transacoes";
 import { AppShell } from "../../components/AppShell/AppShell";
-import ModalTroca from "../../components/Modals/Troca";
-import { GetTransactionClientRequest } from "../../services/requests/getTransactionClient";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
+import { authService } from "../../services/auth/authService";
+import {
+  transactionService,
+  type TransactionItem,
+  type TransactionsPagedResponse,
+} from "../../services/transactions/transactionService";
+
+const formatCurrency = (value: number) =>
+  new Intl.NumberFormat("pt-BR", {
+    style: "currency",
+    currency: "BRL",
+  }).format(Number(value) || 0);
+
+const formatDateTime = (value: string) => {
+  const parsed = new Date(value);
+  if (Number.isNaN(parsed.getTime())) return value;
+  return parsed.toLocaleString("pt-BR", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+};
+
+const extractOrderCode = (order: TransactionItem) => {
+  const code = order.description?.split(" - ")?.[0]?.trim();
+  if (code?.startsWith("PED-")) return code;
+  if (order.uuid) return `PEDIDO ${order.uuid.slice(0, 8).toUpperCase()}`;
+  return "Pedido";
+};
+
+const formatStatusLabel = (status: string) => {
+  switch ((status ?? "").toUpperCase()) {
+    case "AGUARDANDO_ANALISE_RECEITA":
+      return "Aguardando receita";
+    case "AGUARDANDO_REENVIO_RECEITA":
+      return "Aguardando reenvio";
+    case "TROCA_PENDENTE":
+      return "Troca pendente";
+    case "DEVOLUCAO_PENDENTE":
+      return "Devolução pendente";
+    case "TROCA_APROVADA":
+      return "Troca aprovada";
+    case "TROCA_REPROVADA":
+      return "Troca reprovada";
+    case "DEVOLUCAO_APROVADA":
+      return "Devolução aprovada";
+    case "DEVOLUCAO_REPROVADA":
+      return "Devolução reprovada";
+    case "EM_PROCESSAMENTO":
+      return "Em processamento";
+    case "APROVADA":
+      return "Aprovada";
+    case "REPROVADA":
+      return "Reprovada";
+    default:
+      return status || "Não informado";
+  }
+};
+
 const Transacao = () => {
   const [currentPage, setCurrentPage] = useState(1);
-  const [refound, setRefound] = useState(false);
+  const [data, setData] = useState<TransactionsPagedResponse | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
+  const navigate = useNavigate();
   const location = useLocation();
-  const customerUuid = location.state?.uuid;
+  const customerUuid = (location.state as { uuid?: string } | null)?.uuid;
+  const isStaff = authService.hasAnyRole("Admin", "Employee");
 
-  const { data, isLoading } = GetTransactionClientRequest(customerUuid, 1, 20);
+  useEffect(() => {
+    let cancelled = false;
 
-  const [isDesactive, setIsDesactive] = useState(false);
+    const loadOrders = async () => {
+      setIsLoading(true);
+      try {
+        const result = isStaff
+          ? await transactionService.getOrders({
+              page: currentPage,
+              pageSize: 20,
+              customerUuid,
+            })
+          : await transactionService.getMyOrders({
+              page: currentPage,
+              pageSize: 20,
+            });
 
-  const [documentId, setDocumentId] = useState("");
+        if (!cancelled) setData(result);
+      } catch {
+        if (!cancelled) setData(null);
+      } finally {
+        if (!cancelled) setIsLoading(false);
+      }
+    };
+
+    void loadOrders();
+    return () => {
+      cancelled = true;
+    };
+  }, [currentPage, customerUuid, isStaff]);
 
   const handlePageChange = (pageNumber: number) => {
     setCurrentPage(pageNumber);
   };
 
   return (
-    <AppShell title="Transações">
+    <AppShell title="Pedidos">
       <MainTable>
         <ContainerDad>
           <Container>
             <TableContainer>
               <thead>
                 <tr>
-                  <Th style={{ width: "18%", paddingLeft: "5px" }}>CÓDIGO</Th>
-                  <Th style={{ width: "10%", height: "48px" }}>PRODUTOS</Th>
-                  <Th style={{ width: "18%", height: "48px" }}>VALOR</Th>
-
-                  <Th style={{ width: "21%", textAlign: "center" }}>STATUS</Th>
+                  <Th style={{ width: "32%" }}>PEDIDO</Th>
+                  <Th style={{ width: "24%" }}>DATA</Th>
+                  <Th style={{ width: "18%" }}>STATUS</Th>
+                  <Th style={{ width: "16%" }}>TOTAL</Th>
+                  <Th style={{ width: "10%", textAlign: "center" }}>AÇÃO</Th>
                 </tr>
               </thead>
 
               {data?.items.map((transacao, index) => (
                 <tbody key={transacao.id}>
                   <Tr $background={index % 2 === 0}>
-                    <Td style={{ textAlign: "left", paddingLeft: "5px" }}>
-                      <p>R${transacao.amount}</p>
-                    </Td>
-                    <Td>{transacao.description}</Td>
                     <Td>
-                      <p>{transacao.createdAt}</p>
+                      <p>{extractOrderCode(transacao)}</p>
                     </Td>
-                    <Td
-                      style={{
-                        textAlign: "center",
-                        verticalAlign: "middle",
-                        display: "flex",
-                        justifyContent: "center",
-                        alignItems: "center",
-                        height: "inherit",
-                        gap: "20px",
-                      }}
-                    >
-                      <img
-                        src={Refound}
-                        alt="Transações"
-                        onClick={() => setRefound(true)}
+                    <Td>
+                      <p>{formatDateTime(transacao.createdAt)}</p>
+                    </Td>
+                    <Td>
+                      <p>{formatStatusLabel(transacao.status)}</p>
+                    </Td>
+                    <Td>
+                      <p>{formatCurrency(transacao.amount)}</p>
+                    </Td>
+                    <Td style={{ textAlign: "center" }}>
+                      <button
+                        type="button"
+                        disabled={!transacao.uuid}
+                        onClick={() =>
+                          navigate(`/pedidos/${transacao.uuid}`, {
+                            state: { order: transacao },
+                          })
+                        }
                         style={{
-                          width: "24px",
-                          height: "24px",
-                          cursor: "pointer",
+                          border: "1px solid var(--color-border)",
+                          background: "var(--color-surface)",
+                          color: "var(--color-text)",
+                          borderRadius: "8px",
+                          padding: "6px 10px",
+                          fontSize: "12px",
+                          fontWeight: 700,
+                          cursor: transacao.uuid ? "pointer" : "not-allowed",
+                          opacity: transacao.uuid ? 1 : 0.5,
                         }}
-                      />
-                      <p>{transacao.status}</p>
+                      >
+                        Ver
+                      </button>
                     </Td>
                   </Tr>
                 </tbody>
               ))}
 
-              <tbody>
-                <Tr $background={true}>
-                  <Td style={{ textAlign: "left", paddingLeft: "5px" }}>
-                    <p>------</p>
-                  </Td>
-                  <Td>------</Td>
-                  <Td>
-                    <p>------</p>
-                  </Td>
-                  <Td
-                    style={{
-                      textAlign: "center",
-                      verticalAlign: "middle",
-                      display: "flex",
-                      justifyContent: "center",
-                      alignItems: "center",
-                      height: "inherit",
-                      gap: "20px",
-                    }}
-                  >
-                    <p>------</p>
-                  </Td>
-                </Tr>
-              </tbody>
+              {(!data || data.items.length === 0) && !isLoading && (
+                <tbody>
+                  <Tr $background={true}>
+                    <Td>
+                      <p>Nenhum pedido</p>
+                    </Td>
+                    <Td>--</Td>
+                    <Td>--</Td>
+                    <Td>--</Td>
+                    <Td style={{ textAlign: "center" }}>--</Td>
+                  </Tr>
+                </tbody>
+              )}
             </TableContainer>
 
             {data && (data?.totalCount ?? 0) > 0 && (
@@ -128,16 +208,6 @@ const Transacao = () => {
           </Container>
         </ContainerDad>
       </MainTable>
-      {refound && (
-        <ModalTroca
-          title="Troca de Produtos"
-          message2="Selecione a o produto que deseja trocar e digite o motivo"
-          button="Trocar"
-          button2="Cancelar"
-          next={() => setRefound(false)}
-          back={() => setRefound(false)}
-        />
-      )}
     </AppShell>
   );
 };

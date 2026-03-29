@@ -16,6 +16,21 @@ export const NavItems = styled.div`
   }
 `;
 
+export const Badge = styled.span`
+  margin-left: 8px;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: #ef4444;
+  color: #fff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 800;
+`;
+
 export const ItemsContainer = styled.div`
   width: auto;
   height: auto;

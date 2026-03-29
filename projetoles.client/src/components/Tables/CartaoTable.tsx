@@ -11,7 +11,6 @@ import {
   Tr,
 } from "../../pages/ListagemCliente/style";
 import { ButtonPrefer, Title } from "./style";
-import { cartoesMock } from "../../mock/cartao";
 import { GetAllCLientCardsRequest } from "../../services/requests/getCardClient";
 import { useToggleCard } from "../../services/requests/togglePrefered";
 interface Props {
@@ -106,12 +105,12 @@ const CartaoTable: React.FC<Props> = ({ uuid, clientUuid }) => {
                 ))}
             </TableContainer>
 
-            {(cartoesMock.length ?? 0) > 0 && (
+            {(cards?.length ?? 0) > 0 && (
               <DivPagination>
                 <Pagination
                   currentPage={currentPage}
-                  currentCount={cartoesMock.length}
-                  totalCount={cartoesMock.length}
+                  currentCount={cards?.length ?? 0}
+                  totalCount={cards?.length ?? 0}
                   totalPages={1}
                   onPageChange={handlePageChange}
                   type="níveis"

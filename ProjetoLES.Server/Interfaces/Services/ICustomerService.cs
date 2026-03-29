@@ -54,6 +54,10 @@ namespace ProjetoLES.Server.Interfaces.Services
             Guid customerUuid,
             CancellationToken cancellationToken = default);
 
+        Task<IEnumerable<AddressResponseDTO>> GetMyAddressesAsync(
+            Guid userUuid,
+            CancellationToken cancellationToken = default);
+
         Task<PhoneResponseDTO> AddPhoneAsync(
             Guid customerUuid,
             PhoneCreateDTO dto,
@@ -71,6 +75,10 @@ namespace ProjetoLES.Server.Interfaces.Services
 
         Task<IEnumerable<CreditCardResponseDTO>> GetCreditCardsAsync(
             Guid customerUuid,
+            CancellationToken cancellationToken = default);
+
+        Task<IEnumerable<CreditCardResponseDTO>> GetMyCreditCardsAsync(
+            Guid userUuid,
             CancellationToken cancellationToken = default);
 
         Task<PagedResultDTO<TransactionModel>> GetTransactionsAsync(

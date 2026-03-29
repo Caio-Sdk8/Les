@@ -12,7 +12,6 @@ import {
   Th,
   Tr,
 } from "../../pages/ListagemCliente/style";
-import { enderecosMock } from "../../mock/endereco";
 import { Title } from "./style";
 import { GetAllCLientAddressRequest } from "../../services/requests/getAddressClient";
 import { IGetAddressResponse } from "../../services/interfaces/GetAddressClient";
@@ -122,7 +121,7 @@ const handleEdit = (endereco: IGetAddressResponse) => {
                 ))}
             </TableContainer>
 
-            {addresses && (enderecosMock.length ?? 0) > 0 && (
+            {addresses && (addresses.length ?? 0) > 0 && (
               <DivPagination>
                 <Pagination
                   currentPage={currentPage}

@@ -50,10 +50,10 @@ const ListagemCliente = () => {
 
   const handleTransacao = (uuid: string) => {
     if (!isAdmin) {
-      notifyApiError("Apenas administradores podem acessar transações.");
+      notifyApiError("Apenas administradores podem acessar pedidos de clientes.");
       return;
     }
-    navigate("/transacao", { state: { uuid } });
+    navigate("/pedidos", { state: { uuid } });
   };
 
   const handleDelete = (uuid: string, name: string) => {
@@ -137,7 +137,7 @@ const ListagemCliente = () => {
                         />
                         <img
                           src={CarrinhoIcon}
-                          alt="Transações"
+                          alt="Pedidos"
                           onClick={() => handleTransacao(String(usuario.uuid))}
                           style={{
                             width: "24px",

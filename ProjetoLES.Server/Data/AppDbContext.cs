@@ -175,6 +175,7 @@ namespace ProjetoLES.Server.Data
                 e.Property(t => t.Amount).HasColumnType("decimal(18,2)");
                 e.Property(t => t.Description).HasMaxLength(500);
                 e.Property(t => t.Status).IsRequired().HasMaxLength(50);
+                e.Property(t => t.MetadataJson);
 
                 e.HasOne(t => t.Customer)
                  .WithMany(c => c.Transactions)
