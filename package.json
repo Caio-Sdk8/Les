@@ -1,0 +1,12 @@
+{
+  "scripts": {
+    "dev:front": "npm --prefix projetoles.client run dev",
+    "cy:open": "cypress open",
+    "cy:run": "cypress run",
+    "test:e2e": "set START_SERVER_AND_TEST_INSECURE=1&& start-server-and-test dev:front https://localhost:56992 cy:run"
+  },
+  "devDependencies": {
+    "cypress": "^15.13.0",
+    "start-server-and-test": "^3.0.0"
+  }
+}

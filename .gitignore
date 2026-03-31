@@ -2,6 +2,8 @@
 
 # Node artifacts
 node_modules/
+cypress/screenshots/
+cypress/downloads/
 
 # Build results
 [Dd]ebug/
