@@ -32,6 +32,7 @@ import {
   CadastroClienteSchema,
 } from "../../validations/schemas/CadastroCliente";
 import { SingClient } from "../../services/requests/singClient";
+import { maskAreaCode, maskCep, maskCpf, maskPhone, onlyDigits } from "../../utils/masks";
 
 // opções
 export const GENDER_OPTIONS = [
@@ -181,18 +182,24 @@ export default function Cadastro() {
       Name: data.name,
       Gender: data.gender,
       BirthDate: data.birthDate,
-      Cpf: data.cpf,
+      Cpf: onlyDigits(data.cpf),
       Email: data.email,
       PhoneType: data.phoneType,
-      AreaCode: data.areaCode,
-      PhoneNumber: data.phoneNumber,
+      AreaCode: onlyDigits(data.areaCode),
+      PhoneNumber: onlyDigits(data.phoneNumber),
       Password: data.password,
       PasswordConfirmation: data.passwordConfirmation,
-      BillingAddresses: data.billingAddresses.map((address) => ({ ...address })),
+      BillingAddresses: data.billingAddresses.map((address) => ({
+        ...address,
+        zipCode: onlyDigits(address.zipCode),
+      })),
       DeliveryAddresses: (sameAddress
         ? data.billingAddresses
         : data.deliveryAddresses
-      ).map((address) => ({ ...address })),
+      ).map((address) => ({
+        ...address,
+        zipCode: onlyDigits(address.zipCode),
+      })),
       CreditCards: data.cards.map((card, idx) => ({
         CardBrandName: card.cardBrandName,
         CardNumber: card.cardNumber,
@@ -274,7 +281,14 @@ export default function Cadastro() {
               <DivLabel>
                 <Label>CPF</Label>
               </DivLabel>
-              <InputSing {...register("cpf")} placeholder="000.000.000-00" />
+              <InputSing
+                {...register("cpf", {
+                  onChange: (e) => {
+                    e.target.value = maskCpf(e.target.value);
+                  },
+                })}
+                placeholder="000.000.000-00"
+              />
               {errors.cpf && (
                 <span style={{ color: "red" }}>{errors.cpf.message}</span>
               )}
@@ -301,7 +315,11 @@ export default function Cadastro() {
                 <Label>Telefone</Label>
               </DivLabel>
               <InputSing
-                {...register("phoneNumber")}
+                {...register("phoneNumber", {
+                  onChange: (e) => {
+                    e.target.value = maskPhone(e.target.value);
+                  },
+                })}
                 placeholder="00000-0000"
               />
               {errors.phoneNumber && (
@@ -318,9 +336,13 @@ export default function Cadastro() {
                 <Label>DDD</Label>
               </DivLabel>
               <InputSing
-                {...register("areaCode")}
+                {...register("areaCode", {
+                  onChange: (e) => {
+                    e.target.value = maskAreaCode(e.target.value);
+                  },
+                })}
                 placeholder="11"
-                maxLength={3}
+                maxLength={2}
               />
               {errors.areaCode && (
                 <span style={{ color: "red" }}>{errors.areaCode.message}</span>
@@ -616,7 +638,11 @@ function AddressInputs({ prefix, register, errors, disabled }: any) {
             <Label>CEP</Label>
           </DivLabel>
           <InputSing
-            {...register(`${prefix}.zipCode`)}
+            {...register(`${prefix}.zipCode`, {
+              onChange: (e) => {
+                e.target.value = maskCep(e.target.value);
+              },
+            })}
             placeholder="00000-000"
             disabled={disabled}
             style={{ opacity: disabled ? 0.5 : 1 }}

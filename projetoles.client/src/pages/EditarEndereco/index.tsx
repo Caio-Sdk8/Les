@@ -23,6 +23,7 @@ import {
 import { yupResolver } from "@hookform/resolvers/yup";
 import { RESIDENCE_OPTIONS, STREET_OPTIONS } from "../Cadastro";
 import { UpdateAddress } from "../../services/requests/editAddress";
+import { maskCep, onlyDigits } from "../../utils/masks";
 
 export default function EdicaoEndereco() {
   const navigate = useNavigate();
@@ -69,7 +70,7 @@ export default function EdicaoEndereco() {
       Street: data.street,
       Number: data.number,
       Neighborhood: data.neighborhood,
-      ZipCode: data.zipCode,
+      ZipCode: onlyDigits(data.zipCode),
       City: data.city,
       State: data.state,
       Country: data.country,
@@ -136,7 +137,14 @@ export default function EdicaoEndereco() {
               <DivLabel>
                 <Label>CEP</Label>
               </DivLabel>
-              <InputSing {...register("zipCode")} placeholder="00000-000" />
+              <InputSing
+                {...register("zipCode", {
+                  onChange: (e) => {
+                    e.target.value = maskCep(e.target.value);
+                  },
+                })}
+                placeholder="00000-000"
+              />
               {errors.zipCode && (
                 <span style={{ color: "red" }}>{errors.zipCode.message}</span>
               )}

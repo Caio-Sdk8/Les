@@ -26,6 +26,7 @@ import {
 } from "../../validations/schemas/CadastroEndereco";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { AddAddressClient } from "../../services/requests/singAddress";
+import { maskCep, onlyDigits } from "../../utils/masks";
 
 type Props = {
   back?: () => void;
@@ -75,7 +76,10 @@ const ModalEndereco = ({
   const onSubmit = async (formData: AddressFormData) => {
     try {
       if (!uuid) return;
-      await AddAddressClient(uuid, formData);
+      await AddAddressClient(uuid, {
+        ...formData,
+        zipCode: onlyDigits(formData.zipCode),
+      });
       next();
     } catch (error) {
       console.error("Erro ao cadastrar endereço:", error);
@@ -199,7 +203,14 @@ const ModalEndereco = ({
             <DivLabel>
               <Label>CEP</Label>
             </DivLabel>
-            <InputSing placeholder="00000-000" {...register("zipCode")} />
+            <InputSing
+              placeholder="00000-000"
+              {...register("zipCode", {
+                onChange: (e) => {
+                  e.target.value = maskCep(e.target.value);
+                },
+              })}
+            />
             {errors.zipCode && (
               <span style={{ color: "red" }}>{errors.zipCode.message}</span>
             )}
