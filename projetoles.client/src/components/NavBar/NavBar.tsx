@@ -8,6 +8,7 @@ export const NavBar = () => {
   const navigate = useNavigate();
   const isStaff = authService.hasAnyRole("Admin", "Employee");
   const isAdmin = authService.hasRole("Admin");
+  const isCustomer = authService.hasRole("Customer");
   const [pendingAfterSalesCount, setPendingAfterSalesCount] = useState(0);
 
   useEffect(() => {
@@ -32,9 +33,15 @@ export const NavBar = () => {
 
   return (
     <ItemsContainer>
-      <NavItems onClick={() => navigate("/loja")}>Loja</NavItems>
-      <NavItems onClick={() => navigate("/carrinho")}>Carrinho</NavItems>
-      <NavItems onClick={() => navigate("/IA")}>Recomendação</NavItems>
+      {isCustomer && (
+        <NavItems onClick={() => navigate("/loja")}>Loja</NavItems>
+      )}
+      {isCustomer && (
+        <NavItems onClick={() => navigate("/carrinho")}>Carrinho</NavItems>
+      )}
+      {isCustomer && (
+        <NavItems onClick={() => navigate("/IA")}>Recomendação</NavItems>
+      )}
 
       {isStaff && (
         <NavItems onClick={() => navigate("/clientes")}>Clientes</NavItems>

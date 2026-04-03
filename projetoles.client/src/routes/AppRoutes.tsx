@@ -24,11 +24,11 @@ export default function AppRoutes() {
         <Route path="/" element={<LoginForm />} />
         <Route path="/cadastro" element={<Cadastro />} />
 
-        {/* Área do cliente (qualquer usuário autenticado) */}
+        {/* Área do cliente (somente Customer) */}
         <Route
           path="/loja"
           element={
-            <PrivateRoute>
+            <PrivateRoute roles={["Customer"]}>
               <Loja />
             </PrivateRoute>
           }
@@ -36,7 +36,7 @@ export default function AppRoutes() {
         <Route
           path="/produto/:uuid"
           element={
-            <PrivateRoute>
+            <PrivateRoute roles={["Customer"]}>
               <Produto />
             </PrivateRoute>
           }
@@ -44,7 +44,7 @@ export default function AppRoutes() {
         <Route
           path="/carrinho"
           element={
-            <PrivateRoute>
+            <PrivateRoute roles={["Customer"]}>
               <Carrinho />
             </PrivateRoute>
           }
@@ -52,7 +52,7 @@ export default function AppRoutes() {
         <Route
           path="/IA"
           element={
-            <PrivateRoute>
+            <PrivateRoute roles={["Customer"]}>
               <IA />
             </PrivateRoute>
           }
