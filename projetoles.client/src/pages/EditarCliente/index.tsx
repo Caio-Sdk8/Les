@@ -30,11 +30,8 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import { GENDER_OPTIONS } from "../Cadastro";
 import { UpdateClient } from "../../services/requests/editClient";
 import { PhoneTypeEnum } from "../../validations/interfaces/interfaces";
-<<<<<<< Updated upstream
 import { notifyApiError } from "../../services/errors/errorNotifier";
-=======
 import { maskAreaCode, maskCpf, maskPhone, onlyDigits } from "../../utils/masks";
->>>>>>> Stashed changes
 
 export default function Edicao() {
   const [modalCartao, setModalCartao] = useState(false);
