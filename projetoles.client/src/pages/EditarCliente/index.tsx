@@ -30,7 +30,11 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import { GENDER_OPTIONS } from "../Cadastro";
 import { UpdateClient } from "../../services/requests/editClient";
 import { PhoneTypeEnum } from "../../validations/interfaces/interfaces";
+<<<<<<< Updated upstream
 import { notifyApiError } from "../../services/errors/errorNotifier";
+=======
+import { maskAreaCode, maskCpf, maskPhone, onlyDigits } from "../../utils/masks";
+>>>>>>> Stashed changes
 
 export default function Edicao() {
   const [modalCartao, setModalCartao] = useState(false);
@@ -79,11 +83,11 @@ export default function Edicao() {
         birthDate: data.birthDate
           ? new Date(data.birthDate).toISOString().split("T")[0]
           : "",
-        cpf: data.cpf ?? "",
+        cpf: maskCpf(data.cpf ?? ""),
         email: data.email ?? "",
         phoneType: data?.phones[0].phoneType ?? "",
-        areaCode: data?.phones[0].areaCode ?? "",
-        phoneNumber: data?.phones[0].number ?? "",
+        areaCode: maskAreaCode(data?.phones[0].areaCode ?? ""),
+        phoneNumber: maskPhone(data?.phones[0].number ?? ""),
       });
     }
   }, [data, reset]);
@@ -104,8 +108,8 @@ export default function Edicao() {
       Phones: [
         {
           PhoneType: Number(formData.phoneType),
-          AreaCode: formData.areaCode,
-          Number: formData.phoneNumber,
+          AreaCode: onlyDigits(formData.areaCode),
+          Number: onlyDigits(formData.phoneNumber),
           IsMain: true,
         },
       ],
@@ -185,7 +189,11 @@ export default function Edicao() {
                 <Label>CPF</Label>
               </DivLabel>
               <InputSing
-                {...register("cpf")}
+                {...register("cpf", {
+                  onChange: (e) => {
+                    e.target.value = maskCpf(e.target.value);
+                  },
+                })}
                 placeholder="000.000.000-00"
                 readOnly
               />
@@ -212,8 +220,13 @@ export default function Edicao() {
                 <Label>DDD</Label>
               </DivLabel>
               <InputSing
-                {...register("areaCode")}
+                {...register("areaCode", {
+                  onChange: (e) => {
+                    e.target.value = maskAreaCode(e.target.value);
+                  },
+                })}
                 placeholder="Digite o DDD do telefone"
+                maxLength={2}
               />
               {errors.areaCode && (
                 <span style={{ color: "red" }}>{errors.areaCode.message}</span>
@@ -245,7 +258,11 @@ export default function Edicao() {
               <Label>Telefone</Label>
             </DivLabel>
             <InputSing
-              {...register("phoneNumber")}
+              {...register("phoneNumber", {
+                onChange: (e) => {
+                  e.target.value = maskPhone(e.target.value);
+                },
+              })}
               placeholder="Digite o telefone"
             />
             {errors.phoneNumber && (
