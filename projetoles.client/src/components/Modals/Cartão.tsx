@@ -61,7 +61,9 @@ const ModalCartao = ({
     resolver: yupResolver(cardSchema),
   });
 
-  const { data, refetch } = GetAllCLientCardsRequest(uuid);
+  const { data, refetch } = uuid
+    ? GetAllCLientCardsRequest(uuid)
+    : { data: null, refetch: () => Promise.resolve() };
   const { data: cardBrands, isLoading } = GetCardBrandRequest();
 
   const cardOptions =
@@ -84,7 +86,6 @@ const ModalCartao = ({
       };
 
       const response = await createCreditCard(uuid, payload);
-      await refetch();
 
       console.log("Cartão cadastrado com sucesso:", response);
       next();

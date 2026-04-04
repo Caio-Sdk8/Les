@@ -41,6 +41,7 @@ import {
 } from "./style";
 import { useEffect, useMemo, useState } from "react";
 import ModalCartao from "../../components/Modals/Cartão";
+import ModalEndereco from "../../components/Modals/Endereco";
 import QuantitySelector from "../../components/Quantidade/Quantidade";
 import { AppShell } from "../../components/AppShell/AppShell";
 import {
@@ -55,19 +56,28 @@ import {
   type CheckoutAddressOption,
   type CheckoutCardOption,
 } from "../../services/transactions/transactionService";
+import { authService } from "../../services/auth/authService";
 
 type CartLine = ProductSummary & { quantity: number };
 
 export default function Carrinho() {
   const [modalCartao, setModalCartao] = useState(false);
+  const [modalEndereco, setModalEndereco] = useState(false);
   const navigate = useNavigate();
+  const userUuid = authService.getUser()?.uuid;
   const [catalog, setCatalog] = useState<ProductSummary[]>([]);
-  const [availableAddresses, setAvailableAddresses] = useState<CheckoutAddressOption[]>([]);
-  const [availableCards, setAvailableCards] = useState<CheckoutCardOption[]>([]);
+  const [availableAddresses, setAvailableAddresses] = useState<
+    CheckoutAddressOption[]
+  >([]);
+  const [availableCards, setAvailableCards] = useState<CheckoutCardOption[]>(
+    [],
+  );
   const [checkoutDataError, setCheckoutDataError] = useState("");
   const [cartUuids, setCartUuids] = useState(() => cartService.getItems());
   const [quantities, setQuantities] = useState<Record<string, number>>({});
-  const [interactionAlerts, setInteractionAlerts] = useState<DrugInteractionAlert[]>([]);
+  const [interactionAlerts, setInteractionAlerts] = useState<
+    DrugInteractionAlert[]
+  >([]);
   const [interactionLoading, setInteractionLoading] = useState(false);
   const [interactionError, setInteractionError] = useState("");
 
@@ -80,9 +90,55 @@ export default function Carrinho() {
   const [firstCardAmount, setFirstCardAmount] = useState(0);
   const [secondCardAmount, setSecondCardAmount] = useState(0);
   const [prescriptionFileName, setPrescriptionFileName] = useState("");
-  const [prescriptionFileContentType, setPrescriptionFileContentType] = useState("");
+  const [prescriptionFileContentType, setPrescriptionFileContentType] =
+    useState("");
   const [prescriptionFileBase64, setPrescriptionFileBase64] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const loadCheckoutData = async () => {
+    try {
+      setCheckoutDataError("");
+      const [addresses, cards] = await Promise.all([
+        transactionService.getMyCheckoutAddresses(),
+        transactionService.getMyCheckoutCards(),
+      ]);
+
+      const activeAddresses = addresses.filter((address) => address.isActive);
+      const activeCards = cards.filter((card) => card.isActive);
+
+      setAvailableAddresses(activeAddresses);
+      setAvailableCards(activeCards);
+
+      if (!addressId && activeAddresses.length > 0) {
+        setAddressId(activeAddresses[0].uuid);
+      }
+
+      const preferredCard = activeCards.find((card) => card.isPreferred);
+      const fallbackCard = activeCards[0];
+      const defaultCardId = (preferredCard ?? fallbackCard)?.uuid ?? "";
+
+      if (!singleCardId && defaultCardId) {
+        setSingleCardId(defaultCardId);
+      }
+
+      if (!firstCardId && defaultCardId) {
+        setFirstCardId(defaultCardId);
+      }
+
+      if (!secondCardId && activeCards.length > 1) {
+        const second = activeCards.find((card) => card.uuid !== defaultCardId);
+        if (second) {
+          setSecondCardId(second.uuid);
+        }
+      }
+    } catch {
+      setAvailableAddresses([]);
+      setAvailableCards([]);
+      setCheckoutDataError(
+        "Não foi possível carregar seus endereços e cartões cadastrados.",
+      );
+    }
+  };
 
   useEffect(() => {
     let cancelled = false;
@@ -94,7 +150,11 @@ export default function Carrinho() {
         const all: ProductSummary[] = [];
 
         while (true) {
-          const result = await productService.getProducts({ page, pageSize, isActive: true });
+          const result = await productService.getProducts({
+            page,
+            pageSize,
+            isActive: true,
+          });
           all.push(...result.items);
           if (!result.hasNextPage) break;
           page += 1;
@@ -115,52 +175,6 @@ export default function Carrinho() {
   useEffect(() => {
     let cancelled = false;
 
-    const loadCheckoutData = async () => {
-      try {
-        setCheckoutDataError("");
-        const [addresses, cards] = await Promise.all([
-          transactionService.getMyCheckoutAddresses(),
-          transactionService.getMyCheckoutCards(),
-        ]);
-
-        if (cancelled) return;
-
-        const activeAddresses = addresses.filter((address) => address.isActive);
-        const activeCards = cards.filter((card) => card.isActive);
-
-        setAvailableAddresses(activeAddresses);
-        setAvailableCards(activeCards);
-
-        if (!addressId && activeAddresses.length > 0) {
-          setAddressId(activeAddresses[0].uuid);
-        }
-
-        const preferredCard = activeCards.find((card) => card.isPreferred);
-        const fallbackCard = activeCards[0];
-        const defaultCardId = (preferredCard ?? fallbackCard)?.uuid ?? "";
-
-        if (!singleCardId && defaultCardId) {
-          setSingleCardId(defaultCardId);
-        }
-
-        if (!firstCardId && defaultCardId) {
-          setFirstCardId(defaultCardId);
-        }
-
-        if (!secondCardId && activeCards.length > 1) {
-          const second = activeCards.find((card) => card.uuid !== defaultCardId);
-          if (second) {
-            setSecondCardId(second.uuid);
-          }
-        }
-      } catch {
-        if (cancelled) return;
-        setAvailableAddresses([]);
-        setAvailableCards([]);
-        setCheckoutDataError("Não foi possível carregar seus endereços e cartões cadastrados.");
-      }
-    };
-
     void loadCheckoutData();
 
     return () => {
@@ -174,8 +188,8 @@ export default function Carrinho() {
     setQuantities(
       fromStorage.reduce(
         (acc, item) => ({ ...acc, [item.productUuid]: item.quantity }),
-        {} as Record<string, number>
-      )
+        {} as Record<string, number>,
+      ),
     );
   }, []);
 
@@ -198,7 +212,9 @@ export default function Carrinho() {
   }, [catalog, cartUuids, quantities]);
 
   useEffect(() => {
-    const uniqueUuids = Array.from(new Set(cartProducts.map((item) => item.uuid)));
+    const uniqueUuids = Array.from(
+      new Set(cartProducts.map((item) => item.uuid)),
+    );
 
     if (uniqueUuids.length < 2) {
       setInteractionAlerts([]);
@@ -216,7 +232,9 @@ export default function Carrinho() {
       } catch {
         if (!cancelled) {
           setInteractionAlerts([]);
-          setInteractionError("Não foi possível validar interações medicamentosas no momento.");
+          setInteractionError(
+            "Não foi possível validar interações medicamentosas no momento.",
+          );
         }
       } finally {
         if (!cancelled) setInteractionLoading(false);
@@ -232,7 +250,9 @@ export default function Carrinho() {
   const handleSalvar = async () => {
     if (cartProducts.length === 0) return;
 
-    const selectedAddress = availableAddresses.find((address) => address.uuid === addressId);
+    const selectedAddress = availableAddresses.find(
+      (address) => address.uuid === addressId,
+    );
     const addressLabel = selectedAddress
       ? `${selectedAddress.label || `${selectedAddress.city}/${selectedAddress.state}`} - ${selectedAddress.zipCode}`
       : "Endereço selecionado no checkout";
@@ -255,7 +275,8 @@ export default function Carrinho() {
         addressUuid: addressId || undefined,
         couponCode: coupon || "sem",
         singleCardLabel,
-        singleCardUuid: paymentType === "credito1" ? singleCardId || undefined : undefined,
+        singleCardUuid:
+          paymentType === "credito1" ? singleCardId || undefined : undefined,
         splitPayment:
           paymentType === "credito2"
             ? {
@@ -297,8 +318,10 @@ export default function Carrinho() {
   };
 
   const subtotal = cartProducts.reduce(
-    (total, product) => total + product.salePrice * (quantities[product.uuid] ?? product.quantity),
-    0
+    (total, product) =>
+      total +
+      product.salePrice * (quantities[product.uuid] ?? product.quantity),
+    0,
   );
   const shipping = subtotal >= 80 ? 0 : 8.9;
   const couponDiscount =
@@ -319,9 +342,10 @@ export default function Carrinho() {
   const requiresPrescriptionValidation = cartProducts.some(
     (product) =>
       product.prescriptionType === PrescriptionType.TarjaVermelha ||
-      product.prescriptionType === PrescriptionType.TarjaPreta
+      product.prescriptionType === PrescriptionType.TarjaPreta,
   );
-  const prescriptionIsValid = !requiresPrescriptionValidation || prescriptionFileName.length > 0;
+  const prescriptionIsValid =
+    !requiresPrescriptionValidation || prescriptionFileName.length > 0;
   const minCardAmount = hasCoupon ? 0.01 : 10;
 
   const twoCardsAreValid =
@@ -333,17 +357,14 @@ export default function Carrinho() {
     Math.abs(splitSum - total) < 0.01;
 
   const oneCardIsValid =
-    !isOneCard ||
-    (singleCardId.length > 0 && (hasCoupon || total >= 10));
+    !isOneCard || (singleCardId.length > 0 && (hasCoupon || total >= 10));
 
   const checkoutIsValid =
     cartProducts.length > 0 &&
     addressId.length > 0 &&
     paymentType.length > 0 &&
     prescriptionIsValid &&
-    (isPixOrDebit ||
-      oneCardIsValid ||
-      (isTwoCards && twoCardsAreValid));
+    (isPixOrDebit || oneCardIsValid || (isTwoCards && twoCardsAreValid));
 
   const formatCurrency = (value: number) =>
     value.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
@@ -351,7 +372,9 @@ export default function Carrinho() {
   const splitHelperText =
     paymentType === "credito2" && Math.abs(splitSum - total) >= 0.01
       ? `A soma dos cartões deve ser ${formatCurrency(total)}.`
-      : paymentType === "credito2" && !hasCoupon && (firstCardAmount < 10 || secondCardAmount < 10)
+      : paymentType === "credito2" &&
+          !hasCoupon &&
+          (firstCardAmount < 10 || secondCardAmount < 10)
         ? "Sem cupom aplicado, cada cartão deve ter no mínimo R$ 10,00."
         : "";
 
@@ -373,7 +396,9 @@ export default function Carrinho() {
     setFirstCardAmount(Math.max(0, Number((total - normalized).toFixed(2))));
   };
 
-  const handlePrescriptionUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handlePrescriptionUpload = async (
+    event: React.ChangeEvent<HTMLInputElement>,
+  ) => {
     const file = event.target.files?.[0];
     if (!file) {
       setPrescriptionFileName("");
@@ -390,7 +415,8 @@ export default function Carrinho() {
           const payload = result.includes(",") ? result.split(",")[1] : "";
           resolve(payload);
         };
-        reader.onerror = () => reject(new Error("Falha ao ler arquivo de receita."));
+        reader.onerror = () =>
+          reject(new Error("Falha ao ler arquivo de receita."));
         reader.readAsDataURL(file);
       });
 
@@ -409,8 +435,8 @@ export default function Carrinho() {
       <HeroCard>
         <HeroTitle>Revise seus itens antes de finalizar</HeroTitle>
         <HeroDescription>
-          Confira produtos, endereço de entrega e forma de pagamento em um
-          fluxo mais rápido e organizado.
+          Confira produtos, endereço de entrega e forma de pagamento em um fluxo
+          mais rápido e organizado.
         </HeroDescription>
       </HeroCard>
 
@@ -438,7 +464,9 @@ export default function Carrinho() {
                     Selecione a forma de pagamento
                   </option>
                   <option value="credito1">Cartão de crédito (1 cartão)</option>
-                  <option value="credito2">Cartão de crédito (2 cartões)</option>
+                  <option value="credito2">
+                    Cartão de crédito (2 cartões)
+                  </option>
                   <option value="debito">Cartão de débito</option>
                   <option value="pix">PIX</option>
                 </FieldSelect>
@@ -448,14 +476,22 @@ export default function Carrinho() {
                 <FieldLabel>Endereço</FieldLabel>
                 <FieldSelect
                   value={addressId}
-                  onChange={(event) => setAddressId(event.target.value)}
+                  onChange={(event) => {
+                    const value = event.target.value;
+                    if (value === "add-address") {
+                      setModalEndereco(true);
+                    } else {
+                      setAddressId(value);
+                    }
+                  }}
                 >
                   <option value="" disabled>
                     Selecione o endereço
                   </option>
+                  <option value="add-address">Adicionar Endereço</option>
                   {availableAddresses.map((address) => (
                     <option key={address.uuid} value={address.uuid}>
-                      {address.label || `${address.city} - ${address.state}`} • {" "}
+                      {address.label || `${address.city} - ${address.state}`} •{" "}
                       {address.zipCode}
                     </option>
                   ))}
@@ -477,10 +513,14 @@ export default function Carrinho() {
                   <option value="troca30">TROCA30</option>
                 </FieldSelect>
                 {coupon === "semana10" && (
-                  <InlineHint>RN0033: apenas um cupom promocional por compra.</InlineHint>
+                  <InlineHint>
+                    RN0033: apenas um cupom promocional por compra.
+                  </InlineHint>
                 )}
                 {coupon === "troca30" && (
-                  <InlineHint>Cupom de troca (protótipo): abate até R$ 30,00 do total.</InlineHint>
+                  <InlineHint>
+                    Cupom de troca (protótipo): abate até R$ 30,00 do total.
+                  </InlineHint>
                 )}
               </FieldGroup>
 
@@ -489,14 +529,23 @@ export default function Carrinho() {
                   <FieldLabel>Cartão cadastrado</FieldLabel>
                   <FieldSelect
                     value={singleCardId}
-                    onChange={(event) => setSingleCardId(event.target.value)}
+                    onChange={(event) => {
+                      const value = event.target.value;
+                      if (value === "add-card") {
+                        setModalCartao(true);
+                      } else {
+                        setSingleCardId(value);
+                      }
+                    }}
                   >
                     <option value="" disabled>
                       Selecione um cartão
                     </option>
+                    <option value="add-card">Adicionar Cartão</option>
                     {availableCards.map((card) => (
                       <option key={card.uuid} value={card.uuid}>
-                        {card.cardBrandName.toUpperCase()} {card.maskedCardNumber}
+                        {card.cardBrandName.toUpperCase()}{" "}
+                        {card.maskedCardNumber}
                       </option>
                     ))}
                   </FieldSelect>
@@ -511,14 +560,23 @@ export default function Carrinho() {
                     <FieldLabel>Cartão 1</FieldLabel>
                     <FieldSelect
                       value={firstCardId}
-                      onChange={(event) => setFirstCardId(event.target.value)}
+                      onChange={(event) => {
+                        const value = event.target.value;
+                        if (value === "add-card") {
+                          setModalCartao(true);
+                        } else {
+                          setFirstCardId(value);
+                        }
+                      }}
                     >
                       <option value="" disabled>
                         Selecione o primeiro cartão
                       </option>
+                      <option value="add-card">Adicionar Cartão</option>
                       {availableCards.map((card) => (
                         <option key={card.uuid} value={card.uuid}>
-                          {card.cardBrandName.toUpperCase()} {card.maskedCardNumber}
+                          {card.cardBrandName.toUpperCase()}{" "}
+                          {card.maskedCardNumber}
                         </option>
                       ))}
                     </FieldSelect>
@@ -531,7 +589,9 @@ export default function Carrinho() {
                       type="number"
                       min={0}
                       step="0.01"
-                      value={Number.isNaN(firstCardAmount) ? 0 : firstCardAmount}
+                      value={
+                        Number.isNaN(firstCardAmount) ? 0 : firstCardAmount
+                      }
                       onChange={(event) =>
                         setSplitByFirstCard(Number(event.target.value))
                       }
@@ -542,14 +602,23 @@ export default function Carrinho() {
                     <FieldLabel>Cartão 2</FieldLabel>
                     <FieldSelect
                       value={secondCardId}
-                      onChange={(event) => setSecondCardId(event.target.value)}
+                      onChange={(event) => {
+                        const value = event.target.value;
+                        if (value === "add-card") {
+                          setModalCartao(true);
+                        } else {
+                          setSecondCardId(value);
+                        }
+                      }}
                     >
                       <option value="" disabled>
                         Selecione o segundo cartão
                       </option>
+                      <option value="add-card">Adicionar Cartão</option>
                       {availableCards.map((card) => (
                         <option key={card.uuid} value={card.uuid}>
-                          {card.cardBrandName.toUpperCase()} {card.maskedCardNumber}
+                          {card.cardBrandName.toUpperCase()}{" "}
+                          {card.maskedCardNumber}
                         </option>
                       ))}
                     </FieldSelect>
@@ -562,7 +631,9 @@ export default function Carrinho() {
                       type="number"
                       min={0}
                       step="0.01"
-                      value={Number.isNaN(secondCardAmount) ? 0 : secondCardAmount}
+                      value={
+                        Number.isNaN(secondCardAmount) ? 0 : secondCardAmount
+                      }
                       onChange={(event) =>
                         setSplitBySecondCard(Number(event.target.value))
                       }
@@ -584,7 +655,8 @@ export default function Carrinho() {
 
               <RulePanel>
                 <RuleText>
-                  Este pedido possui medicamento sob prescrição. Envie a receita para análise farmacêutica após a finalização do pedido.
+                  Este pedido possui medicamento sob prescrição. Envie a receita
+                  para análise farmacêutica após a finalização do pedido.
                 </RuleText>
 
                 <FieldGroup>
@@ -594,7 +666,11 @@ export default function Carrinho() {
                     accept="image/*,.pdf"
                     onChange={handlePrescriptionUpload}
                   />
-                  {prescriptionFileName && <InlineHint>Arquivo selecionado: {prescriptionFileName}</InlineHint>}
+                  {prescriptionFileName && (
+                    <InlineHint>
+                      Arquivo selecionado: {prescriptionFileName}
+                    </InlineHint>
+                  )}
                 </FieldGroup>
               </RulePanel>
             </SectionCard>
@@ -605,7 +681,8 @@ export default function Carrinho() {
             <CartItemsSection>
               {cartProducts.length === 0 && (
                 <CartEmptyState>
-                  Seu carrinho está vazio no momento. Volte para a loja e adicione alguns produtos.
+                  Seu carrinho está vazio no momento. Volte para a loja e
+                  adicione alguns produtos.
                 </CartEmptyState>
               )}
 
@@ -623,8 +700,13 @@ export default function Carrinho() {
 
                   <CartItemInfo>
                     <strong>{product.name}</strong>
-                    <CartItemMeta>{product.activePrinciple || "Princípio ativo não informado"}</CartItemMeta>
-                    <CartItemMeta>{formatCurrency(product.salePrice)}</CartItemMeta>
+                    <CartItemMeta>
+                      {product.activePrinciple ||
+                        "Princípio ativo não informado"}
+                    </CartItemMeta>
+                    <CartItemMeta>
+                      {formatCurrency(product.salePrice)}
+                    </CartItemMeta>
                   </CartItemInfo>
 
                   <QuantitySelector
@@ -635,7 +717,10 @@ export default function Carrinho() {
                     onChange={(value) => updateQuantity(product.uuid, value)}
                   />
 
-                  <RemoveItemButton type="button" onClick={() => removeFromCart(product.uuid)}>
+                  <RemoveItemButton
+                    type="button"
+                    onClick={() => removeFromCart(product.uuid)}
+                  >
                     Remover
                   </RemoveItemButton>
                 </CartItem>
@@ -646,19 +731,36 @@ export default function Carrinho() {
           <SectionCard>
             <CartTitle>Interações medicamentosas (automático)</CartTitle>
 
-            {interactionLoading && <AlertText>Validando interações entre os itens do carrinho...</AlertText>}
+            {interactionLoading && (
+              <AlertText>
+                Validando interações entre os itens do carrinho...
+              </AlertText>
+            )}
             {interactionError && <AlertText>{interactionError}</AlertText>}
 
-            {!interactionLoading && !interactionError && interactionAlerts.length === 0 && cartProducts.length >= 2 && (
-              <CartEmptyState>Nenhuma interação medicamentosa relevante encontrada entre os itens atuais.</CartEmptyState>
-            )}
+            {!interactionLoading &&
+              !interactionError &&
+              interactionAlerts.length === 0 &&
+              cartProducts.length >= 2 && (
+                <CartEmptyState>
+                  Nenhuma interação medicamentosa relevante encontrada entre os
+                  itens atuais.
+                </CartEmptyState>
+              )}
 
             {!interactionLoading && interactionAlerts.length > 0 && (
               <InteractionList>
                 {interactionAlerts.map((alert, index) => (
-                  <InteractionAlert key={`${alert.productAUuid}-${alert.productBUuid}-${index}`} $severity={alert.severityLevel}>
+                  <InteractionAlert
+                    key={`${alert.productAUuid}-${alert.productBUuid}-${index}`}
+                    $severity={alert.severityLevel}
+                  >
                     <InteractionAlertTitle>
-                      {alert.severityLevel >= 3 ? "ALTA" : alert.severityLevel === 2 ? "MÉDIA" : "BAIXA"}
+                      {alert.severityLevel >= 3
+                        ? "ALTA"
+                        : alert.severityLevel === 2
+                          ? "MÉDIA"
+                          : "BAIXA"}
                     </InteractionAlertTitle>
                     <InteractionMeta>
                       {alert.productAName} + {alert.productBName}
@@ -683,7 +785,9 @@ export default function Carrinho() {
           </SummaryRow>
           <SummaryRow>
             <span>Desconto</span>
-            <span>{couponDiscount > 0 ? `- ${formatCurrency(couponDiscount)}` : "-"}</span>
+            <span>
+              {couponDiscount > 0 ? `- ${formatCurrency(couponDiscount)}` : "-"}
+            </span>
           </SummaryRow>
           <SummaryDivider />
           <SummaryRow>
@@ -703,13 +807,15 @@ export default function Carrinho() {
               <SummaryRow>
                 <InlineHint>Cartão 1</InlineHint>
                 <InlineValue>
-                  {formatCardLabel(firstCardId)} • {formatCurrency(firstCardAmount)}
+                  {formatCardLabel(firstCardId)} •{" "}
+                  {formatCurrency(firstCardAmount)}
                 </InlineValue>
               </SummaryRow>
               <SummaryRow>
                 <InlineHint>Cartão 2</InlineHint>
                 <InlineValue>
-                  {formatCardLabel(secondCardId)} • {formatCurrency(secondCardAmount)}
+                  {formatCardLabel(secondCardId)} •{" "}
+                  {formatCurrency(secondCardAmount)}
                 </InlineValue>
               </SummaryRow>
             </>
@@ -725,13 +831,15 @@ export default function Carrinho() {
 
           {isOneCard && !hasCoupon && total > 0 && total < 10 && (
             <AlertText>
-              Sem cupom aplicado, compras no cartão único exigem valor mínimo de R$ 10,00.
+              Sem cupom aplicado, compras no cartão único exigem valor mínimo de
+              R$ 10,00.
             </AlertText>
           )}
 
           {requiresPrescriptionValidation && !prescriptionIsValid && (
             <AlertText>
-              Anexe a receita para finalizar o pedido com medicamento sob prescrição.
+              Anexe a receita para finalizar o pedido com medicamento sob
+              prescrição.
             </AlertText>
           )}
 
@@ -750,12 +858,29 @@ export default function Carrinho() {
 
       {modalCartao && (
         <ModalCartao
-          uuid=""
-          next={() => setModalCartao(false)}
+          uuid={userUuid || ""}
+          next={() => {
+            loadCheckoutData();
+            setModalCartao(false);
+          }}
           title="Cadastro de cartão"
           button="Cadastrar"
           button2="Cancelar"
           back={() => setModalCartao(false)}
+        />
+      )}
+
+      {modalEndereco && (
+        <ModalEndereco
+          uuid={userUuid || ""}
+          next={() => {
+            loadCheckoutData();
+            setModalEndereco(false);
+          }}
+          title="Cadastro de endereço"
+          button="Cadastrar"
+          button2="Cancelar"
+          back={() => setModalEndereco(false)}
         />
       )}
     </AppShell>
