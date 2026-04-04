@@ -111,7 +111,9 @@ const ListagemCliente = () => {
                           checked={usuario.isActive}
                           onChange={() => {
                             if (!isAdmin) {
-                              notifyApiError("Apenas administradores podem alterar status do cliente.");
+                              notifyApiError(
+                                "Apenas administradores podem alterar status do cliente.",
+                              );
                               return;
                             }
 
@@ -124,17 +126,22 @@ const ListagemCliente = () => {
                             }
                           }}
                         />
-                        <img
-                          src={PencilIcon}
-                          alt="Editar"
-                          onClick={() => handleEdit(String(usuario.uuid), usuario.isActive)}
-                          style={{
-                            width: "24px",
-                            height: "24px",
-                            cursor: "pointer",
-                            opacity: usuario.isActive ? 1 : 0.45,
-                          }}
-                        />
+                        {usuario.isActive === true && (
+                          <img
+                            src={PencilIcon}
+                            alt="Editar"
+                            onClick={() =>
+                              handleEdit(String(usuario.uuid), usuario.isActive)
+                            }
+                            style={{
+                              width: "24px",
+                              height: "24px",
+                              cursor: "pointer",
+                              opacity: usuario.isActive ? 1 : 0.45,
+                            }}
+                          />
+                        )}
+
                         <img
                           src={CarrinhoIcon}
                           alt="Pedidos"
@@ -150,10 +157,7 @@ const ListagemCliente = () => {
                         <button
                           type="button"
                           onClick={() =>
-                            handleDelete(
-                              String(usuario.uuid),
-                              usuario.name,
-                            )
+                            handleDelete(String(usuario.uuid), usuario.name)
                           }
                           disabled={!isAdmin}
                           style={{
