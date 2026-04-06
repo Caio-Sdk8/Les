@@ -32,16 +32,19 @@ function pagedResult(items) {
 describe("Listagem de clientes - front", () => {
   beforeEach(() => {
     cy.viewport(1280, 900);
+
+    cy.intercept("GET", "**/api/transactions/after-sales-requests*", {
+      statusCode: 200,
+      body: [],
+    }).as("afterSales");
   });
 
   it("exibe a listagem dos clientes integrados no front", () => {
     const currentCustomers = [{ ...baseCustomer }];
 
-    cy.intercept("GET", "**/api/customers", (req) => {
-      req.reply({
-        statusCode: 200,
-        body: pagedResult(currentCustomers),
-      });
+    cy.intercept("GET", "**/api/customers*", {
+      statusCode: 200,
+      body: pagedResult(currentCustomers),
     }).as("getCustomers");
 
     cy.visit("/clientes", {
@@ -57,30 +60,22 @@ describe("Listagem de clientes - front", () => {
     cy.contains("joao@cliente.com").should("be.visible");
     cy.contains("CLI-001").should("be.visible");
     cy.get('img[alt="Editar"]').should("have.length", 1);
-    cy.get('img[alt="Transações"]').should("have.length", 1);
+    cy.get('img[alt="Pedidos"]').should("have.length", 1);
   });
 
   it("permite desativar e reativar um cliente pela listagem", () => {
-    let currentCustomers = [{ ...baseCustomer, isActive: true }];
+    let isActive = true;
 
-    cy.intercept("GET", "**/api/customers", (req) => {
+    cy.intercept("GET", "**/api/customers*", (req) => {
       req.reply({
         statusCode: 200,
-        body: pagedResult(currentCustomers),
+        body: pagedResult([{ ...baseCustomer, isActive }]),
       });
     }).as("getCustomers");
 
     cy.intercept("PATCH", "**/api/customers/*/toggle-active", (req) => {
-      currentCustomers = currentCustomers.map((customer) =>
-        customer.uuid === baseCustomer.uuid
-          ? { ...customer, isActive: !customer.isActive }
-          : customer,
-      );
-
-      req.reply({
-        statusCode: 200,
-        body: { success: true },
-      });
+      isActive = !isActive;
+      req.reply({ statusCode: 200, body: { success: true } });
     }).as("toggleCustomer");
 
     cy.visit("/clientes", {

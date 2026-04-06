@@ -27,6 +27,7 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import { createCreditCard } from "../../services/requests/sinCredit";
 import { GetCardBrandRequest } from "../../services/requests/getCardBrand";
 import { GetAllCLientCardsRequest } from "../../services/requests/getCardClient";
+import { useQueryClient } from "@tanstack/react-query";
 
 type Props = {
   back?: () => void;
@@ -72,6 +73,8 @@ const ModalCartao = ({
       value: item.uuid,
     })) ?? [];
 
+  const queryClient = useQueryClient();
+
   const onSubmit = async (formData: CardFormData) => {
     try {
       if (!uuid) return;
@@ -85,9 +88,12 @@ const ModalCartao = ({
         IsPreferred: true,
       };
 
-      const response = await createCreditCard(uuid, payload);
+      await createCreditCard(uuid, payload);
 
-      console.log("Cartão cadastrado com sucesso:", response);
+      await queryClient.invalidateQueries({
+        queryKey: ["GetAllCLientCards", uuid],
+      });
+
       next();
     } catch (error) {
       console.error("Erro ao cadastrar cartão:", error);

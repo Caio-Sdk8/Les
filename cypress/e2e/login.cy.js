@@ -12,6 +12,11 @@ describe("Login - front", () => {
   });
 
   it("faz login como admin e redireciona para a listagem de clientes", () => {
+    cy.intercept("GET", "**/api/transactions/after-sales-requests*", {
+      statusCode: 200,
+      body: [],
+    }).as("afterSales");
+
     cy.intercept("POST", "**/api/auth/login", (req) => {
       expect(req.body).to.deep.equal({
         email: "admin@pharmapro.com",

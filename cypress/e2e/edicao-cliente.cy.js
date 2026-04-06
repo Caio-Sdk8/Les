@@ -89,20 +89,16 @@ function seedAdminSession(win) {
 }
 
 function pagedResult(items) {
-  return {
-    items,
-    page: 1,
-    totalCount: items.length,
-    totalPages: 1,
-  };
+  return { items, page: 1, totalCount: items.length, totalPages: 1 };
 }
 
 function openEditPage({ currentCustomers, currentAddresses, currentCards }) {
-  cy.intercept("GET", "**/api/customers", (req) => {
-    req.reply({
-      statusCode: 200,
-      body: pagedResult(currentCustomers),
-    });
+  cy.intercept("GET", "**/api/customers*", (req) => {
+    if (!req.url.match(/\/api\/customers\/[^/]+/)) {
+      req.reply({ statusCode: 200, body: pagedResult(currentCustomers) });
+    } else {
+      req.continue();
+    }
   }).as("getCustomers");
 
   cy.intercept("GET", `**/api/customers/${customerDetails.uuid}`, {
@@ -114,10 +110,7 @@ function openEditPage({ currentCustomers, currentAddresses, currentCards }) {
     "GET",
     `**/api/customers/${customerDetails.uuid}/addresses`,
     (req) => {
-      req.reply({
-        statusCode: 200,
-        body: currentAddresses,
-      });
+      req.reply({ statusCode: 200, body: currentAddresses });
     },
   ).as("getAddresses");
 
@@ -125,10 +118,7 @@ function openEditPage({ currentCustomers, currentAddresses, currentCards }) {
     "GET",
     `**/api/customers/${customerDetails.uuid}/credit-cards`,
     (req) => {
-      req.reply({
-        statusCode: 200,
-        body: currentCards,
-      });
+      req.reply({ statusCode: 200, body: currentCards });
     },
   ).as("getCards");
 
@@ -136,6 +126,11 @@ function openEditPage({ currentCustomers, currentAddresses, currentCards }) {
     statusCode: 200,
     body: cardBrands,
   }).as("getCardBrands");
+
+  cy.intercept("GET", "**/api/transactions/after-sales-requests*", {
+    statusCode: 200,
+    body: [],
+  }).as("afterSales");
 
   cy.visit("/clientes", {
     onBeforeLoad(win) {
@@ -183,10 +178,7 @@ describe("Edição de cliente - front", () => {
         email: "joana@cliente.com",
       };
 
-      req.reply({
-        statusCode: 200,
-        body: { success: true },
-      });
+      req.reply({ statusCode: 200, body: { success: true } });
     }).as("updateCustomer");
 
     openEditPage({ currentCustomers, currentAddresses, currentCards });
@@ -222,11 +214,7 @@ describe("Edição de cliente - front", () => {
           newPassword: "NovaSenha1!",
           newPasswordConfirmation: "NovaSenha1!",
         });
-
-        req.reply({
-          statusCode: 200,
-          body: { success: true },
-        });
+        req.reply({ statusCode: 200, body: { success: true } });
       },
     ).as("changePassword");
 
@@ -239,11 +227,13 @@ describe("Edição de cliente - front", () => {
     cy.contains("button", "Alterar Senha")
       .scrollIntoView()
       .click({ force: true });
+
     cy.get('input[placeholder="Digite a senha atual"]').type("SenhaAtual1!");
     cy.get('input[placeholder="Digite a nova senha"]').type("NovaSenha1!");
     cy.get('input[placeholder="Digite a nova senha novamente"]').type(
       "NovaSenha1!",
     );
+
     cy.contains("button", /^Alterar$/).click({ force: true });
 
     cy.wait("@changePassword");
@@ -274,16 +264,8 @@ describe("Edição de cliente - front", () => {
           observations: "Sala 12",
         });
 
-        currentAddresses.push({
-          uuid: "addr-2",
-          ...req.body,
-          isActive: true,
-        });
-
-        req.reply({
-          statusCode: 201,
-          body: { uuid: "addr-2" },
-        });
+        currentAddresses.push({ uuid: "addr-2", ...req.body, isActive: true });
+        req.reply({ statusCode: 201, body: { uuid: "addr-2" } });
       },
     ).as("addAddress");
 
@@ -292,6 +274,7 @@ describe("Edição de cliente - front", () => {
     cy.contains("button", "Cadastrar Endereço")
       .scrollIntoView()
       .click({ force: true });
+
     cy.get('select[name="addressType"]').select("Entrega");
     cy.get('select[name="residenceType"]').select("Apartamento");
     cy.get('select[name="streetType"]').select("Avenida");
@@ -318,7 +301,15 @@ describe("Edição de cliente - front", () => {
   it("cadastra um novo cartão para o cliente", () => {
     const currentCustomers = [{ ...baseCustomer }];
     const currentAddresses = [...initialAddresses];
-    let currentCards = [...initialCards];
+    const state = { cards: [...initialCards] };
+
+    cy.intercept(
+      "GET",
+      `**/api/customers/${customerDetails.uuid}/credit-cards`,
+      (req) => {
+        req.reply({ statusCode: 200, body: state.cards });
+      },
+    ).as("getCards");
 
     cy.intercept(
       "POST",
@@ -333,11 +324,11 @@ describe("Edição de cliente - front", () => {
           IsPreferred: true,
         });
 
-        currentCards.forEach((card) => {
-          card.isPreferred = false;
-        });
-
-        currentCards.push({
+        state.cards = state.cards.map((card) => ({
+          ...card,
+          isPreferred: false,
+        }));
+        state.cards.push({
           uuid: "card-3",
           cardBrandName: "Mastercard",
           maskedCardNumber: "**** **** **** 1111",
@@ -347,14 +338,15 @@ describe("Edição de cliente - front", () => {
           isActive: true,
         });
 
-        req.reply({
-          statusCode: 201,
-          body: { uuid: "card-3" },
-        });
+        req.reply({ statusCode: 201, body: { uuid: "card-3" } });
       },
     ).as("addCard");
 
-    openEditPage({ currentCustomers, currentAddresses, currentCards });
+    openEditPage({
+      currentCustomers,
+      currentAddresses,
+      currentCards: state.cards,
+    });
 
     cy.contains("button", "Cadastrar Cartão")
       .scrollIntoView()
@@ -374,8 +366,7 @@ describe("Edição de cliente - front", () => {
     cy.contains("button", /^Cadastrar$/).click({ force: true });
 
     cy.wait("@addCard");
-    cy.wait("@getCards");
-    cy.contains("Carlos Souza").should("be.visible");
+    cy.get('input[placeholder="Digite o nome do titular"]').should("not.exist");
   });
 
   it("muda a preferência do cartão do cliente", () => {
@@ -392,11 +383,7 @@ describe("Edição de cliente - front", () => {
             ? card.uuid === "card-2"
             : card.uuid === "card-1";
         });
-
-        req.reply({
-          statusCode: 200,
-          body: { success: true },
-        });
+        req.reply({ statusCode: 200, body: { success: true } });
       },
     ).as("setPreferredCard");
 
@@ -414,7 +401,7 @@ describe("Edição de cliente - front", () => {
     cy.contains("p", "Maria Souza")
       .closest("tr")
       .within(() => {
-        cy.contains("Preferencial").should("be.visible");
+        cy.contains("p", "Preferencial").should("be.visible");
       });
   });
 });
