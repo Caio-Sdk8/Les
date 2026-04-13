@@ -15,12 +15,16 @@ const USER_KEY = "pharma_user";
 
 export const authService = {
   async login(email: string, password: string): Promise<LoginResponse> {
-    const response = await api.post<LoginResponse>("/api/auth/login", {
-      email,
-      password,
-    }, {
-      skipGlobalErrorHandler: true,
-    });
+    const response = await api.post<LoginResponse>(
+      "/api/auth/login",
+      {
+        email,
+        password,
+      },
+      {
+        skipGlobalErrorHandler: true,
+      },
+    );
     authService.saveSession(response.data);
     return response.data;
   },
