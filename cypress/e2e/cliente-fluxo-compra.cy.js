@@ -199,7 +199,13 @@ function mockCartApis(interactions = []) {
   }).as("getCheckoutCards");
 
   cy.intercept("POST", "**/api/products/drug-interactions", (req) => {
-    expect(req.body).to.be.an("array");
+    const requestBody =
+      typeof req.body === "string" ? JSON.parse(req.body) : req.body;
+    const payload = Array.isArray(requestBody)
+      ? requestBody
+      : requestBody?.productUuids;
+
+    expect(payload).to.be.an("array");
     req.reply({ statusCode: 200, body: interactions });
   }).as("checkDrugInteractions");
 }
@@ -523,5 +529,660 @@ describe("Fluxo de compra do cliente - front", () => {
       "Você já possui uma solicitação pendente para este pedido.",
     ).should("be.visible");
     cy.contains("Troca • Pendente").should("be.visible");
+  });
+
+  it("cliente realiza compra com crédito em 2 cartões", () => {
+    mockStoreApis();
+    mockCartApis();
+
+    cy.intercept("POST", "**/api/transactions/checkout", (req) => {
+      expect(req.body.paymentType).to.equal("credito2");
+      expect(req.body.items).to.deep.equal([
+        { productUuid: products.dipirona.uuid, quantity: 2 },
+        { productUuid: products.vitamina.uuid, quantity: 1 },
+      ]);
+      expect(req.body.splitPayment?.firstCardUuid).to.equal("card-1");
+      expect(req.body.splitPayment?.secondCardUuid).to.equal("card-2");
+
+      req.reply({
+        statusCode: 200,
+        body: {
+          transactionUuid: "order-parcelas",
+          transactionCode: "PED-PARCELAS",
+          status: "EM_PROCESSAMENTO",
+          subtotal: 44.4,
+          shipping: 0,
+          discount: 0,
+          total: 44.4,
+          installments: 3,
+        },
+      });
+    }).as("checkoutRequest");
+
+    cy.visit("/carrinho", {
+      onBeforeLoad(win) {
+        seedCustomerSession(win, [
+          { productUuid: products.dipirona.uuid, quantity: 2 },
+          { productUuid: products.vitamina.uuid, quantity: 1 },
+        ]);
+      },
+    });
+
+    cy.wait("@getCheckoutAddresses");
+    cy.wait("@getCheckoutCards");
+
+    cy.get("select").eq(0).select("Cartão de crédito (2 cartões)");
+    cy.get("select").eq(1).select("Casa • 08750000");
+    cy.get("select").eq(3).select("VISA **** 1111");
+    cy.get("select").eq(4).select("MASTERCARD **** 2222");
+
+    cy.contains("button", "Finalizar pedido").click();
+
+    cy.wait("@checkoutRequest");
+    cy.url().should("include", "/loja");
+    cy.window()
+      .its("localStorage")
+      .invoke("getItem", "pharma_cart")
+      .should("equal", null);
+  });
+
+  it("cliente realiza compra com débito", () => {
+    mockStoreApis();
+    mockCartApis();
+
+    cy.intercept("POST", "**/api/transactions/checkout", (req) => {
+      expect(req.body.paymentType).to.equal("debito");
+      expect(req.body.items).to.deep.equal([
+        { productUuid: products.vitamina.uuid, quantity: 1 },
+      ]);
+
+      req.reply({
+        statusCode: 200,
+        body: {
+          transactionUuid: "order-debito",
+          transactionCode: "PED-DEBITO",
+          status: "EM_PROCESSAMENTO",
+          subtotal: 18.9,
+          shipping: 0,
+          discount: 0,
+          total: 18.9,
+        },
+      });
+    }).as("checkoutRequest");
+
+    cy.visit("/carrinho", {
+      onBeforeLoad(win) {
+        seedCustomerSession(win, [
+          { productUuid: products.vitamina.uuid, quantity: 1 },
+        ]);
+      },
+    });
+
+    cy.wait("@getCheckoutAddresses");
+    cy.wait("@getCheckoutCards");
+
+    cy.get("select").eq(0).select("Cartão de débito");
+    cy.get("select").eq(1).select("Casa • 08750000");
+
+    cy.contains("button", "Finalizar pedido").click();
+
+    cy.wait("@checkoutRequest");
+    cy.url().should("include", "/loja");
+  });
+
+  it("cliente realiza compra com PIX", () => {
+    mockStoreApis();
+    mockCartApis();
+
+    cy.intercept("POST", "**/api/transactions/checkout", (req) => {
+      expect(req.body.paymentType).to.equal("pix");
+      expect(req.body.items).to.deep.equal([
+        { productUuid: products.dipirona.uuid, quantity: 1 },
+      ]);
+
+      req.reply({
+        statusCode: 200,
+        body: {
+          transactionUuid: "order-pix",
+          transactionCode: "PED-PIX",
+          status: "AGUARDANDO_PAGAMENTO_PIX",
+          subtotal: 12.5,
+          shipping: 5.0,
+          discount: 0,
+          total: 17.5,
+          pixKey: "00020126580014br.gov.bcb.pix...",
+        },
+      });
+    }).as("checkoutRequest");
+
+    cy.visit("/carrinho", {
+      onBeforeLoad(win) {
+        seedCustomerSession(win, [
+          { productUuid: products.dipirona.uuid, quantity: 1 },
+        ]);
+      },
+    });
+
+    cy.wait("@getCheckoutAddresses");
+    cy.wait("@getCheckoutCards");
+
+    cy.get("select").eq(0).select("PIX");
+    cy.get("select").eq(1).select("Casa • 08750000");
+
+    cy.contains("button", "Finalizar pedido").click();
+
+    cy.wait("@checkoutRequest");
+    cy.url().should("include", "/loja");
+  });
+
+  it("cliente registra novo endereço e cartão no processo de checkout", () => {
+    mockStoreApis();
+
+    let clientAddresses = [...checkoutAddresses];
+    let clientCards = [...checkoutCards];
+
+    cy.intercept("GET", "**/api/customers/me/addresses", (req) => {
+      req.reply({
+        statusCode: 200,
+        body: clientAddresses,
+      });
+    }).as("getCheckoutAddresses");
+
+    cy.intercept("GET", "**/api/customers/customer-1/addresses", (req) => {
+      req.reply({
+        statusCode: 200,
+        body: clientAddresses,
+      });
+    }).as("getCustomerAddressesDirect");
+
+    cy.intercept("POST", "**/api/customers/customer-1/addresses", (req) => {
+      const newAddress = {
+        uuid: "addr-2",
+        label: req.body.label,
+        street: req.body.street,
+        number: req.body.number,
+        city: req.body.city,
+        state: req.body.state,
+        zipCode: req.body.zipCode,
+        isActive: true,
+      };
+
+      clientAddresses.push(newAddress);
+
+      req.reply({
+        statusCode: 201,
+        body: newAddress,
+      });
+    }).as("createAddress");
+
+    cy.intercept("GET", "**/api/customers/me/credit-cards", (req) => {
+      req.reply({
+        statusCode: 200,
+        body: clientCards,
+      });
+    }).as("getCheckoutCards");
+
+    cy.intercept("GET", "**/api/customers/customer-1/credit-cards", (req) => {
+      req.reply({
+        statusCode: 200,
+        body: clientCards,
+      });
+    }).as("getCustomerCardsDirect");
+
+    cy.intercept("GET", "**/api/card-brands", {
+      statusCode: 200,
+      body: [
+        { uuid: "brand-visa", name: "VISA" },
+        { uuid: "brand-mastercard", name: "MASTERCARD" },
+      ],
+    }).as("getCardBrands");
+
+    cy.intercept("POST", "**/api/customers/customer-1/credit-cards", (req) => {
+      const newCard = {
+        uuid: "card-3",
+        cardBrandName: "mastercard",
+        maskedCardNumber: "**** 5678",
+        isPreferred: false,
+        isActive: true,
+      };
+
+      clientCards.push(newCard);
+
+      req.reply({
+        statusCode: 201,
+        body: newCard,
+      });
+    }).as("createCard");
+
+    cy.intercept("POST", "**/api/transactions/checkout", (req) => {
+      expect(req.body.addressUuid).to.equal("addr-2");
+      expect(req.body.singleCardUuid).to.equal("card-3");
+
+      req.reply({
+        statusCode: 200,
+        body: {
+          transactionUuid: "order-novo-endereco",
+          transactionCode: "PED-2026-NOVO",
+          status: "EM_PROCESSAMENTO",
+          subtotal: 31.4,
+          shipping: 15.0,
+          discount: 0,
+          total: 46.4,
+        },
+      });
+    }).as("checkoutRequest");
+
+    cy.visit("/carrinho", {
+      onBeforeLoad(win) {
+        seedCustomerSession(win, [
+          { productUuid: products.dipirona.uuid, quantity: 2 },
+        ]);
+      },
+    });
+
+    cy.wait("@getCheckoutAddresses");
+    cy.wait("@getCheckoutCards");
+
+    cy.get("select").eq(1).select("Adicionar Endereço");
+    cy.get("select[name='addressType']").select("Entrega");
+    cy.get("input[name='label']").type("Trabalho");
+    cy.get("input[name='street']").type("Rua Comercial");
+    cy.get("input[name='number']").type("500");
+    cy.get("input[name='neighborhood']").type("Centro");
+    cy.get("input[name='zipCode']").type("01310100");
+    cy.get("input[name='city']").type("São Paulo");
+    cy.get("input[name='state']").type("SP");
+    cy.contains("button", /^Cadastrar$/).click({ force: true });
+
+    cy.wait("@createAddress");
+    cy.get("select").eq(1).should("contain", "Trabalho");
+
+    cy.get("select").eq(0).select("Cartão de crédito (1 cartão)");
+    cy.contains("button", "Cadastrar cartão").click();
+    cy.wait("@getCardBrands");
+    cy.get("input[name='printedName']").type("CLIENTE TEST");
+    cy.get("input[name='cardNumber']").type("5555555555555678");
+    cy.get("select[name='cardBrandUuid']").select("MASTERCARD");
+    cy.get("input[name='securityCode']").type("456");
+    cy.get("input[name='expirationDate']").type("2028-12-01");
+    cy.contains("button", /^Cadastrar$/).click({ force: true });
+
+    cy.wait("@createCard");
+    cy.contains("Cadastro de cartão").should("not.exist");
+    cy.get("select").eq(3).should("contain", "**** 5678");
+
+    cy.get("select").eq(1).select("Trabalho • 01310100");
+    cy.get("select").eq(3).select("MASTERCARD **** 5678");
+    cy.contains("button", "Finalizar pedido").click();
+
+    cy.wait("@checkoutRequest");
+    cy.url().should("include", "/loja");
+  });
+
+  it("cliente solicita devolução da compra", () => {
+    let orderDetail = {
+      transactionUuid: "order-devolucao",
+      transactionCode: "PED-2026-DEV",
+      status: "ENTREGUE",
+      createdAt: "2026-04-01T10:00:00Z",
+      description: "PED-2026-DEV - Pedido com múltiplos itens",
+      paymentType: "credito1",
+      addressLabel: "Casa - 08750000",
+      subtotal: 63.8,
+      shipping: 10.0,
+      discount: 0,
+      total: 73.8,
+      items: [
+        {
+          productUuid: products.dipirona.uuid,
+          productName: products.dipirona.name,
+          quantity: 2,
+          unitPrice: 12.5,
+          totalPrice: 25.0,
+        },
+        {
+          productUuid: products.vitamina.uuid,
+          productName: products.vitamina.name,
+          quantity: 2,
+          unitPrice: 18.9,
+          totalPrice: 37.8,
+        },
+      ],
+      afterSalesRequests: [],
+    };
+
+    cy.intercept("GET", "**/api/transactions/my*", {
+      statusCode: 200,
+      body: {
+        items: [
+          {
+            id: 1,
+            uuid: "order-devolucao",
+            customerId: 1,
+            amount: 73.8,
+            description: "PED-2026-DEV - Pedido com múltiplos itens",
+            status: "ENTREGUE",
+            createdAt: "2026-04-01T10:00:00Z",
+          },
+        ],
+        totalCount: 1,
+        page: 1,
+        pageSize: 20,
+        totalPages: 1,
+        hasNextPage: false,
+        hasPreviousPage: false,
+      },
+    }).as("getMyOrders");
+
+    cy.intercept("GET", "**/api/transactions/order-devolucao", (req) => {
+      req.reply({
+        statusCode: 200,
+        body: orderDetail,
+      });
+    }).as("getOrderDetail");
+
+    cy.intercept(
+      "POST",
+      "**/api/transactions/order-devolucao/after-sales-requests",
+      (req) => {
+        if (req.body.type === "DEVOLUCAO" && req.body.items.length === 2) {
+          // Devolução total
+          orderDetail.afterSalesRequests.push({
+            requestUuid: "req-total",
+            type: "DEVOLUCAO",
+            status: "PENDENTE",
+            reason: req.body.reason,
+            items: req.body.items,
+            requestedAt: "2026-04-13T12:00:00Z",
+          });
+        } else if (
+          req.body.type === "DEVOLUCAO" &&
+          req.body.items.length === 1
+        ) {
+          // Devolução parcial
+          orderDetail.afterSalesRequests.push({
+            requestUuid: "req-parcial",
+            type: "DEVOLUCAO",
+            status: "PENDENTE",
+            reason: req.body.reason,
+            items: req.body.items,
+            requestedAt: "2026-04-13T13:00:00Z",
+          });
+        }
+
+        req.reply({
+          statusCode: 200,
+          body: orderDetail.afterSalesRequests[
+            orderDetail.afterSalesRequests.length - 1
+          ],
+        });
+      },
+    ).as("createAfterSales");
+
+    cy.visit("/pedidos", {
+      onBeforeLoad(win) {
+        seedCustomerSession(win);
+      },
+    });
+
+    cy.wait("@getMyOrders");
+    cy.contains("PED-2026-DEV").should("be.visible");
+    cy.contains("button", "Ver").click();
+
+    cy.wait("@getOrderDetail");
+    cy.contains("ENTREGUE").should("be.visible");
+
+    cy.contains("button", "Solicitar troca/devolução").click();
+    cy.get("select").first().select("Devolução");
+
+    cy.get('input[type="checkbox"]').each(($checkbox) => {
+      cy.wrap($checkbox).check({ force: true });
+    });
+
+    cy.get("textarea").type("Produto não atendeu às minhas expectativas.");
+    cy.contains("button", "Solicitar troca/devolução").click();
+
+    cy.wait("@createAfterSales");
+    cy.wait("@getOrderDetail");
+    cy.contains("Devolução • Pendente").should("be.visible");
+
+    cy.contains(
+      "Você já possui uma solicitação pendente para este pedido.",
+    ).should("be.visible");
+  });
+});
+
+// Testes do fluxo administrativo
+const adminSession = {
+  token: "fake-admin-token",
+  user: {
+    uuid: "admin-1",
+    email: "admin@pharmapro.com",
+    roles: ["Admin"],
+  },
+};
+
+function seedAdminSession(win) {
+  win.localStorage.setItem("pharma_token", adminSession.token);
+  win.localStorage.setItem("pharma_user", JSON.stringify(adminSession.user));
+}
+
+describe("Fluxo administrativo pós-venda - front", () => {
+  beforeEach(() => {
+    cy.viewport(1280, 900);
+  });
+
+  it("admin visualiza transações", () => {
+    const transaction = {
+      id: 1,
+      uuid: "order-admin-1",
+      description: "PED-2026-ADMIN1 - Pedido administrativo",
+      status: "AGUARDANDO_CONFIRMACAO_PAGAMENTO",
+      amount: 100.0,
+      paymentType: "credito1",
+      createdAt: "2026-04-12T10:00:00Z",
+      items: [
+        {
+          productName: products.dipirona.name,
+          quantity: 2,
+          unitPrice: 12.5,
+        },
+      ],
+    };
+
+    cy.intercept("GET", "**/api/transactions/after-sales-requests*", {
+      statusCode: 200,
+      body: [],
+    }).as("getPendingAfterSales");
+
+    cy.intercept("GET", "**/api/transactions*", {
+      statusCode: 200,
+      body: {
+        items: [transaction],
+        totalCount: 1,
+        page: 1,
+        pageSize: 20,
+        totalPages: 1,
+        hasNextPage: false,
+        hasPreviousPage: false,
+      },
+    }).as("getTransactions");
+
+    cy.visit("/pedidos", {
+      onBeforeLoad(win) {
+        seedAdminSession(win);
+      },
+    });
+
+    cy.wait("@getPendingAfterSales");
+    cy.wait("@getTransactions");
+
+    cy.contains("PED-2026-ADMIN1").should("be.visible");
+    cy.contains("AGUARDANDO_CONFIRMACAO_PAGAMENTO").should("be.visible");
+    cy.contains("button", "Ver").should("be.visible");
+  });
+
+  it("admin aceita e nega solicitações de troca e devolução", () => {
+    let afterSalesRequests = [
+      {
+        requestUuid: "req-troca-1",
+        transactionUuid: "order-troca-1",
+        transactionCode: "PED-2026-TROCA",
+        type: "TROCA",
+        status: "PENDENTE",
+        reason: "Produto com defeito",
+        items: [{ productName: products.dipirona.name, quantity: 1 }],
+        requestedAt: "2026-04-12T10:00:00Z",
+      },
+      {
+        requestUuid: "req-dev-1",
+        transactionUuid: "order-dev-1",
+        transactionCode: "PED-2026-DEV",
+        type: "DEVOLUCAO",
+        status: "PENDENTE",
+        reason: "Mudei de ideia",
+        items: [{ productName: products.vitamina.name, quantity: 2 }],
+        requestedAt: "2026-04-12T11:00:00Z",
+      },
+    ];
+
+    cy.intercept("GET", "**/api/transactions/after-sales-requests*", (req) => {
+      req.reply({
+        statusCode: 200,
+        body: afterSalesRequests,
+      });
+    }).as("getPendingAfterSales");
+
+    cy.intercept(
+      "PATCH",
+      "**/api/transactions/*/after-sales-requests/req-troca-1/approve",
+      (req) => {
+        afterSalesRequests[0].status = "APROVADA";
+        afterSalesRequests[0].reviewNote = req.body.note;
+        afterSalesRequests[0].reviewedAt = "2026-04-13T09:00:00Z";
+        afterSalesRequests[0].reviewedBy = "admin@pharmapro.com";
+
+        req.reply({ statusCode: 200, body: {} });
+      },
+    ).as("acceptRequest");
+
+    cy.intercept(
+      "PATCH",
+      "**/api/transactions/*/after-sales-requests/req-dev-1/reject",
+      (req) => {
+        afterSalesRequests[1].status = "REPROVADA";
+        afterSalesRequests[1].reviewNote = req.body.note;
+        afterSalesRequests[1].reviewedAt = "2026-04-13T10:00:00Z";
+        afterSalesRequests[1].reviewedBy = "admin@pharmapro.com";
+
+        req.reply({ statusCode: 200, body: {} });
+      },
+    ).as("rejectRequest");
+
+    cy.visit("/avaliacao-trocas-devolucoes", {
+      onBeforeLoad(win) {
+        seedAdminSession(win);
+      },
+    });
+
+    cy.wait("@getPendingAfterSales");
+
+    cy.contains("PED-2026-TROCA").should("be.visible");
+    cy.contains("Troca").should("be.visible");
+
+    cy.get("textarea").type("Autorizado envio de produto de reposição.");
+    cy.contains("button", "Aprovar").click();
+
+    cy.wait("@acceptRequest");
+    cy.contains("APROVADA").should("be.visible");
+
+    cy.contains("td", "PED-2026-DEV").click();
+
+    cy.get("textarea").clear().type("Prazo de devolução expirado.");
+    cy.contains("button", "Reprovar").click();
+
+    cy.wait("@rejectRequest");
+    cy.contains("REPROVADA").should("be.visible");
+  });
+
+  it("admin define produto em transporte e confirma entrega", () => {
+    const transaction = {
+      id: 1,
+      uuid: "order-entrega-1",
+      description: "PED-2026-ENT - Pedido em envio",
+      amount: 12.5,
+      status: "EM_TRANSPORTE",
+      createdAt: "2026-04-14T12:00:00Z",
+      items: [
+        {
+          productName: products.dipirona.name,
+          quantity: 1,
+          status: "EM_TRANSPORTE",
+        },
+      ],
+    };
+
+    cy.intercept("GET", "**/api/transactions/after-sales-requests*", {
+      statusCode: 200,
+      body: [],
+    }).as("getPendingAfterSales");
+
+    cy.intercept("GET", "**/api/transactions*", {
+      statusCode: 200,
+      body: {
+        items: [transaction],
+        totalCount: 1,
+        page: 1,
+        pageSize: 20,
+        totalPages: 1,
+      },
+    }).as("getTransactions");
+
+    cy.visit("/pedidos", {
+      onBeforeLoad(win) {
+        seedAdminSession(win);
+      },
+    });
+
+    cy.wait("@getPendingAfterSales");
+    cy.wait("@getTransactions");
+
+    cy.contains("PED-2026-ENT").should("be.visible");
+    cy.contains("EM_TRANSPORTE").should("be.visible");
+    cy.contains("button", "Ver").should("be.visible");
+  });
+
+  it("admin confirma recebimento de produto devolvido e finaliza processo", () => {
+    const afterSalesRequest = {
+      requestUuid: "req-dev-final",
+      transactionUuid: "order-final",
+      transactionCode: "PED-2026-FINAL",
+      type: "DEVOLUCAO",
+      status: "APROVADA",
+      reason: "Aguardando recebimento do item devolvido",
+      items: [{ productName: products.dipirona.name, quantity: 2 }],
+      pickupCode: null,
+      returnReceivedAt: null,
+      refundStatus: null,
+    };
+
+    cy.intercept("GET", "**/api/transactions/after-sales-requests*", {
+      statusCode: 200,
+      body: [afterSalesRequest],
+    }).as("getPendingAfterSales");
+
+    cy.visit("/avaliacao-trocas-devolucoes", {
+      onBeforeLoad(win) {
+        seedAdminSession(win);
+      },
+    });
+
+    cy.wait("@getPendingAfterSales");
+
+    cy.contains("PED-2026-FINAL").should("be.visible");
+    cy.contains("APROVADA").should("be.visible");
+    cy.contains("Aguardando recebimento do item devolvido").should(
+      "be.visible",
+    );
   });
 });
