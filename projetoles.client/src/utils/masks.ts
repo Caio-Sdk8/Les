@@ -30,3 +30,23 @@ export function maskPhone(value: string) {
 export function maskAreaCode(value: string) {
   return onlyDigits(value).slice(0, 2);
 }
+
+export function maskCardNumber(value: string) {
+  const digits = onlyDigits(value).slice(0, 19);
+  const groups = digits.match(/.{1,4}/g);
+  return groups ? groups.join(" ") : "";
+}
+
+export function maskSecurityCode(value: string) {
+  return onlyDigits(value).slice(0, 4);
+}
+
+export function maskCardExpiration(value: string) {
+  const digits = onlyDigits(value).slice(0, 4);
+
+  if (digits.length <= 2) {
+    return digits;
+  }
+
+  return `${digits.slice(0, 2)}/${digits.slice(2, 4)}`;
+}

@@ -20,3 +20,9 @@ export const createCreditCard = async (
 
   return data;
 };
+
+export const createMyCreditCard = async (payload: ICreateCreditCardPayload) => {
+  const { data } = await api.post(`/api/customers/me/credit-cards`, payload);
+
+  return data;
+};

@@ -186,6 +186,13 @@ export default function PedidoDetalhe() {
     return type === "DEVOLUCAO" ? "Devolução" : "Troca";
   };
 
+  const compensationTypeLabel = (type?: string | null) => {
+    if (!type) return "Compensação";
+    if (type === "CREDITO_TROCA") return "Crédito de troca";
+    if (type === "ESTORNO") return "Estorno";
+    return type;
+  };
+
   const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) {
@@ -601,6 +608,17 @@ export default function PedidoDetalhe() {
                         </ItemName>
                         <ItemMeta>Solicitado em {request.requestedAt}</ItemMeta>
                         <ItemMeta>Motivo: {request.reason}</ItemMeta>
+                        {request.status === "APROVADA" &&
+                          typeof request.compensationAmount === "number" &&
+                          request.compensationAmount > 0 && (
+                            <ItemMeta>
+                              {compensationTypeLabel(request.compensationType)}: {" "}
+                              {request.compensationAmount.toLocaleString("pt-BR", {
+                                style: "currency",
+                                currency: "BRL",
+                              })}
+                            </ItemMeta>
+                          )}
                         {request.reviewNote && <ItemMeta>Análise: {request.reviewNote}</ItemMeta>}
                       </ItemCard>
                     ))}

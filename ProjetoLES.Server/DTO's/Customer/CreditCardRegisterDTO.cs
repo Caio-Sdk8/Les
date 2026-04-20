@@ -1,4 +1,6 @@
-﻿namespace ProjetoLES.Server.DTO_s.Customer
+﻿using System;
+
+namespace ProjetoLES.Server.DTO_s.Customer
 {
     public record CreditCardRegisterDTO
      (

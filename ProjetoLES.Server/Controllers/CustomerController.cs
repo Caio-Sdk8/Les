@@ -250,9 +250,18 @@ namespace ProjetoLES.Server.Controllers
 
 
         [HttpGet("{uuid:guid}/credit-cards")]
-        [Authorize(Roles = "Admin,Employee")]
+        [Authorize(Roles = "Admin,Employee,Customer")]
         public async Task<IActionResult> GetCreditCards(Guid uuid, CancellationToken cancellationToken)
         {
+            if (User.IsInRole("Customer"))
+            {
+                if (!TryGetAuthenticatedUserUuid(out var userUuid))
+                    return Unauthorized(new { message = "Token inválido para consulta de cartões." });
+
+                if (userUuid != uuid)
+                    return Forbid();
+            }
+
             var result = await _customerService.GetCreditCardsAsync(uuid, cancellationToken);
             return Ok(result);
         }
@@ -279,6 +288,30 @@ namespace ProjetoLES.Server.Controllers
             {
                 var result = await _customerService.AddCreditCardAsync(uuid, dto, cancellationToken);
                 return CreatedAtAction(nameof(GetCreditCards), new { uuid }, result);
+            }
+            catch (InvalidOperationException ex)
+            {
+                return Conflict(new { message = ex.Message });
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new { message = ex.Message });
+            }
+        }
+
+        [HttpPost("me/credit-cards")]
+        [Authorize(Roles = "Customer")]
+        public async Task<IActionResult> AddMyCreditCard(
+            [FromBody] CreditCardCreateDTO dto,
+            CancellationToken cancellationToken)
+        {
+            if (!TryGetAuthenticatedUserUuid(out var userUuid))
+                return Unauthorized(new { message = "Token inválido para cadastro de cartão." });
+
+            try
+            {
+                var result = await _customerService.AddMyCreditCardAsync(userUuid, dto, cancellationToken);
+                return Created("api/customers/me/credit-cards", result);
             }
             catch (InvalidOperationException ex)
             {

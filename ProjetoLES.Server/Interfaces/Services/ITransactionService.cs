@@ -41,6 +41,10 @@ namespace ProjetoLES.Server.Interfaces.Services
             string reviewedBy,
             CancellationToken cancellationToken = default);
 
+        Task<ExchangeCreditBalanceDTO> GetMyExchangeCreditBalanceAsync(
+            Guid userUuid,
+            CancellationToken cancellationToken = default);
+
         Task<OrderDetailDTO> GetTransactionDetailAsync(
             Guid transactionUuid,
             Guid? userUuid,

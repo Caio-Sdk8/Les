@@ -96,6 +96,8 @@ export interface AfterSalesRequest {
   status: AfterSalesStatus;
   reason: string;
   reviewNote?: string | null;
+  compensationType?: string | null;
+  compensationAmount?: number | null;
   requestedAt: string;
   reviewedAt?: string | null;
   reviewedBy?: string | null;
@@ -180,6 +182,19 @@ export interface CheckoutCardOption {
   maskedCardNumber: string;
   isPreferred: boolean;
   isActive: boolean;
+}
+
+export interface ExchangeCreditBalance {
+  availableCredit: number;
+  entries: ExchangeCreditEntry[];
+}
+
+export interface ExchangeCreditEntry {
+  transactionUuid: string;
+  transactionCode: string;
+  originalAmount: number;
+  remainingAmount: number;
+  approvedAt: string;
 }
 
 export interface AfterSalesRequestCreatePayload {
@@ -277,6 +292,11 @@ export const transactionService = {
 
   async getMyCheckoutCards(): Promise<CheckoutCardOption[]> {
     const { data } = await api.get<CheckoutCardOption[]>("/api/customers/me/credit-cards");
+    return data;
+  },
+
+  async getMyExchangeCreditBalance(): Promise<ExchangeCreditBalance> {
+    const { data } = await api.get<ExchangeCreditBalance>("/api/transactions/my/exchange-credit");
     return data;
   },
 

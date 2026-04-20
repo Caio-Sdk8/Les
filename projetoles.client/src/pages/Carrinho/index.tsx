@@ -55,6 +55,7 @@ import {
   transactionService,
   type CheckoutAddressOption,
   type CheckoutCardOption,
+  type ExchangeCreditEntry,
 } from "../../services/transactions/transactionService";
 import { authService } from "../../services/auth/authService";
 
@@ -72,6 +73,10 @@ export default function Carrinho() {
   const [availableCards, setAvailableCards] = useState<CheckoutCardOption[]>(
     [],
   );
+  const [exchangeCreditAvailable, setExchangeCreditAvailable] = useState(0);
+  const [exchangeCreditEntries, setExchangeCreditEntries] = useState<
+    ExchangeCreditEntry[]
+  >([]);
   const [checkoutDataError, setCheckoutDataError] = useState("");
   const [cartUuids, setCartUuids] = useState(() => cartService.getItems());
   const [quantities, setQuantities] = useState<Record<string, number>>({});
@@ -98,9 +103,10 @@ export default function Carrinho() {
   const loadCheckoutData = async () => {
     try {
       setCheckoutDataError("");
-      const [addresses, cards] = await Promise.all([
+      const [addresses, cards, exchangeCredit] = await Promise.all([
         transactionService.getMyCheckoutAddresses(),
         transactionService.getMyCheckoutCards(),
+        transactionService.getMyExchangeCreditBalance(),
       ]);
 
       const activeAddresses = addresses.filter((address) => address.isActive);
@@ -108,6 +114,8 @@ export default function Carrinho() {
 
       setAvailableAddresses(activeAddresses);
       setAvailableCards(activeCards);
+      setExchangeCreditAvailable(Math.max(0, Number(exchangeCredit.availableCredit ?? 0)));
+      setExchangeCreditEntries(exchangeCredit.entries ?? []);
 
       if (!addressId && activeAddresses.length > 0) {
         setAddressId(activeAddresses[0].uuid);
@@ -134,6 +142,8 @@ export default function Carrinho() {
     } catch {
       setAvailableAddresses([]);
       setAvailableCards([]);
+      setExchangeCreditAvailable(0);
+      setExchangeCreditEntries([]);
       setCheckoutDataError(
         "Não foi possível carregar seus endereços e cartões cadastrados.",
       );
@@ -171,6 +181,12 @@ export default function Carrinho() {
       cancelled = true;
     };
   }, []);
+
+  useEffect(() => {
+    if (exchangeCreditAvailable <= 0 && coupon === "troca") {
+      setCoupon("sem");
+    }
+  }, [exchangeCreditAvailable, coupon]);
 
   useEffect(() => {
     let cancelled = false;
@@ -273,7 +289,7 @@ export default function Carrinho() {
         paymentType,
         addressLabel,
         addressUuid: addressId || undefined,
-        couponCode: coupon || "sem",
+        couponCode: effectiveCoupon,
         singleCardLabel,
         singleCardUuid:
           paymentType === "credito1" ? singleCardId || undefined : undefined,
@@ -324,16 +340,24 @@ export default function Carrinho() {
     0,
   );
   const shipping = subtotal >= 80 ? 0 : 8.9;
+  const normalizedCoupon = (coupon || "").trim().toLowerCase();
+  const effectiveCoupon =
+    normalizedCoupon === "" || normalizedCoupon === "sem"
+      ? exchangeCreditAvailable > 0
+        ? "troca"
+        : "sem"
+      : normalizedCoupon;
+
   const couponDiscount =
-    coupon === "semana10"
+    effectiveCoupon === "semana10"
       ? subtotal * 0.1
-      : coupon === "fretegratis"
+      : effectiveCoupon === "fretegratis"
         ? shipping
-        : coupon === "troca30"
-          ? Math.min(30, subtotal + shipping)
+        : effectiveCoupon === "troca"
+          ? Math.min(exchangeCreditAvailable, subtotal + shipping)
           : 0;
   const total = subtotal + shipping - couponDiscount;
-  const hasCoupon = coupon !== "" && coupon !== "sem";
+  const hasCoupon = effectiveCoupon !== "" && effectiveCoupon !== "sem";
 
   const splitSum = firstCardAmount + secondCardAmount;
   const isTwoCards = paymentType === "credito2";
@@ -368,6 +392,16 @@ export default function Carrinho() {
 
   const formatCurrency = (value: number) =>
     value.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+
+  const exchangeCreditOptionLabel =
+    exchangeCreditAvailable > 0
+      ? `CREDITO TROCA (${formatCurrency(exchangeCreditAvailable)})`
+      : "CREDITO TROCA";
+
+  const exchangeCreditOriginsLabel = exchangeCreditEntries
+    .slice(0, 3)
+    .map((entry) => `${entry.transactionCode} (${formatCurrency(entry.remainingAmount)})`)
+    .join(" • ");
 
   const splitHelperText =
     paymentType === "credito2" && Math.abs(splitSum - total) >= 0.01
@@ -508,18 +542,31 @@ export default function Carrinho() {
                     Selecione um cupom
                   </option>
                   <option value="sem">Sem cupom</option>
+                  {exchangeCreditAvailable > 0 && (
+                    <option value="troca">{exchangeCreditOptionLabel}</option>
+                  )}
                   <option value="semana10">SEMANA10</option>
                   <option value="fretegratis">FRETEGRATIS</option>
-                  <option value="troca30">TROCA30</option>
                 </FieldSelect>
+                {exchangeCreditAvailable > 0 && (
+                  <InlineHint>
+                    Saldo de troca disponível: {formatCurrency(exchangeCreditAvailable)}.
+                  </InlineHint>
+                )}
+                {exchangeCreditOriginsLabel && (
+                  <InlineHint>
+                    Origem do crédito: {exchangeCreditOriginsLabel}
+                    {exchangeCreditEntries.length > 3 ? " ..." : ""}
+                  </InlineHint>
+                )}
+                {effectiveCoupon === "troca" && (
+                  <InlineHint>
+                    Crédito de troca aplicado: até {formatCurrency(exchangeCreditAvailable)} no total.
+                  </InlineHint>
+                )}
                 {coupon === "semana10" && (
                   <InlineHint>
                     RN0033: apenas um cupom promocional por compra.
-                  </InlineHint>
-                )}
-                {coupon === "troca30" && (
-                  <InlineHint>
-                    Cupom de troca (protótipo): abate até R$ 30,00 do total.
                   </InlineHint>
                 )}
               </FieldGroup>
@@ -859,6 +906,7 @@ export default function Carrinho() {
       {modalCartao && (
         <ModalCartao
           uuid={userUuid || ""}
+          useMyEndpoint
           next={() => {
             loadCheckoutData();
             setModalCartao(false);

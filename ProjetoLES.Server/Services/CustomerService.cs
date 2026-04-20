@@ -479,6 +479,15 @@ namespace ProjetoLES.Server.Services
                 card.PrintedName, card.ExpirationDate, card.IsPreferred, card.IsActive);
         }
 
+        public async Task<CreditCardResponseDTO> AddMyCreditCardAsync(
+            Guid userUuid,
+            CreditCardCreateDTO DTO,
+            CancellationToken cancellationToken = default)
+        {
+            var customerUuid = await GetCustomerUuidByUserUuidAsync(userUuid, cancellationToken);
+            return await AddCreditCardAsync(customerUuid, DTO, cancellationToken);
+        }
+
         public async Task SetPreferredCreditCardAsync(
             Guid customerUuid, Guid creditCardUuid, CancellationToken cancellationToken = default)
         {

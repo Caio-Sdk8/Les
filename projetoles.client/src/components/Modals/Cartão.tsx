@@ -24,10 +24,17 @@ import {
   cardSchema,
 } from "../../validations/schemas/CadastroCartao";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { createCreditCard } from "../../services/requests/sinCredit";
+import {
+  createCreditCard,
+  createMyCreditCard,
+} from "../../services/requests/sinCredit";
 import { GetCardBrandRequest } from "../../services/requests/getCardBrand";
-import { GetAllCLientCardsRequest } from "../../services/requests/getCardClient";
 import { useQueryClient } from "@tanstack/react-query";
+import {
+  maskCardExpiration,
+  maskCardNumber,
+  maskSecurityCode,
+} from "../../utils/masks";
 
 type Props = {
   back?: () => void;
@@ -40,6 +47,7 @@ type Props = {
   height?: string;
   width?: string;
   uuid: string;
+  useMyEndpoint?: boolean;
 };
 
 const ModalCartao = ({
@@ -53,6 +61,7 @@ const ModalCartao = ({
   button2,
   height,
   width,
+  useMyEndpoint = false,
 }: Props) => {
   const {
     register,
@@ -60,11 +69,10 @@ const ModalCartao = ({
     formState: { errors },
   } = useForm<CardFormData>({
     resolver: yupResolver(cardSchema),
+    defaultValues: {
+      isPreferred: true,
+    },
   });
-
-  const { data, refetch } = uuid
-    ? GetAllCLientCardsRequest(uuid)
-    : { data: null, refetch: () => Promise.resolve() };
   const { data: cardBrands, isLoading } = GetCardBrandRequest();
 
   const cardOptions =
@@ -75,20 +83,30 @@ const ModalCartao = ({
 
   const queryClient = useQueryClient();
 
+  const toApiExpirationDate = (maskedExpirationDate: string) => {
+    const [month, year] = maskedExpirationDate.split("/");
+    const fullYear = `20${year}`;
+    return `${fullYear}-${month}-01`;
+  };
+
   const onSubmit = async (formData: CardFormData) => {
     try {
-      if (!uuid) return;
+      if (!useMyEndpoint && !uuid) return;
 
       const payload = {
         CardBrandUuid: formData.cardBrandUuid,
-        CardNumber: formData.cardNumber.replace(/\s/g, ""),
-        PrintedName: formData.printedName,
-        SecurityCode: formData.securityCode,
-        ExpirationDate: formData.expirationDate,
-        IsPreferred: true,
+        CardNumber: formData.cardNumber.replace(/\D/g, ""),
+        PrintedName: formData.printedName.trim().toUpperCase(),
+        SecurityCode: formData.securityCode.replace(/\D/g, ""),
+        ExpirationDate: toApiExpirationDate(formData.expirationDate),
+        IsPreferred: formData.isPreferred ?? true,
       };
 
-      await createCreditCard(uuid, payload);
+      if (useMyEndpoint) {
+        await createMyCreditCard(payload);
+      } else {
+        await createCreditCard(uuid, payload);
+      }
 
       await queryClient.invalidateQueries({
         queryKey: ["GetAllCLientCards", uuid],
@@ -130,7 +148,12 @@ const ModalCartao = ({
 
             <InputSing
               placeholder="Digite o número do cartão"
-              {...register("cardNumber")}
+              maxLength={23}
+              {...register("cardNumber", {
+                onChange: (event) => {
+                  event.target.value = maskCardNumber(event.target.value);
+                },
+              })}
             />
             {errors.cardNumber && <span>{errors.cardNumber.message}</span>}
           </InputWrapper>
@@ -164,8 +187,16 @@ const ModalCartao = ({
               </DivLabel>
 
               <InputSing
-                placeholder="Digite o código de segurança"
-                {...register("securityCode")}
+                type="password"
+                inputMode="numeric"
+                autoComplete="cc-csc"
+                maxLength={4}
+                placeholder="CVV"
+                {...register("securityCode", {
+                  onChange: (event) => {
+                    event.target.value = maskSecurityCode(event.target.value);
+                  },
+                })}
               />
               {errors.securityCode && (
                 <span>{errors.securityCode.message}</span>
@@ -174,13 +205,29 @@ const ModalCartao = ({
           </DivSeparator>
           <InputWrapper>
             <DivLabel>
-              <Label>Data de Validade</Label>
+              <Label>Validade (MM/AA)</Label>
             </DivLabel>
 
-            <InputSing type="date" {...register("expirationDate")} />
+            <InputSing
+              inputMode="numeric"
+              autoComplete="cc-exp"
+              maxLength={5}
+              placeholder="MM/AA"
+              {...register("expirationDate", {
+                onChange: (event) => {
+                  event.target.value = maskCardExpiration(event.target.value);
+                },
+              })}
+            />
             {errors.expirationDate && (
               <span>{errors.expirationDate.message}</span>
             )}
+          </InputWrapper>
+          <InputWrapper>
+            <label style={{ display: "inline-flex", gap: "8px", alignItems: "center" }}>
+              <input type="checkbox" {...register("isPreferred")} />
+              Definir como cartão preferencial
+            </label>
           </InputWrapper>
         </ModalSection>
         <ModalButtons>

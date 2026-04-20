@@ -277,6 +277,18 @@ namespace ProjetoLES.Server.Controllers
             }
         }
 
+        [HttpGet("my/exchange-credit")]
+        [Authorize(Roles = "Customer")]
+        public async Task<IActionResult> GetMyExchangeCredit(CancellationToken cancellationToken)
+        {
+            var userUuidClaim = User.FindFirst("uuid")?.Value;
+            if (!Guid.TryParse(userUuidClaim, out var userUuid))
+                return Unauthorized(new { message = "Token inválido para consulta de crédito de troca." });
+
+            var result = await _transactionService.GetMyExchangeCreditBalanceAsync(userUuid, cancellationToken);
+            return Ok(result);
+        }
+
         [HttpGet("prescriptions")]
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> GetPrescriptionReviews(

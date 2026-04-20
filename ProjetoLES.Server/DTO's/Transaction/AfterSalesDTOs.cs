@@ -13,6 +13,8 @@ namespace ProjetoLES.Server.DTO_s.Transaction
         string Status,
         string Reason,
         string? ReviewNote,
+        string? CompensationType,
+        decimal? CompensationAmount,
         string RequestedAt,
         string? ReviewedAt,
         string? ReviewedBy,

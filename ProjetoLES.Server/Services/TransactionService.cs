@@ -1,6 +1,11 @@
+using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
+using System.Linq;
 using System.Text.Json;
+using System.Threading;
+using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using ProjetoLES.Server.Data;
 using ProjetoLES.Server.DTO_s;
@@ -176,6 +181,15 @@ namespace ProjetoLES.Server.Services
             await _context.SaveChangesAsync(cancellationToken);
 
             return MapAfterSalesRequest(request, transaction.Uuid, metadata.TransactionCode);
+        }
+
+        public async Task<ExchangeCreditBalanceDTO> GetMyExchangeCreditBalanceAsync(
+            Guid userUuid,
+            CancellationToken cancellationToken = default)
+        {
+            var customerId = await GetCustomerIdByUserUuidAsync(userUuid, cancellationToken);
+            var snapshot = await GetExchangeCreditSnapshotAsync(customerId, cancellationToken);
+            return new ExchangeCreditBalanceDTO(snapshot.AvailableCredit, snapshot.Entries);
         }
 
         public async Task<IEnumerable<AfterSalesRequestDTO>> GetAfterSalesRequestsAsync(
@@ -491,7 +505,16 @@ namespace ProjetoLES.Server.Services
             }
 
             var shipping = subtotal >= 80m ? 0m : 8.9m;
-            var discount = CalculateDiscount(dto.CouponCode, subtotal, shipping);
+            var availableExchangeCredit = await GetAvailableExchangeCreditAsync(user.Customer.Id, cancellationToken);
+
+            // Automatic flow: if customer has exchange credit and no coupon, apply it automatically.
+            var normalizedCoupon = NormalizeCouponCode(dto.CouponCode);
+            if (normalizedCoupon is "" or "sem" && availableExchangeCredit > 0m)
+            {
+                normalizedCoupon = "troca";
+            }
+
+            var discount = CalculateDiscount(normalizedCoupon, subtotal, shipping, availableExchangeCredit);
             var total = subtotal + shipping - discount;
 
             var resolvedAddressLabel = await ResolveAddressLabelAsync(user.Customer.Id, dto, cancellationToken);
@@ -507,7 +530,7 @@ namespace ProjetoLES.Server.Services
                 SplitPayment = resolvedSplitPayment
             };
 
-            ValidatePaymentRules(normalizedCheckout, total, !string.IsNullOrWhiteSpace(dto.CouponCode) && dto.CouponCode != "sem");
+            ValidatePaymentRules(normalizedCheckout, total, normalizedCoupon is not ("" or "sem"));
 
             var requiresPrescription = lines.Any(l =>
                 l.PrescriptionType == PrescriptionTypeEnum.TarjaVermelha ||
@@ -530,7 +553,7 @@ namespace ProjetoLES.Server.Services
                 txCode,
                 dto.PaymentType,
                 normalizedCheckout.AddressLabel,
-                dto.CouponCode,
+                normalizedCoupon,
                 normalizedCheckout.SingleCardLabel,
                 normalizedCheckout.SplitPayment,
                 subtotal,
@@ -548,7 +571,8 @@ namespace ProjetoLES.Server.Services
                 requiresPrescription ? dto.PrescriptionFileContentType : null,
                 null,
                 storedPrescriptionPath,
-                new List<AfterSalesRequestMetadata>());
+                new List<AfterSalesRequestMetadata>(),
+                normalizedCoupon == "troca" ? discount : 0m);
 
             var status = requiresPrescription ? "AGUARDANDO_ANALISE_RECEITA" : "EM_PROCESSAMENTO";
             var summaryDescription = $"{txCode} - {lines.Count} item(ns)";
@@ -1095,17 +1119,94 @@ namespace ProjetoLES.Server.Services
             });
         }
 
-        private static decimal CalculateDiscount(string? couponCode, decimal subtotal, decimal shipping)
+        private static decimal CalculateDiscount(string? couponCode, decimal subtotal, decimal shipping, decimal availableExchangeCredit)
         {
-            var coupon = (couponCode ?? string.Empty).Trim().ToLowerInvariant();
+            var coupon = NormalizeCouponCode(couponCode);
 
             return coupon switch
             {
                 "semana10" => Math.Round(subtotal * 0.10m, 2),
                 "fretegratis" => shipping,
-                "troca30" => Math.Min(30m, subtotal + shipping),
+                "troca" => Math.Min(availableExchangeCredit, subtotal + shipping),
                 _ => 0m
             };
+        }
+
+        private static string NormalizeCouponCode(string? couponCode)
+            => (couponCode ?? string.Empty).Trim().ToLowerInvariant();
+
+        private async Task<decimal> GetAvailableExchangeCreditAsync(int customerId, CancellationToken cancellationToken)
+        {
+            var snapshot = await GetExchangeCreditSnapshotAsync(customerId, cancellationToken);
+            return snapshot.AvailableCredit;
+        }
+
+        private async Task<ExchangeCreditSnapshot> GetExchangeCreditSnapshotAsync(int customerId, CancellationToken cancellationToken)
+        {
+            var transactions = await _context.Transactions
+                .AsNoTracking()
+                .Where(t => t.CustomerId == customerId && t.MetadataJson != null)
+                .ToListAsync(cancellationToken);
+
+            decimal used = 0m;
+            var earnedEntries = new List<(Guid TransactionUuid, string TransactionCode, decimal OriginalAmount, DateTime ApprovedAt)>();
+
+            foreach (var transaction in transactions)
+            {
+                var metadata = TryParseMetadata(transaction.MetadataJson);
+                if (metadata is null)
+                    continue;
+
+                var transactionCode = string.IsNullOrWhiteSpace(metadata.TransactionCode)
+                    ? $"PEDIDO {transaction.Uuid.ToString("N")[..8].ToUpperInvariant()}"
+                    : metadata.TransactionCode;
+
+                var requests = (metadata.AfterSalesRequests ?? new List<AfterSalesRequestMetadata>())
+                    .Where(request =>
+                        request.Status == AfterSalesApproved &&
+                        request.Type == "TROCA" &&
+                        request.CompensationType == "CREDITO_TROCA" &&
+                        request.CompensationAmount.HasValue)
+                    .ToList();
+
+                foreach (var request in requests)
+                {
+                    earnedEntries.Add((
+                        transaction.Uuid,
+                        transactionCode,
+                        request.CompensationAmount!.Value,
+                        request.ReviewedAt ?? request.RequestedAt));
+                }
+
+                used += metadata.AppliedExchangeCredit ?? 0m;
+            }
+
+            var orderedEntries = earnedEntries
+                .OrderBy(entry => entry.ApprovedAt)
+                .ToList();
+
+            var remainingToAllocate = used;
+            var resultEntries = new List<ExchangeCreditEntryDTO>();
+
+            foreach (var entry in orderedEntries)
+            {
+                var consumed = Math.Min(entry.OriginalAmount, remainingToAllocate);
+                var remaining = Math.Max(0m, entry.OriginalAmount - consumed);
+                remainingToAllocate = Math.Max(0m, remainingToAllocate - consumed);
+
+                if (remaining <= 0m)
+                    continue;
+
+                resultEntries.Add(new ExchangeCreditEntryDTO(
+                    entry.TransactionUuid,
+                    entry.TransactionCode,
+                    decimal.Round(entry.OriginalAmount, 2),
+                    decimal.Round(remaining, 2),
+                    entry.ApprovedAt.ToLocalTime().ToString("dd/MM/yyyy HH:mm")));
+            }
+
+            var available = resultEntries.Sum(entry => entry.RemainingAmount);
+            return new ExchangeCreditSnapshot(decimal.Round(available, 2), resultEntries);
         }
 
         private static void ValidatePaymentRules(CheckoutRequestDTO dto, decimal total, bool hasCoupon)
@@ -1225,6 +1326,8 @@ namespace ProjetoLES.Server.Services
                 request.Status,
                 request.Reason,
                 request.ReviewNote,
+                request.CompensationType,
+                request.CompensationAmount,
                 request.RequestedAt.ToLocalTime().ToString("dd/MM/yyyy HH:mm"),
                 request.ReviewedAt?.ToLocalTime().ToString("dd/MM/yyyy HH:mm"),
                 request.ReviewedBy,
@@ -1281,7 +1384,8 @@ namespace ProjetoLES.Server.Services
             string? PrescriptionFileContentType,
             string? PrescriptionFileBase64,
             string? PrescriptionStoredPath = null,
-            List<AfterSalesRequestMetadata>? AfterSalesRequests = null);
+            List<AfterSalesRequestMetadata>? AfterSalesRequests = null,
+            decimal? AppliedExchangeCredit = null);
 
         private sealed record AfterSalesRequestMetadata(
             Guid RequestUuid,
@@ -1316,5 +1420,9 @@ namespace ProjetoLES.Server.Services
             string CategoryName,
             int Quantity,
             decimal Revenue);
+
+        private sealed record ExchangeCreditSnapshot(
+            decimal AvailableCredit,
+            List<ExchangeCreditEntryDTO> Entries);
     }
 }

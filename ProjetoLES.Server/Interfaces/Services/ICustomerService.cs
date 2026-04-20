@@ -68,6 +68,11 @@ namespace ProjetoLES.Server.Interfaces.Services
             CreditCardCreateDTO dto,
             CancellationToken cancellationToken = default);
 
+        Task<CreditCardResponseDTO> AddMyCreditCardAsync(
+            Guid userUuid,
+            CreditCardCreateDTO dto,
+            CancellationToken cancellationToken = default);
+
         Task SetPreferredCreditCardAsync(
             Guid customerUuid,
             Guid creditCardUuid,

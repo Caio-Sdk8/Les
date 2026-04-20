@@ -32,6 +32,13 @@ function typeLabel(type: string) {
   return type === "DEVOLUCAO" ? "Devolução" : "Troca";
 }
 
+function compensationTypeLabel(type?: string | null) {
+  if (!type) return "Compensação";
+  if (type === "CREDITO_TROCA") return "Crédito de troca";
+  if (type === "ESTORNO") return "Estorno";
+  return type;
+}
+
 export default function AvaliacaoTrocasDevolucoes() {
   const [requests, setRequests] = useState<AfterSalesRequest[]>([]);
   const [selectedId, setSelectedId] = useState<string>("");
@@ -212,6 +219,20 @@ export default function AvaliacaoTrocasDevolucoes() {
                   </ValueText>
                 ))}
               </Block>
+
+              {selectedRequest.status === "APROVADA" &&
+                typeof selectedRequest.compensationAmount === "number" &&
+                selectedRequest.compensationAmount > 0 && (
+                  <Block>
+                    <Label>{compensationTypeLabel(selectedRequest.compensationType)}</Label>
+                    <Value>
+                      {selectedRequest.compensationAmount.toLocaleString("pt-BR", {
+                        style: "currency",
+                        currency: "BRL",
+                      })}
+                    </Value>
+                  </Block>
+                )}
 
               <Block>
                 <Label>Parecer administrativo</Label>
