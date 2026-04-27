@@ -482,6 +482,7 @@ export default function Carrinho() {
               <FieldGroup>
                 <FieldLabel>Forma de pagamento</FieldLabel>
                 <FieldSelect
+                  data-cy="checkout-payment-select"
                   value={paymentType}
                   onChange={(event) => {
                     const selected = event.target.value;
@@ -509,6 +510,7 @@ export default function Carrinho() {
               <FieldGroup>
                 <FieldLabel>Endereço</FieldLabel>
                 <FieldSelect
+                  data-cy="checkout-address-select"
                   value={addressId}
                   onChange={(event) => {
                     const value = event.target.value;
@@ -535,6 +537,7 @@ export default function Carrinho() {
               <FieldGroup>
                 <FieldLabel>Cupom</FieldLabel>
                 <FieldSelect
+                  data-cy="checkout-coupon-select"
                   value={coupon}
                   onChange={(event) => setCoupon(event.target.value)}
                 >
@@ -575,6 +578,7 @@ export default function Carrinho() {
                 <FieldGroup>
                   <FieldLabel>Cartão cadastrado</FieldLabel>
                   <FieldSelect
+                    data-cy="checkout-single-card-select"
                     value={singleCardId}
                     onChange={(event) => {
                       const value = event.target.value;
@@ -606,6 +610,7 @@ export default function Carrinho() {
                   <FieldGroup>
                     <FieldLabel>Cartão 1</FieldLabel>
                     <FieldSelect
+                      data-cy="checkout-first-card-select"
                       value={firstCardId}
                       onChange={(event) => {
                         const value = event.target.value;
@@ -648,6 +653,7 @@ export default function Carrinho() {
                   <FieldGroup>
                     <FieldLabel>Cartão 2</FieldLabel>
                     <FieldSelect
+                      data-cy="checkout-second-card-select"
                       value={secondCardId}
                       onChange={(event) => {
                         const value = event.target.value;

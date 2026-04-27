@@ -198,6 +198,14 @@ function mockCartApis(interactions = []) {
     body: checkoutCards,
   }).as("getCheckoutCards");
 
+  cy.intercept("GET", "**/api/transactions/my/exchange-credit*", {
+    statusCode: 200,
+    body: {
+      availableCredit: 0,
+      entries: [],
+    },
+  }).as("getExchangeCredit");
+
   cy.intercept("POST", "**/api/products/drug-interactions", (req) => {
     const requestBody =
       typeof req.body === "string" ? JSON.parse(req.body) : req.body;
@@ -208,6 +216,37 @@ function mockCartApis(interactions = []) {
     expect(payload).to.be.an("array");
     req.reply({ statusCode: 200, body: interactions });
   }).as("checkDrugInteractions");
+}
+
+function getFieldSelect(labelText) {
+  return cy
+    .contains("span", labelText)
+    .closest("label")
+    .find("select");
+}
+
+function getPaymentSelect() {
+  return cy.get("[data-cy='checkout-payment-select']");
+}
+
+function getAddressSelect() {
+  return cy.get("[data-cy='checkout-address-select']");
+}
+
+function getCouponSelect() {
+  return cy.get("[data-cy='checkout-coupon-select']");
+}
+
+function getSingleCardSelect() {
+  return cy.get("[data-cy='checkout-single-card-select']");
+}
+
+function getFirstCardSelect() {
+  return cy.get("[data-cy='checkout-first-card-select']");
+}
+
+function getSecondCardSelect() {
+  return cy.get("[data-cy='checkout-second-card-select']");
 }
 
 describe("Fluxo de compra do cliente - front", () => {
@@ -343,10 +382,10 @@ describe("Fluxo de compra do cliente - front", () => {
     cy.get('img[alt="Aumentar"]').first().click();
     cy.contains(/R\$\s*57,40/).should("be.visible");
 
-    cy.get("select").eq(0).select("Cartão de crédito (1 cartão)");
-    cy.get("select").eq(1).select("Casa • 08750000");
-    cy.get("select").eq(2).select("SEMANA10");
-    cy.get("select").eq(3).select("VISA **** 1111");
+    getPaymentSelect().select("credito1");
+    getAddressSelect().select("addr-1");
+    getCouponSelect().select("semana10");
+    getSingleCardSelect().select("card-1");
 
     cy.get('input[type="file"]').selectFile({
       contents: Cypress.Buffer.from("fake-pdf-content"),
@@ -406,10 +445,12 @@ describe("Fluxo de compra do cliente - front", () => {
     cy.wait("@getCheckoutAddresses");
     cy.wait("@getCheckoutCards");
 
-    cy.get("select").eq(0).select("Cartão de crédito (1 cartão)");
-    cy.get("select").eq(1).select("Casa • 08750000");
-    cy.get("select").eq(2).select("Sem cupom");
-    cy.get("select").eq(3).select("VISA **** 1111");
+    getAddressSelect().should("contain", "Casa");
+    getAddressSelect().should("contain", "Casa");
+    getPaymentSelect().select("credito1");
+    getAddressSelect().select("addr-1");
+    getCouponSelect().select("sem");
+    getSingleCardSelect().select("card-1");
 
     cy.contains("button", "Finalizar pedido").click();
 
@@ -623,10 +664,11 @@ describe("Fluxo de compra do cliente - front", () => {
     cy.wait("@getCheckoutAddresses");
     cy.wait("@getCheckoutCards");
 
-    cy.get("select").eq(0).select("Cartão de crédito (2 cartões)");
-    cy.get("select").eq(1).select("Casa • 08750000");
-    cy.get("select").eq(3).select("VISA **** 1111");
-    cy.get("select").eq(4).select("MASTERCARD **** 2222");
+    getAddressSelect().should("contain", "Casa");
+    getPaymentSelect().select("credito2");
+    getAddressSelect().select("addr-1");
+    getFirstCardSelect().select("card-1");
+    getSecondCardSelect().select("card-2");
 
     cy.contains("button", "Finalizar pedido").click();
 
@@ -673,8 +715,9 @@ describe("Fluxo de compra do cliente - front", () => {
     cy.wait("@getCheckoutAddresses");
     cy.wait("@getCheckoutCards");
 
-    cy.get("select").eq(0).select("Cartão de débito");
-    cy.get("select").eq(1).select("Casa • 08750000");
+    getAddressSelect().should("contain", "Casa");
+    getPaymentSelect().select("debito");
+    getAddressSelect().select("addr-1");
 
     cy.contains("button", "Finalizar pedido").click();
 
@@ -718,8 +761,9 @@ describe("Fluxo de compra do cliente - front", () => {
     cy.wait("@getCheckoutAddresses");
     cy.wait("@getCheckoutCards");
 
-    cy.get("select").eq(0).select("PIX");
-    cy.get("select").eq(1).select("Casa • 08750000");
+    getAddressSelect().should("contain", "Casa");
+    getPaymentSelect().select("pix");
+    getAddressSelect().select("addr-1");
 
     cy.contains("button", "Finalizar pedido").click();
 
@@ -773,6 +817,14 @@ describe("Fluxo de compra do cliente - front", () => {
         body: clientCards,
       });
     }).as("getCheckoutCards");
+
+    cy.intercept("GET", "**/api/transactions/my/exchange-credit*", {
+      statusCode: 200,
+      body: {
+        availableCredit: 0,
+        entries: [],
+      },
+    }).as("getExchangeCredit");
 
     cy.intercept("GET", "**/api/customers/customer-1/credit-cards", (req) => {
       req.reply({
@@ -834,8 +886,9 @@ describe("Fluxo de compra do cliente - front", () => {
 
     cy.wait("@getCheckoutAddresses");
     cy.wait("@getCheckoutCards");
+    cy.wait("@getExchangeCredit");
 
-    cy.get("select").eq(1).select("Adicionar Endereço");
+    getAddressSelect().select("add-address");
     cy.get("select[name='addressType']").select("Entrega");
     cy.get("input[name='label']").type("Trabalho");
     cy.get("input[name='street']").type("Rua Comercial");
@@ -847,24 +900,25 @@ describe("Fluxo de compra do cliente - front", () => {
     cy.contains("button", /^Cadastrar$/).click({ force: true });
 
     cy.wait("@createAddress");
-    cy.get("select").eq(1).should("contain", "Trabalho");
+    cy.wait("@getCheckoutAddresses");
+    getAddressSelect().should("contain", "Trabalho");
 
-    cy.get("select").eq(0).select("Cartão de crédito (1 cartão)");
+    getPaymentSelect().select("credito1");
     cy.contains("button", "Cadastrar cartão").click();
     cy.wait("@getCardBrands");
     cy.get("input[name='printedName']").type("CLIENTE TEST");
     cy.get("input[name='cardNumber']").type("5555555555555678");
-    cy.get("select[name='cardBrandUuid']").select("MASTERCARD");
+    cy.get("select[name='cardBrandUuid']").select("brand-mastercard");
     cy.get("input[name='securityCode']").type("456");
-    cy.get("input[name='expirationDate']").type("2028-12-01");
+    cy.get("input[name='expirationDate']").type("12/28");
     cy.contains("button", /^Cadastrar$/).click({ force: true });
 
     cy.wait("@createCard");
+    cy.wait("@getCheckoutCards");
     cy.contains("Cadastro de cartão").should("not.exist");
-    cy.get("select").eq(3).should("contain", "**** 5678");
 
-    cy.get("select").eq(1).select("Trabalho • 01310100");
-    cy.get("select").eq(3).select("MASTERCARD **** 5678");
+    getAddressSelect().select("addr-2");
+    getSingleCardSelect().select("card-3");
     cy.contains("button", "Finalizar pedido").click();
 
     cy.wait("@checkoutRequest");
