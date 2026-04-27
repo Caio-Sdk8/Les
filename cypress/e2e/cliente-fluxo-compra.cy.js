@@ -366,6 +366,58 @@ describe("Fluxo de compra do cliente - front", () => {
       .should("equal", null);
   });
 
+  it("registra pedido de venda com sucesso", () => {
+    mockStoreApis();
+    mockCartApis();
+
+    cy.intercept("POST", "**/api/transactions/checkout", (req) => {
+      expect(req.body.items).to.deep.equal([
+        { productUuid: products.dipirona.uuid, quantity: 1 },
+      ]);
+      expect(req.body.paymentType).to.equal("credito1");
+      expect(req.body.addressUuid).to.equal("addr-1");
+      expect(req.body.singleCardUuid).to.equal("card-1");
+      expect(req.body.couponCode).to.equal("sem");
+      expect(req.body.prescriptionFileName).to.be.undefined;
+
+      req.reply({
+        statusCode: 200,
+        body: {
+          transactionUuid: "order-success",
+          transactionCode: "PED-2026-0003",
+          status: "EM_PROCESSAMENTO",
+          subtotal: 12.5,
+          shipping: 8.9,
+          discount: 0,
+          total: 21.4,
+        },
+      });
+    }).as("checkoutRequest");
+
+    cy.visit("/carrinho", {
+      onBeforeLoad(win) {
+        seedCustomerSession(win, [
+          { productUuid: products.dipirona.uuid, quantity: 1 },
+        ]);
+      },
+    });
+
+    cy.wait("@getProducts");
+    cy.wait("@getCheckoutAddresses");
+    cy.wait("@getCheckoutCards");
+
+    cy.get("select").eq(0).select("Cartão de crédito (1 cartão)");
+    cy.get("select").eq(1).select("Casa • 08750000");
+    cy.get("select").eq(2).select("Sem cupom");
+    cy.get("select").eq(3).select("VISA **** 1111");
+
+    cy.contains("button", "Finalizar pedido").click();
+
+    cy.wait("@checkoutRequest");
+    cy.url().should("include", "/loja");
+    cy.window().its("localStorage").invoke("getItem", "pharma_cart").should("equal", null);
+  });
+
   it("lista pedidos, abre detalhes, reenvia receita e solicita troca", () => {
     let currentDetail = {
       transactionUuid: "order-2",
