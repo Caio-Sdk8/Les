@@ -219,10 +219,7 @@ function mockCartApis(interactions = []) {
 }
 
 function getFieldSelect(labelText) {
-  return cy
-    .contains("span", labelText)
-    .closest("label")
-    .find("select");
+  return cy.contains("span", labelText).closest("label").find("select");
 }
 
 function getPaymentSelect() {
@@ -456,7 +453,10 @@ describe("Fluxo de compra do cliente - front", () => {
 
     cy.wait("@checkoutRequest");
     cy.url().should("include", "/loja");
-    cy.window().its("localStorage").invoke("getItem", "pharma_cart").should("equal", null);
+    cy.window()
+      .its("localStorage")
+      .invoke("getItem", "pharma_cart")
+      .should("equal", null);
   });
 
   it("lista pedidos, abre detalhes, reenvia receita e solicita troca", () => {
@@ -841,7 +841,7 @@ describe("Fluxo de compra do cliente - front", () => {
       ],
     }).as("getCardBrands");
 
-    cy.intercept("POST", "**/api/customers/customer-1/credit-cards", (req) => {
+    cy.intercept("POST", "**/api/customers/me/credit-cards", (req) => {
       const newCard = {
         uuid: "card-3",
         cardBrandName: "mastercard",
