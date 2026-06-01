@@ -425,5 +425,13 @@ namespace ProjetoLES.Server.Controllers
             var result = await _transactionService.GetSalesCatalogAsync(cancellationToken);
             return Ok(result);
         }
+        
+        [HttpPost("seed-sales")]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> SeedSales([FromQuery] int months = 12, CancellationToken cancellationToken = default)
+        {
+            await _transactionService.GenerateSampleSalesDataAsync(months, cancellationToken);
+            return NoContent();
+        }
     }
 }

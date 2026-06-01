@@ -92,5 +92,8 @@ namespace ProjetoLES.Server.Interfaces.Services
 
         Task<SalesCatalogDTO> GetSalesCatalogAsync(
             CancellationToken cancellationToken = default);
+
+        // Generates synthetic sales data for the past N months to populate dashboards.
+        Task GenerateSampleSalesDataAsync(int months, CancellationToken cancellationToken = default);
     }
 }

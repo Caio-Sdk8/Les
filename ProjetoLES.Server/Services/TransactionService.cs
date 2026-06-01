@@ -831,6 +831,132 @@ namespace ProjetoLES.Server.Services
             return new SalesCatalogDTO(periodOptions, productSeries, categorySeries);
         }
 
+        public async Task GenerateSampleSalesDataAsync(int months, CancellationToken cancellationToken = default)
+        {
+            if (months <= 0) months = 12;
+            months = Math.Min(months, 36);
+
+            var products = await _context.Products
+                .Include(p => p.Stock)
+                .Include(p => p.ProductCategories).ThenInclude(pc => pc.Category)
+                .Where(p => p.IsActive)
+                .ToListAsync(cancellationToken);
+
+            var customers = await _context.Customers
+                .Where(c => c.IsActive)
+                .ToListAsync(cancellationToken);
+
+            if (products.Count == 0 || customers.Count == 0)
+                return;
+
+            var rand = new Random();
+            var startMonth = new DateTime(DateTime.UtcNow.Year, DateTime.UtcNow.Month, 1, 0, 0, 0, DateTimeKind.Utc)
+                .AddMonths(-months + 1);
+
+            var transactionsToAdd = new List<TransactionModel>();
+
+            for (var m = 0; m < months; m++)
+            {
+                var month = startMonth.AddMonths(m);
+                var txCount = rand.Next(6, 18);
+
+                for (var t = 0; t < txCount; t++)
+                {
+                    var day = rand.Next(1, DateTime.DaysInMonth(month.Year, month.Month) + 1);
+                    var createdAt = new DateTime(month.Year, month.Month, day, rand.Next(0, 24), rand.Next(0, 60), rand.Next(0, 60), DateTimeKind.Utc);
+
+                    var customer = customers[rand.Next(customers.Count)];
+
+                    var itemsCount = rand.Next(1, 5);
+                    var chosen = products.OrderBy(_ => rand.Next()).Take(itemsCount).ToList();
+
+                    var lines = new List<TransactionItemMetadata>();
+                    decimal subtotal = 0m;
+
+                    foreach (var prod in chosen)
+                    {
+                        var qty = rand.Next(1, 4);
+                        var categoryName = prod.ProductCategories.Select(pc => pc.Category.Name).FirstOrDefault() ?? "Sem categoria";
+                        var unitPrice = prod.SalePrice;
+
+                        lines.Add(new TransactionItemMetadata(
+                            prod.Uuid,
+                            prod.Name,
+                            categoryName,
+                            qty,
+                            unitPrice,
+                            prod.PrescriptionType));
+
+                        subtotal += unitPrice * qty;
+
+                        if (prod.Stock is not null)
+                        {
+                            prod.Stock.AvailableQuantity = Math.Max(0, prod.Stock.AvailableQuantity - qty);
+                            prod.Stock.LastUpdated = DateTime.UtcNow;
+                        }
+                    }
+
+                    var shipping = subtotal >= 80m ? 0m : 8.9m;
+                    var discount = 0m;
+                    var total = subtotal + shipping - discount;
+
+                    var txCode = $"SAMPLE-{month:yyyyMM}-{Guid.NewGuid().ToString("N")[..6]}";
+
+                    var metadata = new TransactionMetadata(
+                        txCode,
+                        "desconhecido",
+                        "sample",
+                        "sem",
+                        null,
+                        null,
+                        subtotal,
+                        shipping,
+                        discount,
+                        total,
+                        lines,
+                        null,
+                        "NAO_APLICA",
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        new List<AfterSalesRequestMetadata>(),
+                        0m);
+
+                    var transaction = new TransactionModel
+                    {
+                        CustomerId = customer.Id,
+                        CreditCardId = null,
+                        Amount = total,
+                        Description = $"{txCode} - {lines.Count} item(ns)",
+                        Status = "EM_PROCESSAMENTO",
+                        MetadataJson = JsonSerializer.Serialize(metadata, JsonOptions),
+                        CreatedAt = createdAt
+                    };
+
+                    transactionsToAdd.Add(transaction);
+                }
+            }
+
+            if (transactionsToAdd.Count > 0)
+            {
+                await using var dbTx = await _context.Database.BeginTransactionAsync(cancellationToken);
+                try
+                {
+                    await _context.Transactions.AddRangeAsync(transactionsToAdd, cancellationToken);
+                    await _context.SaveChangesAsync(cancellationToken);
+                    await dbTx.CommitAsync(cancellationToken);
+                }
+                catch
+                {
+                    await dbTx.RollbackAsync(cancellationToken);
+                    throw;
+                }
+            }
+        }
+
         private async Task<decimal> ApplyApprovedAfterSalesEffectsAsync(
             TransactionMetadata metadata,
             AfterSalesRequestMetadata request,
