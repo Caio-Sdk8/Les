@@ -52,7 +52,7 @@ export default function AppRoutes() {
         <Route
           path="/IA"
           element={
-            <PrivateRoute roles={["Customer"]}>
+            <PrivateRoute>
               <IA />
             </PrivateRoute>
           }

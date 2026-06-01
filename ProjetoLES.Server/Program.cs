@@ -69,6 +69,7 @@
     builder.Services.AddScoped<IProductService, ProductService>();
     builder.Services.AddScoped<IStockService, StockService>();
     builder.Services.AddScoped<ITransactionService, TransactionService>();
+    builder.Services.AddScoped<ChatService>();
 
     // ── Controllers + OpenAPI ─────────────────────────────────────────────────────
    builder.Services.AddControllers();

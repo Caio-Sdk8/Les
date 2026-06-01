@@ -9,6 +9,7 @@ export const NavBar = () => {
   const isStaff = authService.hasAnyRole("Admin", "Employee");
   const isAdmin = authService.hasRole("Admin");
   const isCustomer = authService.hasRole("Customer");
+  const canUseIa = authService.isAuthenticated();
   const [pendingAfterSalesCount, setPendingAfterSalesCount] = useState(0);
 
   useEffect(() => {
@@ -39,7 +40,7 @@ export const NavBar = () => {
       {isCustomer && (
         <NavItems onClick={() => navigate("/carrinho")}>Carrinho</NavItems>
       )}
-      {isCustomer && (
+      {canUseIa && (
         <NavItems onClick={() => navigate("/IA")}>Recomendação</NavItems>
       )}
 
