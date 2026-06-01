@@ -49,12 +49,16 @@ namespace ProjetoLES.Server.Services
         ];
 
         private static readonly string SystemPrompt = """
-            Você é o assistente da farmácia.
-            Responda sempre em português do Brasil, com objetividade e tom cordial.
-            Concentre-se apenas em produtos, categorias, pedidos, estoque, receitas e interações medicamentosas.
-            Se o usuário pedir algo fora desse escopo, recuse e redirecione educadamente para assuntos da farmácia.
-            Para dúvidas de saúde ou uso de medicamentos, recomende orientação de um farmacêutico.
-            Não invente preços, estoque, pedidos ou interações: use os dados retornados pelas ferramentas.
+            Você é o assistente virtual exclusivo da farmácia.
+            Responda sempre em português do Brasil, com objetividade, clareza e tom profissional.
+            
+            DIRETRIZES DE ESCOPO RÍGIDAS:
+            1. Concentre-se APENAS em saúde, bem-estar, medicamentos, produtos de higiene, cosméticos e assuntos farmacêuticos.
+            2. Se o usuário solicitar produtos ou assuntos que não pertencem ao contexto farmacêutico (como chocolates finos ou importados como Lindt, eletrônicos, carros, etc.), você deve recusar de forma imediata, direta e incisiva, sem tentar oferecer alternativas fora de escopo. 
+               Exemplo de recusa: "Como assistente de farmácia, meu atendimento é estritamente restrito a medicamentos, saúde e bem-estar. Não possuímos chocolates Lindt ou outros produtos alimentícios gourmet no catálogo. Como posso ajudar você com algum medicamento ou produto de higiene?"
+            3. Não tente ser prestativo para itens totalmente fora do catálogo farmacêutico (como sugerir procurar "outros tipos de chocolates" se pedirem Lindt). Corte o assunto imediatamente e redirecione para saúde.
+            4. Para dúvidas médicas complexas ou uso de medicamentos, recomende a orientação presencial de um farmacêutico ou médico.
+            5. Não invente preços, estoque, códigos ou interações: use estritamente os dados retornados pelas ferramentas de busca.
             """;
 
         private readonly AppDbContext _context;
@@ -89,11 +93,8 @@ namespace ProjetoLES.Server.Services
             Guid? userUuid,
             CancellationToken cancellationToken = default)
         {
-            if (IsOutOfScope(message))
-            {
-                return new ChatResponseDTO(BuildOutOfScopeReply(), string.Empty, "local");
-            }
-
+            // Se a IA remota estiver ativa, priorizamos o processamento dela por completo,
+            // permitindo que ela lide com o escopo e responda de forma muito mais natural e fluida.
             if (_remoteClient is not null)
             {
                 try
@@ -103,8 +104,21 @@ namespace ProjetoLES.Server.Services
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogWarning(ex, "Falha no chat remoto. Usando resposta local.");
+                    _logger.LogWarning(ex, "Falha no chat remoto. Retornando aviso de instabilidade para o usuário.");
+                    return new ChatResponseDTO(
+                        "Desculpe, tive uma instabilidade temporária na minha conexão com a inteligência artificial avançada. 🔌 " +
+                        "Estou operando temporariamente no modo básico local.\n\n" +
+                        "Você pode tentar repetir sua última pergunta em alguns instantes ou buscar diretamente por produtos (ex: 'buscar Advil') ou categorias.",
+                        string.Empty,
+                        "local"
+                    );
                 }
+            }
+
+            // O filtro de escopo local (rígido) só é aplicado no Modo Local (contingência)
+            if (IsOutOfScope(message))
+            {
+                return new ChatResponseDTO(BuildOutOfScopeReply(), string.Empty, "local");
             }
 
             var localReply = await BuildLocalReplyAsync(message, userUuid, cancellationToken);
@@ -158,10 +172,10 @@ namespace ProjetoLES.Server.Services
                 {
                   "type": "object",
                   "properties": {
-                    "termo": { "type": "string", "description": "Nome ou parte do nome do produto" },
-                    "categoria": { "type": "string", "description": "Nome da categoria" },
+                    "termo": { "type": ["string", "null"], "description": "Nome ou parte do nome do produto" },
+                    "categoria": { "type": ["string", "null"], "description": "Nome da categoria" },
                     "preco_max": { "type": ["number", "null"], "description": "Preço máximo desejado" },
-                    "limite": { "type": "integer", "description": "Quantidade máxima de resultados" }
+                    "limite": { "type": ["integer", "null"], "description": "Quantidade máxima de resultados" }
                   }
                 }
                 """)));
@@ -437,7 +451,7 @@ namespace ProjetoLES.Server.Services
                 return FormatToolResult("Produtos encontrados", products);
             }
 
-            return "Posso ajudar com produtos, categorias, pedidos e interações medicamentosas. Tente algo como: 'buscar produtos para dor', 'quais categorias existem?' ou 'verifique interações de dipirona e ibuprofeno'.";
+            return "Olá! Sou o assistente virtual da farmácia. 🌟\n\nPosso ajudar você com:\n• 🔍 Buscar produtos (ex: 'buscar produtos para dor')\n• 🗂️ Listar categorias (ex: 'quais categorias existem?')\n• 📦 Consultar seus pedidos (ex: 'mostrar meus pedidos')\n• ⚠️ Verificar interações medicamentosas (ex: 'verificar dipirona e ibuprofeno')\n\nComo posso ajudar você hoje?";
         }
 
         private static string FormatToolResult(string title, string json)
@@ -590,7 +604,7 @@ namespace ProjetoLES.Server.Services
         }
 
         private static string BuildOutOfScopeReply()
-            => "infelizmente eu só posso responder coisas referentes a farmácia";
+            => "Olá! Como sou o assistente virtual da farmácia, posso ajudar você apenas com dúvidas sobre nossos produtos, categorias, pedidos ou interações medicamentosas. Como posso ajudar você nessa área?";
 
         private static bool IsTooGenericTarget(string term)
             => ContainsAnyWord(term, ["isso", "aquele", "aquela", "aquilo", "coisa", "item", "produto", "medicamento", "remedio", "remédio"]);

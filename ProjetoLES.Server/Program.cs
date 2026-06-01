@@ -16,8 +16,15 @@
     var jwtSettings = builder.Configuration.GetSection("Jwt").Get<JwtSettings>()!;
 
     // ── Banco de dados ────────────────────────────────────────────────────────────
+    var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+    if (connectionString != null && connectionString.Contains("projetoles.db") && !Path.IsPathRooted(connectionString.Replace("Data Source=", "").Replace("datasource=", "", StringComparison.OrdinalIgnoreCase)))
+    {
+        var dbFileName = connectionString.Replace("Data Source=", "", StringComparison.OrdinalIgnoreCase).Trim();
+        var absoluteDbPath = Path.Combine(builder.Environment.ContentRootPath, dbFileName);
+        connectionString = $"Data Source={absoluteDbPath}";
+    }
     builder.Services.AddDbContext<AppDbContext>(options =>
-        options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
+        options.UseSqlite(connectionString));
 
     // ── Autenticação JWT ──────────────────────────────────────────────────────────
     builder.Services.AddAuthentication(options =>
