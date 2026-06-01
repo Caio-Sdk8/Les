@@ -4,9 +4,12 @@ using OpenAI.Chat;
 using ProjetoLES.Server.Data;
 using ProjetoLES.Server.DTO_s.Chat;
 using ProjetoLES.Server.Models;
-using System.ClientModel;
-using System.Text.Json;
+
+using Azure.Core;
 using System.Text.RegularExpressions;
+using System.Text.Json;
+using System.Net.Http;
+using System.ClientModel;
 
 namespace ProjetoLES.Server.Services
 {
@@ -82,7 +85,6 @@ namespace ProjetoLES.Server.Services
                 {
                     Endpoint = endpoint
                 };
-
                 _remoteClient = new ChatClient(model, new ApiKeyCredential(apiKey), options);
             }
         }
@@ -97,22 +99,37 @@ namespace ProjetoLES.Server.Services
             // permitindo que ela lide com o escopo e responda de forma muito mais natural e fluida.
             if (_remoteClient is not null)
             {
-                try
+                const int maxAttempts = 3;
+                int attempt = 0;
+                while (true)
                 {
-                    var remoteReply = await SendWithModelAsync(history, message, userUuid, cancellationToken);
-                    return new ChatResponseDTO(remoteReply, string.Empty, "groq");
+                    try
+                    {
+                        var remoteReply = await SendWithModelAsync(history, message, userUuid, cancellationToken);
+                        return new ChatResponseDTO(remoteReply, string.Empty, "groq");
+                    }
+                    catch (Exception ex)
+                    {
+                        attempt++;
+                        _logger.LogWarning(ex, "Falha no chat remoto na tentativa {Attempt}.", attempt);
+                        if (attempt >= maxAttempts)
+                        {
+                            // Exceeded retries, fallback to local mode.
+                            break;
+                        }
+                        // Pequena pausa antes de nova tentativa.
+                        await Task.Delay(TimeSpan.FromSeconds(1), cancellationToken);
+                    }
                 }
-                catch (Exception ex)
-                {
-                    _logger.LogWarning(ex, "Falha no chat remoto. Retornando aviso de instabilidade para o usuário.");
-                    return new ChatResponseDTO(
-                        "Desculpe, tive uma instabilidade temporária na minha conexão com a inteligência artificial avançada. 🔌 " +
-                        "Estou operando temporariamente no modo básico local.\n\n" +
-                        "Você pode tentar repetir sua última pergunta em alguns instantes ou buscar diretamente por produtos (ex: 'buscar Advil') ou categorias.",
-                        string.Empty,
-                        "local"
-                    );
-                }
+
+                // Fallback local response after exhausted retries.
+                return new ChatResponseDTO(
+                    "Desculpe, tive uma instabilidade temporária na minha conexão com a inteligência artificial avançada. 🔌 " +
+                    "Estou operando temporariamente no modo básico local.\n\n" +
+                    "Você pode tentar repetir sua última pergunta em alguns instantes ou buscar diretamente por produtos (ex: 'buscar Advil') ou categorias.",
+                    string.Empty,
+                    "local"
+                );
             }
 
             // O filtro de escopo local (rígido) só é aplicado no Modo Local (contingência)

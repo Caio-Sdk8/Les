@@ -3,7 +3,6 @@ import { AppShell } from "../../components/AppShell/AppShell";
 import { chatService, type ChatResponse } from "../../services/chat/chatService";
 import {
   AssistantBubble,
-  AssistantMeta,
   Badge,
   ChatCard,
   ChatComposer,
@@ -16,7 +15,6 @@ import {
   ComposerButton,
   ComposerFooter,
   ComposerHint,
-  ComposerRow,
   ComposerWrap,
   EmptyState,
   EmptyStateText,
@@ -172,15 +170,6 @@ export default function IA() {
 
               <Badge $mode={lastMode}>{lastMode === "groq" ? "Groq ativo" : "Modo local"}</Badge>
             </HeaderRow>
-
-            <ChatIntro>
-              <EmptyState>
-                <EmptyStateText>
-                  Pergunte em linguagem natural. Exemplos: “busque um antialérgico”, “quais categorias existem?” ou “verifique interações de dipirona e ibuprofeno”.
-                </EmptyStateText>
-              </EmptyState>
-            </ChatIntro>
-
             <QuickActions>
               {QUICK_PROMPTS.map((prompt) => (
                 <QuickButton key={prompt} type="button" onClick={() => handleQuickPrompt(prompt)}>
