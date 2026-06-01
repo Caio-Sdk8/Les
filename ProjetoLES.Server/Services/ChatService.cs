@@ -452,19 +452,72 @@ namespace ProjetoLES.Server.Services
                     return messageElement.GetString() ?? title;
                 }
 
-                if (root.TryGetProperty("items", out var itemsElement) && itemsElement.ValueKind == JsonValueKind.Array)
+                var lines = new List<string> { title + ":" };
+
+                if (root.TryGetProperty("total", out var totalElement) && totalElement.ValueKind == JsonValueKind.Number)
                 {
-                    var lines = new List<string> { title + ":" };
+                    var total = totalElement.GetInt32();
+                    lines[0] = $"{title}: ({total})";
 
-                    foreach (var item in itemsElement.EnumerateArray())
+                    // If there are zero results, return a friendly message depending on the tool type
+                    if (total == 0)
                     {
-                        lines.Add(FormatItem(item));
-                    }
+                        var lowerTitle = title.ToLowerInvariant();
 
-                    return string.Join(Environment.NewLine, lines.Where(line => !string.IsNullOrWhiteSpace(line)));
+                        if (lowerTitle.Contains("produto") || lowerTitle.Contains("produtos") || lowerTitle.Contains("alternativa"))
+                        {
+                            return "infelizmente não temos nada no estoque correspondente ao que você quer";
+                        }
+
+                        if (lowerTitle.Contains("categoria") || lowerTitle.Contains("categorias"))
+                        {
+                            return "infelizmente não temos categorias correspondentes ao que você quer";
+                        }
+
+                        if (lowerTitle.Contains("pedido") || lowerTitle.Contains("pedidos"))
+                        {
+                            return "infelizmente não encontramos pedidos correspondentes ao que você quer";
+                        }
+
+                        if (lowerTitle.Contains("intera") || lowerTitle.Contains("interações") || lowerTitle.Contains("interacao"))
+                        {
+                            return "infelizmente não foram encontradas interações para os produtos informados";
+                        }
+                    }
                 }
 
-                return title;
+                if (root.TryGetProperty("items", out var itemsElement) && itemsElement.ValueKind == JsonValueKind.Array)
+                {
+                    var any = false;
+                    foreach (var item in itemsElement.EnumerateArray())
+                    {
+                        var formatted = FormatItem(item);
+                        if (!string.IsNullOrWhiteSpace(formatted))
+                        {
+                            lines.Add(formatted);
+                            any = true;
+                        }
+                        else
+                        {
+                            // fallback: append the raw item JSON if formatting produced nothing
+                            lines.Add("- " + item.GetRawText());
+                            any = true;
+                        }
+                    }
+
+                    if (any)
+                        return string.Join(Environment.NewLine, lines.Where(line => !string.IsNullOrWhiteSpace(line)));
+                }
+
+                // as a fallback, return the raw json or the title
+                try
+                {
+                    return JsonSerializer.Serialize(JsonDocument.Parse(json).RootElement, JsonOptions);
+                }
+                catch
+                {
+                    return title;
+                }
             }
             catch
             {
@@ -537,7 +590,7 @@ namespace ProjetoLES.Server.Services
         }
 
         private static string BuildOutOfScopeReply()
-            => "Posso ajudar apenas com assuntos da farmácia, como produtos, categorias, pedidos, estoque, receitas e interações medicamentosas. Se quiser, faça uma pergunta nesse contexto.";
+            => "infelizmente eu só posso responder coisas referentes a farmácia";
 
         private static bool IsTooGenericTarget(string term)
             => ContainsAnyWord(term, ["isso", "aquele", "aquela", "aquilo", "coisa", "item", "produto", "medicamento", "remedio", "remédio"]);
