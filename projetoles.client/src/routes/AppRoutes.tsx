@@ -5,7 +5,6 @@ import Edicao from "../pages/EditarCliente";
 import Transacao from "../pages/Transacao";
 import Loja from "../pages/Loja/Loja";
 import Carrinho from "../pages/Carrinho";
-import IA from "../pages/IA";
 import Grafico from "../pages/Grafico";
 import LoginForm from "../pages/Login/index";
 import PrivateRoute from "../components/PrivateRoute";
@@ -49,15 +48,6 @@ export default function AppRoutes() {
             </PrivateRoute>
           }
         />
-        <Route
-          path="/IA"
-          element={
-            <PrivateRoute>
-              <IA />
-            </PrivateRoute>
-          }
-        />
-
         {/* Área administrativa (Admin e Employee) */}
         <Route
           path="/clientes"

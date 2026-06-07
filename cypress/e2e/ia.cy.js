@@ -12,21 +12,26 @@ function seedCustomerSession(win) {
   win.localStorage.setItem("pharma_user", JSON.stringify(customerSession.user));
 }
 
-describe("Tela de recomendação com IA - front", () => {
+describe("Assistente de IA flutuante", () => {
   beforeEach(() => {
     cy.viewport(1280, 900);
   });
 
-  it("abre a tela e permite digitar uma pergunta", () => {
-    cy.visit("/IA", {
+  it("abre o modal de IA a partir da bolinha e permite digitar uma pergunta", () => {
+    cy.visit("/loja", {
       onBeforeLoad(win) {
         seedCustomerSession(win);
       },
     });
 
-    cy.contains("Assistente IA").should("be.visible");
-    cy.get('input[placeholder="Digite sua pergunta..."]')
-      .type("Quais vitaminas ajudam na imunidade?")
-      .should("have.value", "Quais vitaminas ajudam na imunidade?");
+    cy.get('[data-cy="ia-widget-button"]').should("be.visible").click();
+    cy.contains("💊 Assistente da Farmácia").should("be.visible");
+    cy.get('[data-cy="ia-chat-input"]')
+      .should("be.visible")
+      .type("Quais vitaminas ajudam na imunidade?", { delay: 50 });
+    cy.get('[data-cy="ia-chat-input"]').should(
+      "have.value",
+      "Quais vitaminas ajudam na imunidade?",
+    );
   });
 });

@@ -19,7 +19,9 @@ export const NavBar = () => {
 
     const loadPendingAfterSales = async () => {
       try {
-        const items = await transactionService.getAfterSalesRequests({ status: "PENDENTE" });
+        const items = await transactionService.getAfterSalesRequests({
+          status: "PENDENTE",
+        });
         if (!cancelled) setPendingAfterSalesCount(items.length);
       } catch {
         if (!cancelled) setPendingAfterSalesCount(0);
@@ -40,10 +42,6 @@ export const NavBar = () => {
       {isCustomer && (
         <NavItems onClick={() => navigate("/carrinho")}>Carrinho</NavItems>
       )}
-      {canUseIa && (
-        <NavItems onClick={() => navigate("/IA")}>Recomendação</NavItems>
-      )}
-
       {isStaff && (
         <NavItems onClick={() => navigate("/clientes")}>Clientes</NavItems>
       )}
@@ -59,12 +57,17 @@ export const NavBar = () => {
       <NavItems onClick={() => navigate("/pedidos")}>Pedidos</NavItems>
 
       {isAdmin && (
-        <NavItems onClick={() => navigate("/avaliacao-receitas")}>Receitas</NavItems>
+        <NavItems onClick={() => navigate("/avaliacao-receitas")}>
+          Receitas
+        </NavItems>
       )}
 
       {isStaff && (
-        <NavItems onClick={() => navigate("/avaliacao-trocas-devolucoes")}>Trocas/Devoluções
-          {pendingAfterSalesCount > 0 && <Badge>{pendingAfterSalesCount}</Badge>}
+        <NavItems onClick={() => navigate("/avaliacao-trocas-devolucoes")}>
+          Trocas/Devoluções
+          {pendingAfterSalesCount > 0 && (
+            <Badge>{pendingAfterSalesCount}</Badge>
+          )}
         </NavItems>
       )}
     </ItemsContainer>
