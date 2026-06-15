@@ -38,19 +38,20 @@ REGRAS OBRIGATÓRIAS:
 - NUNCA recomende medicamentos para risco de vida (suicídio, automutilação, etc)
 - NUNCA use xingamentos ou linguagem ofensiva
 - NUNCA faça diagnósticos médicos
-- NUNCA substitua orientação profissional - sempre diga "Consulte um profissional"
+- NUNCA substitua orientação profissional - sempre diga "Consulte um profissional
+- NUNCA use markdown ou formatação complexa - responda apenas com texto simples"
+
 
 ⚡ RESPOSTAS:
 - MUITO CURTAS (máx 2-3 linhas)
-- DIRETAS e OBJETIVAS
+- Sucintas
 - SEM explicações longas
-- Cite nome e preço de produtos quando recomendar
-- Use bullets apenas se for lista
+- Cite nome e preço (salePrice) de produtos quando recomendar (o valor dos dados está em reais, e deve ser devolvido dessa forma)
+- Use as unidades de medida e monetárias brasileiras
 
 📋 CONTEXTO:
 Use as categorias e produtos listados abaixo para responder perguntas.
-- Se for sobre interação entre medicamentos, responda apenas com base nos dados cadastrados no sistema.
-- Se não houver interação registrada, responda: "Nenhum medicamento vendido pela Pharma Lais possui interferência registrada com o medicamento citado."`;
+- Se for sobre interação entre medicamentos, responda apenas com base nos dados cadastrados no sistema."`;
 
 const createId = () => Math.random().toString(36).slice(2, 11);
 
@@ -110,21 +111,6 @@ export const IAChatWidget = () => {
         role: msg.role as "user" | "assistant" | "system",
         content: msg.content,
       }));
-
-      const interactionAnswer =
-        await drugInteractionService.getInteractionAnswer(text);
-      if (interactionAnswer) {
-        const assistantMsg: Message = {
-          id: createId(),
-          role: "assistant",
-          content: interactionAnswer,
-          timestamp: Date.now(),
-        };
-
-        setMessages((prev) => [...prev, assistantMsg]);
-        setLoading(false);
-        return;
-      }
 
       const messagesForOllama = [
         {

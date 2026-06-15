@@ -50,8 +50,9 @@ export const productContextService = {
       const productsText = products
         .slice(0, 100) // Limitar a 100 produtos para não ficar muito grande
         .map((product) => {
+          const uuid = product.uuid
           const name = product.name || "Sem nome";
-          const price = product.price ? `R$ ${product.price.toFixed(2)}` : "";
+          const price = product.salePrice ? `R$ ${product.salePrice.toFixed(2)}` : "";
           const cats = product.categories?.join(", ") || "Geral";
           return `- ${name} (${cats}) ${price}`;
         })
