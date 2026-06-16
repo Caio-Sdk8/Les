@@ -8,5 +8,8 @@
   "devDependencies": {
     "cypress": "^15.13.0",
     "start-server-and-test": "^3.0.0"
+  },
+  "dependencies": {
+    "cypress-slow-down": "^1.4.0"
   }
 }
