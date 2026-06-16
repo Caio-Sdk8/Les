@@ -9,8 +9,8 @@
 
 | Nome | RA |
 |------|----|
-| Caio Soares | 1840482322021 |
-| Lucas Athié | 1840482322017 |
+| Caio ... | ... |
+| Lucas Athié | ... |
 
 ---
 
@@ -43,9 +43,7 @@ Les/
 ├── docs/
 │   ├── COMO_EXECUTAR.md        # Guia completo de instalação e execução
 │   ├── ARQUITETURA.md          # Arquitetura do sistema e decisões técnicas
-│   ├── API.md                  # Referência completa dos endpoints REST
-│   ├── video-cliente.mp4       # Vídeo demonstrativo — fluxo do cliente
-│   └── video-admin.mp4         # Vídeo demonstrativo — fluxo administrativo
+│   └── API.md                  # Referência completa dos endpoints REST
 ├── DVP_PharmaLais.md           # Documento de Visão do Projeto
 ├── OLLAMA_IA_SETUP.md          # Guia de configuração da IA (Ollama)
 ├── PharmaPro.postman_collection.json  # Coleção Postman para testes de API
@@ -139,7 +137,7 @@ Os testes cobrem os principais fluxos da aplicação e devem ser executados com 
 
 > _Demonstração das funcionalidades de cadastro, login, navegação pela loja, carrinho, checkout e acompanhamento de pedidos._
 
-🔗 **[Assistir ao vídeo — Fluxo do Cliente](./docs/video-cliente.mp4)**
+🔗 **[Assistir ao vídeo — Fluxo do Cliente](https://youtu.be/GR-Q_tKwbhE)**
 
 ---
 
@@ -147,7 +145,7 @@ Os testes cobrem os principais fluxos da aplicação e devem ser executados com 
 
 > _Demonstração das funcionalidades administrativas: gestão de estoque, avaliação de receitas, aprovação de trocas/devoluções, gráficos gerenciais e IA._
 
-🔗 **[Assistir ao vídeo — Fluxo Administrativo](./docs/video-admin.mp4)**
+🔗 **[Assistir ao vídeo — Fluxo Administrativo](https://www.youtube.com/watch?v=LINK_ADMIN_AQUI)**
 
 ---
 
