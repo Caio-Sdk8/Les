@@ -9,8 +9,8 @@
 
 | Nome | RA |
 |------|----|
-| Caio ... | ... |
-| Lucas Athié | ... |
+| Caio Soares | 1840482322021 |
+| Lucas Athié | 1840482322017 |
 
 ---
 
