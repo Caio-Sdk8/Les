@@ -138,7 +138,6 @@ Os testes cobrem os principais fluxos da aplicação e devem ser executados com 
 > _Demonstração das funcionalidades de cadastro, login, navegação pela loja, carrinho, checkout e acompanhamento de pedidos._
 
 🔗 **[Assistir ao vídeo — Fluxo do Cliente](https://youtu.be/GR-Q_tKwbhE)**
-🔗 **[Assistir ao vídeo — Fluxo do Admin](https://youtu.be/8n7H8jxFyLI)**
 
 
 ---
@@ -147,7 +146,7 @@ Os testes cobrem os principais fluxos da aplicação e devem ser executados com 
 
 > _Demonstração das funcionalidades administrativas: gestão de estoque, avaliação de receitas, aprovação de trocas/devoluções, gráficos gerenciais e IA._
 
-🔗 **[Assistir ao vídeo — Fluxo Administrativo](https://www.youtube.com/watch?v=LINK_ADMIN_AQUI)**
+🔗 **[Assistir ao vídeo — Fluxo do Admin](https://youtu.be/8n7H8jxFyLI)**
 
 ---
 
