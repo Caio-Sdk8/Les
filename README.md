@@ -182,7 +182,6 @@ Os testes cobrem os principais fluxos da aplicação e devem ser executados com 
 - [`docs/COMO_EXECUTAR.md`](./docs/COMO_EXECUTAR.md) — Guia completo de instalação, configuração e execução do projeto
 - [`docs/ARQUITETURA.md`](./docs/ARQUITETURA.md) — Arquitetura do sistema, camadas, páginas e fluxo da IA
 - [`docs/API.md`](./docs/API.md) — Referência completa de todos os endpoints REST
-- [`DVP_PharmaLais.md`](./DVP_PharmaLais.md) — Documento de Visão do Projeto com requisitos, regras de negócio, cronograma e diagramas
 - [`OLLAMA_IA_SETUP.md`](./OLLAMA_IA_SETUP.md) — Guia de configuração do Ollama (instalação, modelos, troubleshooting)
 - [`PharmaPro.postman_collection.json`](./PharmaPro.postman_collection.json) — Coleção Postman com exemplos de requisição para a API
 
